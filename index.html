@@ -283,6 +283,21 @@ a.tog{text-decoration:none;display:inline-block}
 }
 .gpmeta{grid-template-columns:minmax(0,1fr);flex:1;min-width:0}
 @media (max-width:899px){.tbl{font-size:12px}.c-last b{font-size:12.5px}.c-ty .wear{width:34px}.c-drv i{margin-right:5px}}
+/* ---- ultra telemetria ---- */
+#vTele{grid-template-columns:repeat(12,minmax(0,1fr))}
+#vTele .wide{grid-column:1/-1}.s3{grid-column:span 3}.s4{grid-column:span 4}.s5{grid-column:span 5}.s6{grid-column:span 6}.s8{grid-column:span 8}
+.cbox{position:relative}.cbox canvas{position:absolute;inset:0;width:100%;height:100%}
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:8px;padding:12px 16px 16px}
+.kpi{background:#0b101a;border:1px solid var(--line);border-radius:10px;padding:9px 11px;min-width:0}
+.kpi span{display:block;font-size:10px;letter-spacing:.06em;color:var(--muted)}
+.kpi b{display:block;font:800 20px/1.15 var(--f-mono);margin-top:4px;white-space:nowrap}
+.kpi i{display:block;height:4px;border-radius:2px;background:#1a2132;margin-top:6px;overflow:hidden}.kpi i em{display:block;height:100%;width:0}
+.gauges4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.gauges4 svg{width:100%;height:auto;background:#0b101a;border:1px solid var(--line);border-radius:10px}
+.sectbl td,.sectbl th{height:30px;font-size:12px;text-align:left!important}
+.sectbl td.q0{color:#d8b4fe;background:rgba(168,85,247,.16)}.sectbl td.q1{color:var(--green);background:rgba(16,185,129,.1)}.sectbl td.q2{color:var(--yellow)}.sectbl td.q3{color:#ff8a85}
+@media (max-width:1279px){.s3,.s4,.s5{grid-column:span 6}.s6,.s8{grid-column:1/-1}}
+@media (max-width:899px){#vTele>*{grid-column:1/-1!important}.gauges4{grid-template-columns:repeat(2,minmax(0,1fr))}.kpi b{font-size:17px}}
 </style>
 </head>
 <body data-view="pista" data-mode="pit">
@@ -464,15 +479,68 @@ a.tog{text-decoration:none;display:inline-block}
 </main>
 
 <!-- ================= VISTA 2: ULTRA TELEMETRIA ================= -->
-<main id="vTele" class="view" hidden>
+<main id="vTele" class="view tele" hidden>
   <section class="panel wide">
-    <div class="panel-h"><h2>Oscilloscopio telemetrico · <span id="oscWho">—</span></h2>
-      <p class="legend2"><i style="background:#06B6D4"></i>Velocità km/h <i style="background:#10B981"></i>Acceleratore % <i style="background:#E10600"></i>Freni bar <i style="background:#F59E0B"></i>ERS kW</p></div>
-    <div class="oscbox"><canvas id="osc"></canvas></div>
+    <div class="panel-h"><h2>Live telemetry · <span id="oscWho">—</span></h2><p id="tSub">—</p></div>
+    <div class="kpis" id="tKpi"></div>
   </section>
-  <section class="panel"><div class="panel-h"><h2>Power Unit FIA 2026</h2><p>valori simulati</p></div><div class="pad grid3" id="puGrid"></div></section>
-  <section class="panel"><div class="panel-h"><h2>Matrice 4 angoli</h2><p>gomme · freni · carico</p></div><div class="pad quad" id="cornerQuad"></div></section>
-  <section class="panel wide"><div class="panel-h"><h2>Tabella ingegneristica · 22 piloti</h2><p>14 canali</p></div>
+  <section class="panel s8">
+    <div class="panel-h"><h2>Oscilloscopio multi-canale</h2>
+      <p class="legend2"><i style="background:#06B6D4"></i>Velocità <i style="background:#10B981"></i>Gas <i style="background:#E10600"></i>Freno <i style="background:#F59E0B"></i>ERS kW <i style="background:#A855F7"></i>RPM <i style="background:#e9eef8"></i>Marcia</p></div>
+    <div class="cbox" style="height:250px"><canvas id="osc"></canvas></div>
+  </section>
+  <section class="panel s4">
+    <div class="panel-h"><h2>Speed map</h2><p>velocità di riferimento · ▲ staccate</p></div>
+    <div class="cbox" style="height:250px"><canvas id="tHeat"></canvas></div>
+  </section>
+  <section class="panel s8">
+    <div class="panel-h"><h2>Giro attuale vs miglior giro</h2><p id="tOvlSub">velocità per distanza</p></div>
+    <div class="cbox" style="height:200px"><canvas id="tOvl"></canvas></div>
+    <div class="cbox" style="height:96px;border-top:1px solid var(--line)"><canvas id="tDlt"></canvas></div>
+  </section>
+  <section class="panel s4">
+    <div class="panel-h"><h2>Stile di guida</h2><p>quota di tempo sul giro</p></div>
+    <div class="pad"><svg id="tStyle" viewBox="0 0 300 150" class="chart" role="img" aria-label="Stile di guida"></svg>
+    <svg id="tGears" viewBox="0 0 300 130" class="chart" role="img" aria-label="Uso delle marce"></svg></div>
+  </section>
+  <section class="panel s5">
+    <div class="panel-h"><h2>Vettura · gomme e freni</h2><p>interno / centro / esterno</p></div>
+    <div class="pad"><svg id="tCar" viewBox="0 0 320 300" class="chart" role="img" aria-label="Temperature gomme e freni"></svg></div>
+  </section>
+  <section class="panel s4">
+    <div class="panel-h"><h2>Power unit FIA 2026</h2><p>valori simulati</p></div>
+    <div class="pad gauges4" id="tPU"></div>
+  </section>
+  <section class="panel s3">
+    <div class="panel-h"><h2>Energia ERS</h2><p>carica nel giro</p></div>
+    <div class="cbox" style="height:170px"><canvas id="tEnergy"></canvas></div>
+    <div class="pad trio" id="tEnStats" style="margin-top:0"></div>
+  </section>
+  <section class="panel s6">
+    <div class="panel-h"><h2>Passo gara · <span id="tLapsWho">—</span></h2><p id="tDeg">—</p></div>
+    <div class="cbox" style="height:230px"><canvas id="tLaps"></canvas></div>
+  </section>
+  <section class="panel s6">
+    <div class="panel-h"><h2>Distacco dal leader · top 10</h2><p>secondi per giro</p></div>
+    <div class="cbox" style="height:230px"><canvas id="tGaps"></canvas></div>
+  </section>
+  <section class="panel s6">
+    <div class="panel-h"><h2>Strategia gomme · 22 piloti</h2><p class="legend2"><i style="background:#e5383b"></i>S <i style="background:#f2c230"></i>M <i style="background:#e9eef8"></i>H <i style="background:#3fbf7f"></i>I <i style="background:#4f8ef7"></i>W</p></div>
+    <div class="pad"><svg id="tStrat" class="chart" role="img" aria-label="Strategia gomme"></svg></div>
+  </section>
+  <section class="panel s6">
+    <div class="panel-h"><h2>Lap chart · posizioni</h2><p>pilota selezionato in evidenza</p></div>
+    <div class="cbox" style="height:356px"><canvas id="tPos"></canvas></div>
+  </section>
+  <section class="panel s6">
+    <div class="panel-h"><h2>Settori · miglior tempo per pilota</h2><p>giro ideale = S1+S2+S3 migliori</p></div>
+    <div class="tblwrap"><table class="tbl sectbl" id="tSec"></table></div>
+  </section>
+  <section class="panel s6">
+    <div class="panel-h"><h2>Speed trap</h2><p>velocità massima registrata</p></div>
+    <div class="pad"><svg id="tTrap" class="chart" role="img" aria-label="Speed trap"></svg></div>
+  </section>
+  <section class="panel wide"><div class="panel-h"><h2>Tabella ingegneristica · 22 piloti</h2><p>14 canali · tocca una riga per selezionare</p></div>
     <div class="tblwrap"><table class="tbl eng"><thead><tr><th>POS</th><th>DRIVER</th><th>SPEED TRAP</th><th>THROTTLE</th><th>BRAKE BAR</th><th>RPM</th><th>GEAR</th><th>AERO 26</th><th>ERS %</th><th>MGU-K kW</th><th>TYRE TEMP</th><th>BRAKE BIAS</th><th>DIFF IN/OUT</th><th>FUEL DELTA</th></tr></thead><tbody id="engBody"></tbody></table></div>
   </section>
 </main>
@@ -790,7 +858,7 @@ function Sim(cfg){
       lapStart:self.isRace?LIGHTS:-1,secStart:self.isRace?LIGHTS:-1,msStart:-1,lapN:0,secIdx:0,nb:self.bnds[0],
       lastLap:0,lastCls:0,bestLap:Infinity,lapsDone:0,sec:[0,0,0],secCls:[0,0,0],secBestP:[Infinity,Infinity,Infinity],
       msCls:new Uint8Array(MS),msBestP:new Float64Array(MS).fill(Infinity),msNow:0,
-      gap:0,gapSet:false,pos:k+1,prevPos:k+1,soc:1,hist:[],vmax:0};
+      gap:0,gapSet:false,pos:k+1,prevPos:k+1,soc:1,hist:[],vmax:0,lapLog:[],stints:[{ty:tyre,from:0}]};
     car.prev=car.dist;self.cars.push(car);self.byId[id]=car;
   });
   this.order=this.cars.slice();
@@ -822,13 +890,14 @@ Sim.prototype.doPit=function(c,rem){
   else{const k=this.laps,fits=x=>TY[x].life*k*0.95>=rem;
     nt=fits("S")&&c.tyre!=="S"?"S":fits("M")&&c.tyre!=="M"?"M":c.tyre!=="H"?"H":"M";}
   c.tyre=nt;c.tyreStart=c.dist;c.stint=TY[nt].life*this.laps*(0.88+0.3*c.rng());
-  c.pit=this.pitDur;c.pitStops++;
+  c.pit=this.pitDur;c.pitStops++;c.stints.push({ty:nt,from:c.lapsDone});if(c.lapLog.length)c.lapLog[c.lapLog.length-1].pit=true;
   this.feed(DRIVERS[c.id].code,"pit","BOX — monta "+TY[nt].name+" (sosta "+c.pitStops+")");
 };
 Sim.prototype.onLap=function(c,tc){
   const race=this.isRace,L=this.L,lapT=tc-c.lapStart;
   c.lapStart=tc;c.lastLap=lapT;c.lapsDone++;c.lastCls=1;
   c.hist.push(lapT);if(c.hist.length>12)c.hist.shift();
+  c.lapLog.push({t:lapT,pos:c.pos,gap:c.gapSet?c.gap:0,ty:c.tyre,pit:false});
   if(lapT<c.bestLap){c.bestLap=lapT;c.lastCls=2;}
   if(lapT<this.fast.t&&(!race||c.lapsDone>1)){
     this.fast={t:lapT,id:c.id};c.lastCls=3;
@@ -1426,6 +1495,7 @@ function frame(){
   const a=clamp(tgt/DT-sim.n+1,0,1),now=performance.now(),moving=tgt!==lastTgt;
   if(moving||dirty||mode==="show"||(mode==="pit"&&ghostOn)){
     const t=renderCockpit(a);
+    if(window.recTrace)recTrace(a,t);
     if(mode==="pit")drawMap(a);else if(mode==="tele")renderTeleFast(a,t,moving);else renderShowFast(a,t,now);
     if(now-lastSlow>240||dirty){lastSlow=now;renderShared();if(mode==="pit")renderPit();else if(mode==="tele")renderTeleSlow();else renderShowSlow();}
     lastTgt=tgt;dirty=false;
@@ -1593,42 +1663,294 @@ $("apiTest").addEventListener("click",async()=>{
 });
 
 /* =====================================================================
-   Vista 2 — Ultra telemetria
+   Vista 2 — Ultra telemetria (riprogettata)
    ===================================================================== */
-const OSC_N=480,oscBuf=[new Float32Array(OSC_N),new Float32Array(OSC_N),new Float32Array(OSC_N),new Float32Array(OSC_N)];
+const TYC={S:"#e5383b",M:"#f2c230",H:"#e9eef8",I:"#3fbf7f",W:"#4f8ef7"};
+const MONO="'JetBrains Mono',ui-monospace,monospace";
+function cvs(id){const c=$(id);return{c,x:c.getContext("2d"),w:0,h:0,d:1};}
+function prep(o){
+  const r=o.c.parentNode.getBoundingClientRect(),d=Math.min(2.5,window.devicePixelRatio||1);
+  if(Math.round(r.width)!==o.w||Math.round(r.height)!==o.h||d!==o.d){o.w=Math.round(r.width);o.h=Math.round(r.height);o.d=d;o.c.width=Math.round(o.w*d);o.c.height=Math.round(o.h*d);}
+  o.x.setTransform(o.d,0,0,o.d,0,0);o.x.clearRect(0,0,o.w,o.h);return o.w>0&&o.h>0;
+}
+function gridY(x,W,H,L,R,T,B,y0,y1,n,fmt,inv){
+  x.font="500 9.5px "+MONO;x.fillStyle="#8792aa";x.strokeStyle="#1c2436";x.lineWidth=1;x.textAlign="right";x.textBaseline="middle";
+  const Y=v=>inv?T+(v-y0)/(y1-y0)*(H-T-B):H-B-(v-y0)/(y1-y0)*(H-T-B);
+  for(let i=0;i<=n;i++){const v=y0+(y1-y0)*i/n,y=Y(v);x.beginPath();x.moveTo(L,y);x.lineTo(W-R,y);x.stroke();x.fillText(fmt(v),L-5,y);}
+  x.textBaseline="alphabetic";return Y;
+}
+function msg(x,W,H,t){x.fillStyle="#8792aa";x.font="500 11px "+MONO;x.textAlign="center";x.fillText(t,W/2,H/2);}
+function tcol(T){/* blu freddo → verde finestra → rosso surriscaldato */
+  if(T<88){const k=clamp((T-60)/28,0,1);return"rgb("+Math.round(40+k*20)+","+Math.round(110+k*90)+","+Math.round(230-k*100)+")";}
+  if(T<=105)return"#10B981";const k=clamp((T-105)/20,0,1);return"rgb("+Math.round(16+k*209)+","+Math.round(185-k*150)+","+Math.round(129-k*110)+")";
+}
+function vcol(k){return"hsl("+Math.round(235-235*k)+",85%,"+Math.round(52+6*k)+"%)";}
+
+/* --- registrazione per distanza del pilota selezionato: giro attuale, precedente, migliore --- */
+const TB=200;
+let trc={id:-1,sim:null};
+function newTr(){const f=()=>new Float32Array(TB).fill(NaN);return{v:f(),thr:f(),brk:f(),t:f(),soc:f(),kw:f()};}
+function filled(T){let n=0;for(let i=0;i<TB;i++)if(T.t[i]===T.t[i])n++;return n>TB*0.85;}
+function recTrace(a,t){
+  const s=sim,c=s.byId[sel];
+  if(trc.id!==sel||trc.sim!==s){trc={id:sel,sim:s,lap:c.lapN,cur:newTr(),last:null,best:null,bestT:Infinity};}
+  if(c.lapStart<0||c.finished||c.pit>0)return;
+  if(c.lapN!==trc.lap){const ok=filled(trc.cur);trc.last=ok?trc.cur:null;if(ok&&c.lastLap>0&&c.lastLap<trc.bestT){trc.best=trc.cur;trc.bestT=c.lastLap;}trc.cur=newTr();trc.lap=c.lapN;}
+  const d=c.prev+(c.dist-c.prev)*a-c.lapN*s.L,b=Math.floor(d/s.L*TB);if(b<0||b>=TB)return;
+  const T=trc.cur;T.v[b]=t.kmh;T.thr[b]=t.thr;T.brk[b]=t.brk;T.t[b]=(s.n-1+a)*DT-c.lapStart;T.soc[b]=t.soc*100;T.kw[b]=t.kw;
+}
+window.recTrace=recTrace;
+function liveDelta(){
+  const s=sim,c=s.byId[sel];if(!trc.best||!trc.cur||c.lapStart<0)return null;
+  const b=Math.floor((c.dist-c.lapN*s.L)/s.L*TB);if(b<1||b>=TB)return null;
+  const a=trc.cur.t[b-1],r=trc.best.t[b-1];return a===a&&r===r?a-r:null;
+}
+
+/* --- KPI --- */
+const KPI=[["SPEED","km/h"],["RPM",""],["GEAR",""],["THROTTLE","%"],["BRAKE","%"],["G LAT",""],["G LONG",""],["STEERING","°"],["ERS SOC","%"],["MGU-K","kW"],["ACTIVE AERO",""],["Δ VS BEST",""],["POS / GAP",""],["GOMMA",""],["FUEL","kg"]];
+const kpiEl=KPI.map(k=>{const d=document.createElement("div");d.className="kpi";d.innerHTML="<span>"+k[0]+(k[1]?" · "+k[1]:"")+"</span><b>—</b><i><em></em></i>";$("tKpi").appendChild(d);return{b:d.children[1],bar:d.children[2].firstChild};});
+function kp(i,txt,col,pct,barCol){const e=kpiEl[i];setT(e.b,txt);if(e.b._col!==col){e.b._col=col;e.b.style.color=col||"";}const p=pct==null?0:clamp(pct,0,100);setW(e.bar,p);if(e.bar._bc!==barCol){e.bar._bc=barCol;e.bar.style.background=barCol||"var(--cyan)";}}
+function renderKpi(t){
+  const s=sim,c=s.byId[sel],dl=liveDelta(),fuel=s.isRace?Math.max(1,100-c.dist/(s.laps*s.L)*98):45;
+  kp(0,String(Math.round(t.kmh)),"#06B6D4",t.kmh/360*100);
+  kp(1,t.rpm.toLocaleString("it-IT"),t.rpm>12500?"#E10600":"",t.rpm/13500*100,"#A855F7");
+  kp(2,"G"+t.gear,"",t.gear/8*100,"#e9eef8");
+  kp(3,Math.round(t.thr)+"%","#10B981",t.thr,"#10B981");
+  kp(4,Math.round(t.brk)+"%",t.brk>0?"#E10600":"",t.brk,"#E10600");
+  kp(5,(t.gLat>=0?"+":"")+t.gLat.toFixed(2)+"G","",Math.abs(t.gLat)/5.5*100,"#F59E0B");
+  kp(6,(t.gLong>=0?"+":"")+t.gLong.toFixed(2)+"G","",Math.abs(t.gLong)/5.5*100,"#F59E0B");
+  kp(7,(t.steer>=0?"+":"")+Math.round(t.steer)+"°","",Math.abs(t.steer)/120*100,"#8792aa");
+  kp(8,Math.round(t.soc*100)+"%","#F59E0B",t.soc*100,"#F59E0B");
+  kp(9,String(t.kw),t.kw<0?"#10B981":t.kw>0?"#F59E0B":"",Math.abs(t.kw)/350*100,t.kw<0?"#10B981":"#F59E0B");
+  kp(10,t.xmode?"X-MODE":"Z-MODE",t.xmode?"#A855F7":"",t.xmode?100:35,"#A855F7");
+  kp(11,dl==null?"—":(dl>=0?"+":"")+dl.toFixed(3),dl==null?"":dl<=0?"#10B981":"#E10600",dl==null?0:Math.min(100,Math.abs(dl)*100),dl!=null&&dl<=0?"#10B981":"#E10600");
+  kp(12,"P"+c.pos+(s.isRace&&c.pos>1&&c.gapSet?" +"+c.gap.toFixed(1):""),"",(23-c.pos)/22*100,"#06B6D4");
+  kp(13,c.tyre+" · "+Math.floor(t.age)+"L",TYC[c.tyre],t.wear,TYC[c.tyre]);
+  kp(14,fuel.toFixed(1),"",fuel,"#8792aa");
+}
+
+/* --- oscilloscopio a 6 canali --- */
+const OSC_N=480,OSC_K=6,oscBuf=[];for(let k=0;k<OSC_K;k++)oscBuf.push(new Float32Array(OSC_N));
 let oscI=0,oscFill=0,oscSkip=0,discT=[480,480,460,460];
-const oscCv=$("osc"),oscCtx=oscCv.getContext("2d");let oscF={w:0,h:0,d:1};
-const PU=["ICE °C","MGU-K 350kW °C","ENERGY STORE °C","STATO CARICA %","TURBO BOOST bar","FUEL FLOW kg/h"].map(n=>{const d=document.createElement("div");d.className="mini";d.innerHTML="<span>"+n+"</span><b>—</b>";$("puGrid").appendChild(d);return d.children[1];});
-const CORN=["FL","FR","RL","RR"].map(n=>{const d=document.createElement("div");d.className="mini corner";d.innerHTML="<span>"+n+"</span><b>—</b><small></small><small></small><small></small>";$("cornerQuad").appendChild(d);return d;});
+const oscO=cvs("osc");
 window.onDriverChange=()=>{oscFill=0;oscI=0;buildMesh();radarKey="";};
 function renderTeleFast(a,t,moving){
   if(moving&&(oscSkip^=1)){
-    oscBuf[0][oscI]=t.kmh/360;oscBuf[1][oscI]=t.thr/100;oscBuf[2][oscI]=t.brk/100;oscBuf[3][oscI]=(t.kw+260)/620;
+    const v=[t.kmh/360,t.thr/100,t.brk/100,(t.kw+350)/700,t.rpm/13500,t.gear/8];
+    for(let k=0;k<OSC_K;k++)oscBuf[k][oscI]=v[k];
     oscI=(oscI+1)%OSC_N;if(oscFill<OSC_N)oscFill++;
     for(let k=0;k<4;k++){const tg=(k<2?440:400)+t.brk*(k<2?5.4:4.2);discT[k]+=(tg-discT[k])*(tg>discT[k]?0.25:0.02);}
   }
-  const W=oscF.w,H=oscF.h,c=oscCtx;if(!W)return;
-  c.setTransform(oscF.d,0,0,oscF.d,0,0);c.clearRect(0,0,W,H);
-  c.strokeStyle="#1c2436";c.lineWidth=1;c.beginPath();for(let g=1;g<4;g++){c.moveTo(0,H*g/4);c.lineTo(W,H*g/4);}for(let g=1;g<8;g++){c.moveTo(W*g/8,0);c.lineTo(W*g/8,H);}c.stroke();
-  const cols=["#06B6D4","#10B981","#E10600","#F59E0B"],lab=[Math.round(t.kmh)+" km/h",Math.round(t.thr)+" %",Math.round(t.brk*1.6)+" bar",t.kw+" kW"];
-  for(let k=0;k<4;k++){
-    c.beginPath();
-    for(let i=0;i<oscFill;i++){const v=oscBuf[k][(oscI-oscFill+i+OSC_N*2)%OSC_N],x=W-90-(oscFill-1-i)*(W-90)/(OSC_N-1),y=H-8-clamp(v,0,1)*(H-16);if(i)c.lineTo(x,y);else c.moveTo(x,y);}
-    c.strokeStyle=cols[k];c.lineWidth=1.8;c.stroke();
-    c.fillStyle=cols[k];c.font="700 11px 'JetBrains Mono',monospace";c.textAlign="right";c.fillText(lab[k],W-6,16+k*16);
+  renderKpi(t);
+  if(!prep(oscO))return;
+  const x=oscO.x,W=oscO.w,H=oscO.h,L=8,R=96;
+  x.strokeStyle="#1c2436";x.lineWidth=1;x.beginPath();for(let g=1;g<4;g++){x.moveTo(L,H*g/4);x.lineTo(W-R,H*g/4);}for(let g=1;g<8;g++){const gx=L+(W-L-R)*g/8;x.moveTo(gx,0);x.lineTo(gx,H);}x.stroke();
+  const cols=["#06B6D4","#10B981","#E10600","#F59E0B","#A855F7","#e9eef8"],lab=[Math.round(t.kmh)+" km/h",Math.round(t.thr)+" %",Math.round(t.brk*1.6)+" bar",t.kw+" kW",t.rpm+" rpm","G"+t.gear];
+  for(let k=0;k<OSC_K;k++){
+    x.beginPath();
+    for(let i=0;i<oscFill;i++){const v=oscBuf[k][(oscI-oscFill+i+OSC_N*2)%OSC_N],px=W-R-(oscFill-1-i)*(W-L-R)/(OSC_N-1),py=H-8-clamp(v,0,1)*(H-16);if(i)x.lineTo(px,py);else x.moveTo(px,py);}
+    x.strokeStyle=cols[k];x.lineWidth=k===5?1:1.7;x.globalAlpha=k>=4?0.75:1;x.stroke();x.globalAlpha=1;
+    x.fillStyle=cols[k];x.font="700 11px "+MONO;x.textAlign="right";x.fillText(lab[k],W-8,18+k*17);
   }
 }
+
+/* --- speed map --- */
+const heatO=cvs("tHeat");
+function drawHeat(){
+  if(!prep(heatO))return;const x=heatO.x,W=heatO.w,H=heatO.h,tr=sim.tr,N=tr.N,c=sim.byId[sel];
+  const scr=projectTrack(tr,W,H-16,18,1,null,0);let vmin=1e9,vmax=0;for(let i=0;i<N;i++){vmin=Math.min(vmin,tr.v[i]);vmax=Math.max(vmax,tr.v[i]);}
+  x.lineCap="round";x.lineWidth=11;x.strokeStyle="#151c2b";x.beginPath();x.moveTo(SX[0],SY[0]);for(let i=1;i<=N;i++)x.lineTo(SX[i],SY[i]);x.stroke();
+  x.lineWidth=5;for(let i=0;i<N;i++){x.beginPath();x.moveTo(SX[i],SY[i]);x.lineTo(SX[i+1],SY[i+1]);x.strokeStyle=vcol((tr.v[i]-vmin)/(vmax-vmin));x.stroke();}
+  x.fillStyle="#ffffff";for(let i=1;i<N;i++)if(tr.brk[i]>45&&tr.brk[i-1]<=45){x.beginPath();x.arc(SX[i],SY[i],2.6,0,6.2832);x.fill();}
+  const p=scr(c.dist,0);x.beginPath();x.arc(p[0],p[1],6,0,6.2832);x.fillStyle=TEAMS[DRIVERS[sel].team].c;x.fill();x.lineWidth=2;x.strokeStyle="#fff";x.stroke();
+  const gw=Math.min(180,W-90),gx=(W-gw)/2,gy=H-12,gr=x.createLinearGradient(gx,0,gx+gw,0);for(let k=0;k<=10;k++)gr.addColorStop(k/10,vcol(k/10));
+  x.fillStyle=gr;x.fillRect(gx,gy,gw,5);x.fillStyle="#8792aa";x.font="500 9.5px "+MONO;x.textAlign="right";x.fillText(Math.round(vmin*3.6),gx-5,gy+6);x.textAlign="left";x.fillText(Math.round(vmax*3.6)+" km/h",gx+gw+5,gy+6);
+}
+
+/* --- giro attuale vs migliore + delta --- */
+const ovlO=cvs("tOvl"),dltO=cvs("tDlt");
+function drawTraceLine(x,arr,X,Y,col,w,dash){x.beginPath();let on=false;for(let i=0;i<TB;i++){const v=arr[i];if(v!==v){on=false;continue;}const px=X(i),py=Y(v);if(on)x.lineTo(px,py);else{x.moveTo(px,py);on=true;}}x.strokeStyle=col;x.lineWidth=w;x.setLineDash(dash||[]);x.stroke();x.setLineDash([]);}
+function drawOverlay(){
+  const s=sim,col=TEAMS[DRIVERS[sel].team].c;
+  if(prep(ovlO)){
+    const x=ovlO.x,W=ovlO.w,H=ovlO.h,L=44,R=12,T=10,B=20,X=i=>L+i/(TB-1)*(W-L-R);
+    const Y=gridY(x,W,H,L,R,T,B,0,s.tr.VT*3.6*1.02,4,v=>Math.round(v));
+    if(trc.cur){x.fillStyle="rgba(225,6,0,.13)";for(let i=0;i<TB;i++)if(trc.cur.brk[i]>5)x.fillRect(X(i)-1,T,(W-L-R)/TB+1,H-T-B);}
+    [[1/3,"S2"],[2/3,"S3"]].forEach(p=>{const px=L+p[0]*(W-L-R);x.strokeStyle="#2b3550";x.setLineDash([3,3]);x.beginPath();x.moveTo(px,T);x.lineTo(px,H-B);x.stroke();x.setLineDash([]);x.fillStyle="#8792aa";x.textAlign="left";x.fillText(p[1],px+3,T+9);});
+    if(trc.best)drawTraceLine(x,trc.best.v,X,Y,"#8792aa",1.4,[4,3]);
+    if(trc.last&&trc.last!==trc.best)drawTraceLine(x,trc.last.v,X,Y,"rgba(168,85,247,.55)",1.2);
+    if(trc.cur)drawTraceLine(x,trc.cur.v,X,Y,col,2);
+    x.fillStyle="#8792aa";x.textAlign="center";x.font="500 9.5px "+MONO;x.fillText("distanza nel giro → (zone rosse: frenata)",L+(W-L-R)/2,H-5);
+    if(!trc.best&&!trc.cur)msg(x,W,H,"In attesa dei dati del giro");
+  }
+  setT($("tOvlSub"),trc.best?"tratteggio: miglior giro "+fmtLap(trc.bestT)+" · viola: giro precedente":"il confronto compare dopo il primo giro completo");
+  if(prep(dltO)){
+    const x=dltO.x,W=dltO.w,H=dltO.h,L=44,R=12,X=i=>L+i/(TB-1)*(W-L-R);
+    if(!trc.best||!trc.cur){msg(x,W,H,"Delta live: serve un giro completo di riferimento");return;}
+    let mx=0.2;const dd=new Float32Array(TB).fill(NaN);for(let i=0;i<TB;i++){const a=trc.cur.t[i],b=trc.best.t[i];if(a===a&&b===b){dd[i]=a-b;mx=Math.max(mx,Math.abs(a-b));}}
+    mx=Math.ceil(mx*10)/10;const Y=gridY(x,W,H,L,R,8,8,-mx,mx,2,v=>(v>0?"+":"")+v.toFixed(1),true);
+    for(let i=0;i<TB;i++){const v=dd[i];if(v!==v)continue;const y0=Y(0),y1=Y(v);x.fillStyle=v>0?"rgba(225,6,0,.75)":"rgba(16,185,129,.8)";x.fillRect(X(i),Math.min(y0,y1),Math.max(1,(W-L-R)/TB),Math.abs(y1-y0));}
+    x.fillStyle="#8792aa";x.textAlign="left";x.fillText("Δ s · verde = più veloce del best",L+4,12);
+  }
+}
+
+/* --- stile di guida + marce (dal profilo del circuito) --- */
+let styleKey="";
+function drawStyle(){
+  const tr=sim.tr,key=sim.c.id+"|"+sel;if(key===styleKey)return;styleKey=key;
+  let full=0,part=0,brk=0,tot=0;const gears=new Float64Array(9);
+  for(let i=0;i<tr.N;i++){const dt=tr.ds/tr.v[i];tot+=dt;if(tr.brk[i]>0)brk+=dt;else if(tr.thr[i]>=100)full+=dt;else part+=dt;gears[Math.max(1,Math.min(8,1+Math.floor(tr.v[i]*3.6/42)))]+=dt;}
+  const parts=[["Gas pieno",full,"#10B981"],["Parzializzato",part,"#F59E0B"],["Frenata",brk,"#E10600"]];
+  let s='',a0=-Math.PI/2;const cx=70,cy=75,r=52;
+  for(const p of parts){const a1=a0+p[1]/tot*Math.PI*2,lg=a1-a0>Math.PI?1:0;s+='<path d="M'+(cx+r*Math.cos(a0)).toFixed(1)+' '+(cy+r*Math.sin(a0)).toFixed(1)+' A'+r+' '+r+' 0 '+lg+' 1 '+(cx+r*Math.cos(a1)).toFixed(1)+' '+(cy+r*Math.sin(a1)).toFixed(1)+'" fill="none" stroke="'+p[2]+'" stroke-width="20"/>';a0=a1;}
+  s+='<text x="'+cx+'" y="'+(cy-2)+'" text-anchor="middle" font-size="17" font-weight="800" fill="#e9eef8" font-family="monospace">'+Math.round(full/tot*100)+'%</text><text x="'+cx+'" y="'+(cy+13)+'" text-anchor="middle" font-size="8" fill="#8792aa" font-family="monospace">GAS PIENO</text>';
+  parts.forEach((p,k)=>{const y=40+k*30;s+='<rect x="150" y="'+(y-9)+'" width="10" height="10" rx="2" fill="'+p[2]+'"/><text x="166" y="'+y+'" font-size="11" fill="#e9eef8" font-family="monospace">'+p[0]+'</text><text x="290" y="'+y+'" text-anchor="end" font-size="11" font-weight="800" fill="'+p[2]+'" font-family="monospace">'+Math.round(p[1]/tot*100)+'%</text><text x="166" y="'+(y+12)+'" font-size="9" fill="#8792aa" font-family="monospace">'+p[1].toFixed(1)+' s/giro</text>';});
+  $("tStyle").innerHTML=s;
+  let g='<text x="8" y="14" font-size="9" fill="#8792aa" font-family="monospace">USO MARCE · % TEMPO</text>',mg=0;for(let k=1;k<=8;k++)mg=Math.max(mg,gears[k]);
+  for(let k=1;k<=8;k++){const h=gears[k]/mg*80,xx=14+(k-1)*35;g+='<rect x="'+xx+'" y="'+(104-h)+'" width="24" height="'+Math.max(1,h)+'" rx="3" fill="#06B6D4" opacity="'+(0.45+0.55*gears[k]/mg)+'"/><text x="'+(xx+12)+'" y="'+(100-h)+'" text-anchor="middle" font-size="8.5" fill="#e9eef8" font-family="monospace">'+Math.round(gears[k]/tot*100)+'</text><text x="'+(xx+12)+'" y="120" text-anchor="middle" font-size="10" fill="#8792aa" font-family="monospace">G'+k+'</text>';}
+  $("tGears").innerHTML=g;
+}
+
+/* --- vettura vista dall'alto: gomme a 3 zone e dischi --- */
+function drawCar(t){
+  const P=[[44,40],[236,40],[44,190],[236,190]],nm=["FL","FR","RL","RR"],tc=TEAMS[DRIVERS[sel].team].c;
+  let s='<path d="M160 18 L172 60 L178 120 L196 150 L198 230 L184 268 L136 268 L122 230 L124 150 L142 120 L148 60 Z" fill="#141a28" stroke="'+tc+'" stroke-width="1.6"/><rect x="118" y="12" width="84" height="10" rx="3" fill="'+tc+'" opacity=".8"/><rect x="128" y="270" width="64" height="12" rx="3" fill="'+tc+'" opacity=".8"/><ellipse cx="160" cy="135" rx="11" ry="16" fill="#05080d" stroke="#3a4560"/>';
+  s+='<line x1="88" y1="68" x2="124" y2="80" stroke="#3a4560" stroke-width="2"/><line x1="232" y1="68" x2="196" y2="80" stroke="#3a4560" stroke-width="2"/><line x1="88" y1="218" x2="124" y2="210" stroke="#3a4560" stroke-width="2"/><line x1="232" y1="218" x2="196" y2="210" stroke="#3a4560" stroke-width="2"/>';
+  for(let k=0;k<4;k++){
+    const T=t.tyres[k],side=(k%2===0?-1:1)*t.gLat,inner=T+3+(k<2?t.brk*0.02:0),mid=T,outer=T-2+Math.max(0,side)*2.2;
+    const z=k%2===0?[outer,mid,inner]:[inner,mid,outer],x0=P[k][0],y0=P[k][1];
+    for(let j=0;j<3;j++)s+='<rect x="'+(x0+j*13.3)+'" y="'+y0+'" width="13.4" height="58" fill="'+tcol(z[j])+'"'+(j===0?' rx="4"':j===2?' rx="4"':'')+'/>';
+    s+='<rect x="'+x0+'" y="'+y0+'" width="40" height="58" rx="5" fill="none" stroke="#05080d" stroke-width="1.5"/>';
+    const disc=clamp(discT[k],450,980),dk=(disc-450)/530,dx=k%2===0?x0+52:x0-12;
+    s+='<circle cx="'+dx+'" cy="'+(y0+29)+'" r="8" fill="rgb('+Math.round(60+195*dk)+','+Math.round(60+60*dk)+','+Math.round(70-50*dk)+')" stroke="#05080d"/>';
+    const tx=k%2===0?x0:x0+40,an=k%2===0?"start":"end",ty=k<2?y0-8:y0+74;
+    s+='<text x="'+tx+'" y="'+ty+'" text-anchor="'+an+'" font-size="10.5" font-weight="800" fill="#e9eef8" font-family="monospace">'+nm[k]+' '+Math.round(T)+'°C</text>';
+    s+='<text x="'+tx+'" y="'+(ty+(k<2?-11:12))+'" text-anchor="'+an+'" font-size="9" fill="#8792aa" font-family="monospace">'+(22.5+clamp((T-80)*0.07,0,2.3)).toFixed(1)+' psi · disco '+Math.round(disc)+'°</text>';
+    const wear=Math.max(0,t.wear-(k<2?0:3));s+='<rect x="'+x0+'" y="'+(y0+61)+'" width="40" height="3" fill="#1a2132"/><rect x="'+x0+'" y="'+(y0+61)+'" width="'+(40*wear/100).toFixed(1)+'" height="3" fill="'+(wear>50?"#10B981":wear>25?"#F59E0B":"#E10600")+'"/>';
+  }
+  s+='<text x="160" y="296" text-anchor="middle" font-size="9" fill="#8792aa" font-family="monospace">barra sotto la gomma = vita residua · cerchio = disco freno</text>';
+  $("tCar").innerHTML=s;
+}
+
+/* --- power unit: 8 strumenti circolari --- */
+const PUM=[["ICE","°C",90,130],["MGU-K","°C",40,120],["BATTERIA","°C",30,60],["SOC","%",0,100],["TURBO","bar",1,4.5],["FUEL FLOW","kg/h",0,100],["OLIO","bar",3,6],["MGU-K","kW",-350,350]];
+const puEl=PUM.map(m=>{const d=document.createElementNS("http://www.w3.org/2000/svg","svg");d.setAttribute("viewBox","0 0 80 72");
+  d.innerHTML='<path d="M14 58 A30 30 0 1 1 66 58" fill="none" stroke="#1a2132" stroke-width="7" stroke-linecap="round"/><path class="arc" d="M14 58 A30 30 0 1 1 66 58" fill="none" stroke-width="7" stroke-linecap="round" stroke-dasharray="141" stroke-dashoffset="141"/><text class="v" x="40" y="44" text-anchor="middle" font-size="13" font-weight="800" fill="#e9eef8" font-family="monospace">—</text><text x="40" y="68" text-anchor="middle" font-size="7.5" fill="#8792aa" font-family="monospace">'+m[0]+' '+m[1]+'</text>';
+  $("tPU").appendChild(d);return{arc:d.querySelector(".arc"),v:d.querySelector(".v")};});
+function drawPU(t){
+  const v=[102+t.thr*0.13,66+Math.abs(t.kw)*0.07,40+(1-t.soc)*15,t.soc*100,1.2+t.thr/100*2.6,10+t.thr*0.62,4.4+t.rpm/13500*1.2,t.kw];
+  for(let k=0;k<8;k++){const m=PUM[k],p=clamp((v[k]-m[2])/(m[3]-m[2]),0,1),e=puEl[k],col=k===7?(v[k]<0?"#10B981":"#F59E0B"):p>0.85?"#E10600":p>0.6?"#F59E0B":"#10B981";
+    e.arc.setAttribute("stroke-dashoffset",(141*(1-p)).toFixed(1));e.arc.setAttribute("stroke",col);setT(e.v,k===4||k===6?v[k].toFixed(2):String(Math.round(v[k])));}
+}
+
+/* --- energia ERS --- */
+const enO=cvs("tEnergy");
+function drawEnergy(){
+  const st=$("tEnStats");
+  if(prep(enO)){
+    const x=enO.x,W=enO.w,H=enO.h,L=34,R=10,T=10,B=22,X=i=>L+i/(TB-1)*(W-L-R),Y=gridY(x,W,H,L,R,T,B,0,100,2,v=>Math.round(v)+"%");
+    if(trc.cur){for(let i=0;i<TB;i++){const k=trc.cur.kw[i];if(k!==k)continue;x.fillStyle=k<0?"#10B981":k>200?"#F59E0B":"#2b3550";x.fillRect(X(i),H-B+6,Math.max(1,(W-L-R)/TB),6);}}
+    if(trc.last)drawTraceLine(x,trc.last.soc,X,Y,"#5a6480",1.2,[3,3]);
+    if(trc.cur)drawTraceLine(x,trc.cur.soc,X,Y,"#F59E0B",2);
+    else msg(x,W,H,"In attesa del giro");
+  }
+  const T=trc.cur;let dep=0,har=0,n=0,mn=100,mx=0;
+  if(T)for(let i=0;i<TB;i++){const k=T.kw[i];if(k!==k)continue;n++;if(k>200)dep++;if(k<0)har++;mn=Math.min(mn,T.soc[i]);mx=Math.max(mx,T.soc[i]);}
+  const key=n?Math.round(dep/n*100)+"|"+Math.round(har/n*100)+"|"+Math.round(mn)+"|"+Math.round(mx):"-";
+  if(st._v!==key){st._v=key;st.innerHTML='<div class="mini"><span>DEPLOY</span><b style="color:#F59E0B">'+(n?Math.round(dep/n*100)+"%":"—")+'</b></div><div class="mini"><span>HARVEST</span><b style="color:#10B981">'+(n?Math.round(har/n*100)+"%":"—")+'</b></div><div class="mini"><span>SOC MIN–MAX</span><b>'+(n?Math.round(mn)+"–"+Math.round(mx):"—")+'</b></div>';}
+}
+
+/* --- passo gara pilota vs rivale --- */
+const lapsO=cvs("tLaps");
+function drawLaps(){
+  const s=sim,A=s.byId[sel],B=s.byId[rival],ca=TEAMS[DRIVERS[sel].team].c,cb=DRIVERS[rival].team===DRIVERS[sel].team?"#e9eef8":TEAMS[DRIVERS[rival].team].c;
+  setT($("tLapsWho"),DRIVERS[sel].code+" vs "+DRIVERS[rival].code);
+  /* degrado dello stint attuale: regressione lineare sui giri senza sosta */
+  const st=A.stints[A.stints.length-1].from,pts=A.lapLog.map((l,i)=>[i,l.t,l.pit]).filter(p=>p[0]>st&&!p[2]&&!(A.lapLog[p[0]-1]&&A.lapLog[p[0]-1].pit));
+  let deg="—";if(pts.length>=3){let sx=0,sy=0,sxx=0,sxy=0;const n=pts.length;for(const p of pts){sx+=p[0];sy+=p[1];sxx+=p[0]*p[0];sxy+=p[0]*p[1];}const k=(n*sxy-sx*sy)/(n*sxx-sx*sx);if(isFinite(k))deg=(k>=0?"+":"")+k.toFixed(3)+" s/giro";}
+  setT($("tDeg"),"degrado stint "+A.tyre+": "+deg);
+  if(!prep(lapsO))return;const x=lapsO.x,W=lapsO.w,H=lapsO.h,L=50,R=12,T=12,BM=22;
+  const la=A.lapLog,lb=B.lapLog,all=la.concat(lb).filter(l=>!l.pit).map(l=>l.t).sort((p,q)=>p-q);
+  if(all.length<2){msg(x,W,H,"Servono almeno 2 giri completati");return;}
+  const lo=all[0]-0.3,hi=Math.min(all[all.length-1],all[Math.floor(all.length/2)]+3)+0.3,n=Math.max(la.length,lb.length,2);
+  const X=i=>L+i/(n-1)*(W-L-R),Y=gridY(x,W,H,L,R,T,BM,lo,hi,4,v=>v.toFixed(1),true);
+  x.fillStyle="#8792aa";x.textAlign="center";for(let i=0;i<n;i+=Math.max(1,Math.ceil(n/10)))x.fillText(String(i+1),X(i),H-6);
+  const line=(lg,col)=>{x.beginPath();lg.forEach((l,i)=>{const y=Y(clamp(l.t,lo,hi));if(i)x.lineTo(X(i),y);else x.moveTo(X(i),y);});x.strokeStyle=col;x.lineWidth=1.8;x.stroke();
+    lg.forEach((l,i)=>{const y=Y(clamp(l.t,lo,hi));x.beginPath();x.arc(X(i),y,l.pit?4.5:2.6,0,6.2832);x.fillStyle=TYC[l.ty];x.fill();if(l.pit){x.strokeStyle=col;x.lineWidth=1.5;x.stroke();x.fillStyle=col;x.font="700 8.5px "+MONO;x.fillText("PIT",X(i),y-8);}});};
+  line(lb,cb);line(la,ca);
+  x.textAlign="left";x.font="700 10px "+MONO;x.fillStyle=ca;x.fillText("● "+DRIVERS[sel].code,L+4,T+10);x.fillStyle=cb;x.fillText("● "+DRIVERS[rival].code,L+60,T+10);
+}
+
+/* --- distacchi dal leader --- */
+const gapsO=cvs("tGaps");
+function drawGaps(){
+  if(!prep(gapsO))return;const s=sim,x=gapsO.x,W=gapsO.w,H=gapsO.h,L=44,R=40,T=10,B=20;
+  if(!s.isRace){msg(x,W,H,"Disponibile in gara e sprint");return;}
+  const top=s.order.slice(0,10),n=Math.max(2,...top.map(c=>c.lapLog.length));
+  if(n<2||top[0].lapLog.length<2){msg(x,W,H,"Servono almeno 2 giri completati");return;}
+  let mx=5;top.forEach(c=>c.lapLog.forEach(l=>{if(l.gap<120)mx=Math.max(mx,l.gap);}));mx=Math.ceil(mx/5)*5;
+  const X=i=>L+i/(n-1)*(W-L-R),Y=gridY(x,W,H,L,R,T,B,0,mx,4,v=>"+"+Math.round(v),true);
+  x.fillStyle="#8792aa";x.textAlign="center";for(let i=0;i<n;i+=Math.max(1,Math.ceil(n/10)))x.fillText(String(i+1),X(i),H-6);
+  for(const c of top){const lg=c.lapLog,col=TEAMS[DRIVERS[c.id].team].c,isS=c.id===sel;if(!lg.length)continue;
+    x.beginPath();lg.forEach((l,i)=>{const y=Y(clamp(l.gap,0,mx));if(i)x.lineTo(X(i),y);else x.moveTo(X(i),y);});x.strokeStyle=col;x.lineWidth=isS?2.6:1.3;x.globalAlpha=isS?1:0.8;x.stroke();x.globalAlpha=1;
+    const l=lg[lg.length-1];x.fillStyle=col;x.font=(isS?"800":"600")+" 9px "+MONO;x.textAlign="left";x.fillText(DRIVERS[c.id].code,X(lg.length-1)+4,Y(clamp(l.gap,0,mx))+3);}
+}
+
+/* --- strategia gomme --- */
+function drawStrat(){
+  const s=sim,ord=s.order,total=s.isRace?s.laps:Math.max(5,...ord.map(c=>c.lapsDone+1)),rowH=15,L=46,W=600,R=10,H=ord.length*rowH+26;
+  const X=l=>L+l/total*(W-L-R);let h='';
+  for(let k=0;k<=5;k++){const l=Math.round(total*k/5),px=X(l);h+='<line x1="'+px+'" x2="'+px+'" y1="0" y2="'+(H-18)+'" stroke="#1c2436"/><text x="'+px+'" y="'+(H-5)+'" text-anchor="middle" font-size="9" fill="#8792aa" font-family="monospace">L'+l+'</text>';}
+  ord.forEach((c,r)=>{const y=r*rowH+2,isS=c.id===sel,now=Math.min(total,c.dist/s.L);
+    h+='<text x="'+(L-6)+'" y="'+(y+10)+'" text-anchor="end" font-size="9.5" font-weight="'+(isS?800:500)+'" fill="'+(isS?"#ffffff":"#c4cbda")+'" font-family="monospace">'+DRIVERS[c.id].code+'</text>';
+    c.stints.forEach((st,k)=>{const a=st.from,b=k+1<c.stints.length?c.stints[k+1].from:Math.max(a,now);if(b<=a&&k+1<c.stints.length)return;
+      h+='<rect x="'+X(a).toFixed(1)+'" y="'+y+'" width="'+Math.max(2,X(b)-X(a)).toFixed(1)+'" height="'+(rowH-4)+'" rx="2" fill="'+TYC[st.ty]+'" opacity="'+(k+1<c.stints.length?0.65:1)+'"/>';});
+    if(isS)h+='<rect x="'+(L-2)+'" y="'+(y-1)+'" width="'+(W-L-R+4)+'" height="'+(rowH-2)+'" fill="none" stroke="#ffffff" stroke-width="1"/>';
+  });
+  const el=$("tStrat");el.setAttribute("viewBox","0 0 "+W+" "+H);el.innerHTML=h;
+}
+
+/* --- lap chart posizioni --- */
+const posO=cvs("tPos");
+function drawPos(){
+  if(!prep(posO))return;const s=sim,x=posO.x,W=posO.w,H=posO.h,L=30,R=40,T=10,B=20;
+  const n=Math.max(2,...s.cars.map(c=>c.lapLog.length+1));
+  const X=i=>L+i/(n-1)*(W-L-R),Y=p=>T+(p-1)/21*(H-T-B);
+  x.font="500 9px "+MONO;x.fillStyle="#8792aa";x.textAlign="right";for(let p=1;p<=22;p+=3)x.fillText("P"+p,L-5,Y(p)+3);
+  x.textAlign="center";for(let i=0;i<n;i+=Math.max(1,Math.ceil(n/10)))x.fillText(i===0?"VIA":String(i),X(i),H-6);
+  const start={};s.cars.forEach((c,k)=>{start[c.id]=k+1;});
+  const draw=(c,isS)=>{const col=TEAMS[DRIVERS[c.id].team].c,pts=[start[c.id]].concat(c.lapLog.map(l=>l.pos));
+    x.beginPath();pts.forEach((p,i)=>{if(i)x.lineTo(X(i),Y(p));else x.moveTo(X(i),Y(p));});x.strokeStyle=col;x.lineWidth=isS?3:1.2;x.globalAlpha=isS?1:0.45;x.stroke();x.globalAlpha=1;
+    const last=pts[pts.length-1];x.fillStyle=col;x.font=(isS?"800 10px ":"600 8.5px ")+MONO;x.textAlign="left";x.globalAlpha=isS?1:0.8;x.fillText(DRIVERS[c.id].code,X(pts.length-1)+4,Y(last)+3);x.globalAlpha=1;};
+  s.cars.forEach(c=>{if(c.id!==sel)draw(c,false);});draw(s.byId[sel],true);
+}
+
+/* --- settori: miglior tempo per pilota --- */
+function renderSec(){
+  const s=sim,b=s.bestSec,rows=s.cars.map(c=>{const id=c.secBestP.reduce((p,q)=>p+q,0);return{c,id};}).sort((p,q)=>(p.id===q.id?p.c.pos-q.c.pos:p.id<q.id?-1:1));
+  const bestIdeal=rows[0].id,q=(v,ref)=>!isFinite(v)?"":v<=ref+1e-6?"q0":v-ref<0.15?"q1":v-ref<0.45?"q2":"q3",f=v=>isFinite(v)?v.toFixed(3):"—";
+  let h='<thead><tr><th>#</th><th>DRIVER</th><th>S1</th><th>S2</th><th>S3</th><th>IDEALE</th><th>BEST</th><th>Δ IDEALE</th></tr></thead><tbody>';
+  rows.forEach((r,i)=>{const c=r.c,d=DRIVERS[c.id];
+    h+='<tr class="'+(c.id===sel?"sel":"")+'" data-id="'+c.id+'"><td>'+(i+1)+'</td><td class="c-drv"><i style="background:'+TEAMS[d.team].c+'"></i><b>'+d.code+'</b></td>';
+    for(let k=0;k<3;k++)h+='<td class="'+q(c.secBestP[k],b[k])+'">'+f(c.secBestP[k])+'</td>';
+    h+='<td class="'+q(r.id,bestIdeal)+'">'+(isFinite(r.id)?fmtLap(r.id):"—")+'</td><td>'+fmtLap(c.bestLap)+'</td><td class="sub">'+(isFinite(r.id)&&isFinite(c.bestLap)?"+"+(c.bestLap-r.id).toFixed(3):"—")+'</td></tr>';});
+  $("tSec").innerHTML=h+'</tbody>';
+}
+$("tSec").addEventListener("click",e=>{const tr=e.target.closest("tr[data-id]");if(tr)selectDriver(+tr.dataset.id);});
+
+/* --- speed trap --- */
+function drawTrap(){
+  const s=sim,arr=s.cars.slice().sort((a,b)=>b.vmax-a.vmax),top=arr[0].vmax*3.6||1,lo=Math.max(0,(arr[arr.length-1].vmax*3.6||0)-15),rowH=15,L=46,W=600,H=arr.length*rowH+6;
+  let h='';arr.forEach((c,r)=>{const v=c.vmax*3.6,y=r*rowH+2,w=v>0?(v-lo)/(top-lo)*(W-L-70):0,d=DRIVERS[c.id],isS=c.id===sel;
+    h+='<text x="'+(L-6)+'" y="'+(y+10)+'" text-anchor="end" font-size="9.5" font-weight="'+(isS?800:500)+'" fill="'+(isS?"#fff":"#c4cbda")+'" font-family="monospace">'+d.code+'</text><rect x="'+L+'" y="'+y+'" width="'+Math.max(1,w).toFixed(1)+'" height="'+(rowH-4)+'" rx="2" fill="'+TEAMS[d.team].c+'" opacity="'+(isS?1:0.75)+'"/><text x="'+(L+w+6).toFixed(1)+'" y="'+(y+10)+'" font-size="9.5" fill="#e9eef8" font-family="monospace">'+(v>0?Math.round(v)+" km/h":"—")+'</text>';});
+  const el=$("tTrap");el.setAttribute("viewBox","0 0 "+W+" "+H);el.innerHTML=h;
+}
+
 function renderTeleSlow(){
   const s=sim,c=s.byId[sel],t=liveCar(tele(s,c,1)),d=DRIVERS[sel];
   setT($("oscWho"),d.code+" · "+d.first+" "+d.last);
-  const pu=[(102+t.thr*0.13).toFixed(0),(66+Math.abs(t.kw)*0.07).toFixed(0),(40+(1-t.soc)*15).toFixed(0),Math.round(t.soc*100),(1.2+t.thr/100*2.6).toFixed(2),(10+t.thr*0.62).toFixed(1)];
-  for(let k=0;k<6;k++)setT(PU[k],String(pu[k]));
-  const aero=Math.pow(t.kmh/3.6,2)*0.95*(t.xmode?0.62:1),stat=1900;
-  for(let k=0;k<4;k++){
-    const el=CORN[k],x=t.tyres[k],side=(k%2===0?1:-1)*t.gLat,load=Math.max(300,stat+aero/4+side*420+(k<2?-1:1)*t.gLong*300);
-    setT(el.children[1],Math.round(x)+"°C sup · "+Math.round(x-9+t.age*0.1)+"°C carc");setC(el,"mini corner "+(x<90?"cold":x>105?"hot":"ok"));
-    setT(el.children[2],"Disco "+Math.round(clamp(discT[k],450,980))+"°C");setT(el.children[3],(22.5+clamp((x-80)*0.07,0,2.3)).toFixed(1)+" PSI");setT(el.children[4],Math.round(load).toLocaleString("it-IT")+" N");
-  }
+  setT($("tSub"),TEAMS[d.team].n+" · "+SLABEL[s.session]+" · "+s.c.circuit+(live.active?" · dati vettura OpenF1":" · valori simulati"));
+  drawHeat();drawOverlay();drawStyle();drawCar(t);drawPU(t);drawEnergy();drawLaps();drawGaps();drawStrat();drawPos();renderSec();drawTrap();
   let h="";
   for(const car of s.order){
     const dd=DRIVERS[car.id],x=tele(s,car,1),fd=((noise(s.cfg.seed|0,car.id+20,s.t,70)-0.5)*1.4);
@@ -1864,8 +2186,8 @@ $("shDl").addEventListener("click",async()=>{
 $("shareUrl").style.userSelect="all";
 
 /* ---------- dimensionamento canvas delle viste ---------- */
-window.sizeViews=()=>{oscF=fitCanvas(oscCv,oscCv.parentNode);hF=fitCanvas(hCv,hCv.parentNode);cfdF=fitCanvas(cfdCv,cfdCv.parentNode);neF=fitCanvas(neCv,neCv.parentNode);dirty=true;};
-if(window.ResizeObserver){const ro=new ResizeObserver(()=>window.sizeViews());[oscCv,hCv,cfdCv,neCv].forEach(c=>ro.observe(c.parentNode));}
+window.sizeViews=()=>{hF=fitCanvas(hCv,hCv.parentNode);cfdF=fitCanvas(cfdCv,cfdCv.parentNode);neF=fitCanvas(neCv,neCv.parentNode);dirty=true;};
+if(window.ResizeObserver){const ro=new ResizeObserver(()=>window.sizeViews());[hCv,cfdCv,neCv].forEach(c=>ro.observe(c.parentNode));}
 
 /* ---------- avvio ---------- */
 function start(saved){
