@@ -1301,10 +1301,10 @@ function renderPit(){
   /* feed */
   if(s.feedId!==lastFeedId||live.radioVer!==lastRadioVer){
     lastFeedId=s.feedId;lastRadioVer=live.radioVer;
-    fillFeed($("feed"),s.feedArr.slice(0,14),race);
+    fillFeed($("feed"),live.active&&live.rc.length?live.rc.concat(s.feedArr.filter(f=>f.cls!=="rc")).slice(0,14):s.feedArr.slice(0,14),race);
     const rl=live.radio.length?live.radio.map(r=>({cls:"radio",tag:r.code,text:"Team radio reale (OpenF1)",url:r.url,lap:0,t:0})):s.feedArr.filter(f=>f.cls==="radio").slice(0,8);
     fillFeed($("radioList"),rl,race);
-    setT($("feedSub"),live.radio.length?"RADIO REALI + SIMULATE":"RADIO SIMULATA");
+    setT($("feedSub"),(live.active&&live.rc.length?"FIA REALE · ":"")+(live.radio.length?"RADIO REALI + SIMULATE":"RADIO SIMULATA"));
   }
 }
 let lastRadioVer=0;
@@ -1318,7 +1318,7 @@ function fillFeed(ul,items,race){
     const w=document.createElement("span");w.className="when";
     if(f.url&&/^https:\/\//.test(f.url)){const l=document.createElement("a");l.href=f.url;l.target="_blank";l.rel="noopener";l.className="play";l.textContent="▶ MP3";w.appendChild(l);}
     else if(f.cls==="radio"){const p=document.createElement("button");p.type="button";p.className="play";p.textContent="▶ PLAY";w.appendChild(p);}
-    else w.textContent=race?"L"+f.lap:fmtClock(f.t);
+    else w.textContent=f.date?new Date(f.date).toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"}):race?"L"+f.lap:fmtClock(f.t);
     li.append(a,b,w);ul.appendChild(li);
   }
 }
@@ -1587,7 +1587,7 @@ async function initShared(){
    ===================================================================== */
 const API="https://api.openf1.org/v1";
 const live={on:false,active:false,status:"SIM",note:"",last:null,key:store.get("key",""),poll:store.get("poll",8),
-  weather:null,pos:{},gap:{},int:{},hasPos:false,car:null,carNum:0,radio:[],radioVer:0,timer:0,busy:false,session:null};
+  weather:null,pos:{},gap:{},int:{},hasPos:false,car:null,carNum:0,radio:[],radioVer:0,rc:[],rcFlag:null,timer:0,busy:false,session:null};
 if([8,3,1.5].indexOf(live.poll)<0)live.poll=8;
 function apiGet(path){
   const h=live.key?{Authorization:"Bearer "+live.key}:{};
@@ -1604,7 +1604,7 @@ async function pollLive(){
     if(!s||!(now>=t0&&now<=t1)){liveStandby(s?"nessuna sessione in corso (ultima: "+(s.session_name||"")+" "+(s.circuit_short_name||"")+")":"nessuna sessione");}
     else{
       const since=encodeURIComponent(new Date(now-25000).toISOString());
-      const jobs=[apiGet("/weather?session_key=latest"),apiGet("/position?session_key=latest"),apiGet("/intervals?session_key=latest&date%3E"+since)];
+      const jobs=[apiGet("/weather?session_key=latest"),apiGet("/position?session_key=latest"),apiGet("/intervals?session_key=latest&date%3E"+since),apiGet("/race_control?session_key=latest")];
       if(live.key){
         const num=DRIVERS[sel].num;
         jobs.push(apiGet("/car_data?session_key=latest&driver_number="+num+"&date%3E"+encodeURIComponent(new Date(now-6000).toISOString())).then(a=>({num,a})));
@@ -1614,8 +1614,9 @@ async function pollLive(){
       if(r[0].status==="fulfilled"&&r[0].value.length)live.weather=r[0].value[r[0].value.length-1];
       if(r[1].status==="fulfilled"){const m=lastPer(r[1].value);live.pos={};for(const k in m)live.pos[k]=m[k].position;live.hasPos=Object.keys(live.pos).length>0;}
       if(r[2].status==="fulfilled"){const m=lastPer(r[2].value);for(const k in m){live.gap[k]=m[k].gap_to_leader;live.int[k]=m[k].interval;}}
-      if(r[3]&&r[3].status==="fulfilled"&&r[3].value.a.length){live.car=r[3].value.a[r[3].value.a.length-1];live.carNum=r[3].value.num;}
-      if(r[4]&&r[4].status==="fulfilled"&&Array.isArray(r[4].value)){live.radio=r[4].value.slice(-6).reverse().map(x=>({code:(DRIVERS[NUM2ID[x.driver_number]]||{code:"#"+x.driver_number}).code,url:x.recording_url}));live.radioVer++;}
+      if(r[3].status==="fulfilled")applyRaceControl(r[3].value);
+      if(r[4]&&r[4].status==="fulfilled"&&r[4].value.a.length){live.car=r[4].value.a[r[4].value.a.length-1];live.carNum=r[4].value.num;}
+      if(r[5]&&r[5].status==="fulfilled"&&Array.isArray(r[5].value)){live.radio=r[5].value.slice(-6).reverse().map(x=>({code:(DRIVERS[NUM2ID[x.driver_number]]||{code:"#"+x.driver_number}).code,url:x.recording_url}));live.radioVer++;}
       if(r.some(x=>x.status==="rejected"&&x.reason&&x.reason.status===429))live.note="rate limit: rallento";else live.note="";
       live.active=true;live.status="CONNECTED";
     }
@@ -1625,12 +1626,28 @@ async function pollLive(){
   }
   live.busy=false;updateLiveUI();dirty=true;lastSlow=0;
 }
+/* direzione gara reale: messaggi nel feed e stato pista dalla bandiera o safety car più recente */
+function rcFlagOf(m){
+  const t=String(m.message||"").toUpperCase(),f=String(m.flag||"").toUpperCase(),c=m.category;
+  if(c==="SafetyCar"){if(/VIRTUAL SAFETY CAR DEPLOYED|VSC DEPLOYED/.test(t))return"VSC";if(/SAFETY CAR DEPLOYED/.test(t))return"SC";if(/ENDING|IN THIS LAP|WITHDRAWN/.test(t))return null;}
+  if(c==="Flag"){if(f==="RED")return"RED";if(f==="GREEN"||f==="CLEAR")return m.scope==="Sector"?null:"GREEN";if((f==="YELLOW"||f==="DOUBLE YELLOW")&&m.scope==="Track")return"YELLOW";if(f==="CHEQUERED")return null;}
+  if(c==="SessionStatus"&&/RESUME|STARTED/.test(t))return"GREEN";
+  return null;
+}
+function applyRaceControl(arr){
+  if(!Array.isArray(arr))return;
+  const msgs=arr.filter(m=>m&&m.message).slice(-40);
+  live.rc=msgs.slice(-14).reverse().map(m=>({cls:"rc",tag:m.driver_number&&DRIVERS[NUM2ID[m.driver_number]]?DRIVERS[NUM2ID[m.driver_number]].code:"FIA",text:String(m.message).slice(0,160),lap:m.lap_number||0,t:0,date:m.date}));
+  let fl=null;for(let i=msgs.length-1;i>=0&&!fl;i--)fl=rcFlagOf(msgs[i]);
+  live.radioVer++;
+  if(fl&&fl!==live.rcFlag){live.rcFlag=fl;if(fl!==sim.flag&&!sim.done&&canControl())pushEvent("flag",fl);}
+}
 function setLive(on){
   live.on=on;clearInterval(live.timer);
   if(on){
     if(ctl.gp!==NEXT_GP&&canControl())mutate(c=>resetCtl(c,NEXT_GP,"race"));
     live.status="STANDBY_NEXT_GP";live.note="collegamento…";pollLive();live.timer=setInterval(pollLive,live.poll*1000);
-  }else{live.active=false;live.status="SIM";live.weather=null;live.hasPos=false;live.car=null;live.radio=[];live.radioVer++;}
+  }else{live.active=false;live.status="SIM";live.weather=null;live.hasPos=false;live.car=null;live.radio=[];live.rc=[];live.rcFlag=null;live.radioVer++;}
   updateLiveUI();dirty=true;
 }
 function updateLiveUI(){
