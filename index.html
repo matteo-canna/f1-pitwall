@@ -380,6 +380,10 @@ body.solo .p-feed.on .feed{max-height:none}
 #msModal.is-drag .ms-trash{opacity:1;border-color:var(--accent);color:#ff8a85}
 .ms-trash.over{background:rgba(225,6,0,.15);transform:scale(1.04)}
 #msReset{margin-left:auto}
+
+body.home .soloBar{position:sticky;top:0;z-index:15}
+body.home .top .hostctl,body.home #liveBtn,body.home #apiBtn,body.home #msBtn,body.home .syncbtn{display:none}
+.soloBar .tog.home{border-color:var(--cyan);color:var(--cyan);font-weight:800}
 </style>
 </head>
 <body data-view="pista" data-mode="pit">
@@ -413,7 +417,7 @@ body.solo .p-feed.on .feed{max-height:none}
   <button class="btn sharebtn" type="button">SHARE LINK</button>
   </div>
 </header>
-<div class="soloBar" id="soloBar" hidden><span class="led ok"></span><span id="soloTxt">—</span><span class="spacer"></span><button class="tog" id="soloFs" type="button">SCHERMO INTERO</button><button class="tog" id="soloExit" type="button">LAYOUT COMPLETO</button></div>
+<div class="soloBar" id="soloBar" hidden><span class="led ok"></span><span id="soloTxt">—</span><span class="spacer"></span><button class="tog home" id="soloHome" type="button" hidden>⌂ HOME</button><button class="tog" id="soloFs" type="button">SCHERMO INTERO</button><button class="tog" id="soloExit" type="button">LAYOUT COMPLETO</button></div>
 
 <section class="tiles" aria-label="Stazione meteo e controllo sessione">
   <div class="tile">
@@ -1198,7 +1202,7 @@ function rebuildSim(){
 }
 function runTo(tgt){const n=Math.floor(tgt/DT);while(sim.n<n){if(sim.done){sim.n=n;break;}sim.step();}}
 function isSynced(){return!!(db&&syncOn&&shared);}
-function canControl(){return!isSynced()||canWrite!==false;}
+function canControl(){if(window.isFollower&&window.isFollower())return false;return!isSynced()||canWrite!==false;}
 function mutate(fn){
   if(!canControl())return false;
   const now=Date.now(),c=JSON.parse(JSON.stringify(ctl)),tNow=sharedT(ctl,now);
@@ -2359,6 +2363,18 @@ window.needPit=()=>SOLO?(soloHas("map")||soloHas("table")||soloHas("feed")||solo
 window.needTele=()=>SOLO?soloHas("tele"):mode==="tele";
 window.needShow=()=>SOLO?soloHas("show"):mode==="show";
 $("soloExit").addEventListener("click",()=>{applySolo(null);toast("Layout completo ripristinato in questa finestra.");});
+/* finestre secondarie: HOME mostra l'app completa in questa finestra, poi si torna alla sezione assegnata */
+let homeOn=false,homeList=null;
+window.isFollower=()=>!!following;
+function setHome(on){
+  if(on){homeList=SOLO?SOLO.slice():homeList;homeOn=true;applySolo(null);setMode("pit");$("soloBar").hidden=false;document.body.classList.add("home");
+    setT($("soloTxt"),"Home · app completa, sincronizzata con la finestra principale (i comandi restano all'host)");}
+  else{homeOn=false;document.body.classList.remove("home");if(homeList)applySolo(homeList,false);}
+  const b=$("soloHome");b.textContent=homeOn?"↩ TORNA ALLA SEZIONE":"⌂ HOME";b.setAttribute("aria-pressed",homeOn);
+  try{window.opener&&!window.opener.closed&&on&&0;}catch(e){}
+  updateCtlUI();lastSlow=0;dirty=true;
+}
+$("soloHome").addEventListener("click",()=>setHome(!homeOn));
 $("soloFs").addEventListener("click",()=>{try{const p=document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();if(p&&p.catch)p.catch(()=>toast("Schermo intero non consentito: premi F11."));}catch(e){toast("Premi F11 per lo schermo intero.");}});
 
 /* ---------- sincronizzazione tra finestre ---------- */
@@ -2373,7 +2389,7 @@ setInterval(()=>postState(false),400);setInterval(()=>postState(true),2000);
 if(chan)chan.onmessage=e=>{
   const m=e.data;if(!m||typeof m!=="object")return;
   if(following&&m.type==="state"){
-    leaderSeen=Date.now();$("soloTxt").classList.remove("k1r");if($("soloTxt")._base)setT($("soloTxt"),$("soloTxt")._base);
+    leaderSeen=Date.now();$("soloTxt").classList.remove("k1r");if($("soloTxt")._base&&!homeOn)setT($("soloTxt"),$("soloTxt")._base);
     const v=validCtl(m.ctl);if(v&&JSON.stringify(v)!==JSON.stringify(ctl)){ctl=v;dirty=true;}
     if(m.sel>=0&&m.sel<DRIVERS.length&&m.sel!==sel)selectDriver(m.sel,true);
     if(m.rival>=0&&m.rival<DRIVERS.length)rival=m.rival;
@@ -2564,6 +2580,7 @@ function bootFollower(){
   const list=q.get("solo").split(",").filter(k=>UK[k]);if(!list.length)return false;
   following=q.get("follow")==="1"&&!!chan;MSC.role=following?"follow":"solo";
   applySolo(list,!following);
+  $("soloHome").hidden=!following;
   if(following){try{chan.postMessage({type:"hello"});}catch(e){}
     setInterval(()=>{if(leaderSeen&&Date.now()-leaderSeen>5000){setT($("soloTxt"),"In attesa della finestra principale…");}},2000);}
   return true;
