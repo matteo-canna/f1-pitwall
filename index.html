@@ -319,6 +319,50 @@ body.solo #vTele.on,body.solo #vShow.on{display:grid!important;align-content:sta
 body.solo .p-map.on{display:flex!important;flex-direction:column}
 body.solo .p-map.on .mapbox{flex:1;aspect-ratio:auto;max-height:none;min-height:240px}
 body.solo .p-feed.on .feed{max-height:none}
+
+/* ---- finestra multi-schermo v2 ---- */
+.mbox.ms{width:min(980px,100%);display:flex;flex-direction:column}
+.ms-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:18px 20px 10px}
+.ms-head h2{font:800 20px/1.1 var(--f-display);font-stretch:118%;letter-spacing:.04em;text-transform:uppercase}
+.ms-head .sub{margin-top:4px}
+.ms-alert{margin:0 20px 8px;border:1px solid var(--accent);color:#ff8a85;border-radius:10px;padding:10px 12px;font-size:12.5px}
+.ms-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:6px 20px}
+.ms-bar .sub{flex:1 1 260px;font-size:12px}
+.ms-status{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-size:12px;background:#0b101a}
+.ms-status i{width:8px;height:8px;border-radius:50%;background:var(--yellow);flex:none}
+.ms-status.ok{border-color:rgba(16,185,129,.5)}.ms-status.ok i{background:var(--green)}
+.ms-status.warn{border-color:rgba(245,158,11,.5)}.ms-status.wait i{animation:pulse 1s infinite}
+.ms-count{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:3px 4px 3px 12px;font-size:12px;background:#0b101a}
+.ms-count button{width:28px;height:28px;border-radius:50%;border:1px solid var(--line);background:#1a2132;font-weight:800}
+.ms-count b{min-width:16px;text-align:center}
+.ms-stage{display:flex;align-items:flex-end;justify-content:center;gap:14px;flex-wrap:wrap;padding:18px 20px;margin:8px 20px 0;border-radius:14px;background:radial-gradient(80% 120% at 50% 100%,#111a2b 0%,#070a11 80%);border:1px solid var(--line)}
+.ms-scr{position:relative;height:230px;max-width:100%;min-width:150px;background:#05070c;border:2px solid #2b3550;border-radius:10px;padding:26px 6px 22px;display:flex;flex-direction:column;transition:border-color .15s,transform .15s,box-shadow .15s}
+.ms-scr::after{content:"";position:absolute;left:50%;bottom:-12px;width:34%;height:8px;transform:translateX(-50%);background:#1a2132;border-radius:0 0 6px 6px}
+.ms-scr.cur{border-color:var(--accent)}
+.ms-scr.drop.armed{cursor:pointer;border-style:dashed;border-color:var(--cyan)}
+.ms-scr.drop.armed:hover,.ms-scr.over{border-color:var(--cyan);box-shadow:0 0 0 4px rgba(6,182,212,.18);transform:translateY(-2px)}
+.ms-scr-h{position:absolute;top:5px;left:8px;right:8px;display:flex;gap:6px;align-items:baseline;font-size:11px;white-space:nowrap;overflow:hidden}
+.ms-scr-h b{background:#e9eef8;color:#05070c;border-radius:4px;padding:0 5px;font-size:10.5px}
+.ms-scr-h span{font-weight:800;overflow:hidden;text-overflow:ellipsis}.ms-scr-h small{color:var(--muted)}
+.ms-tag{position:absolute;bottom:4px;left:8px;font-style:normal;font-size:9.5px;font-weight:800;letter-spacing:.06em;color:var(--cyan)}
+.ms-tag.cur{color:#ff8a85}.ms-tag.off{color:var(--dim)}
+.ms-grid{flex:1;display:grid;gap:4px;min-height:0}
+.ms-cell{position:relative;border-radius:5px;background:color-mix(in srgb,var(--uc) 16%,#0b101a);border:1px solid color-mix(in srgb,var(--uc) 60%,transparent);display:flex;align-items:center;justify-content:center;min-width:0;min-height:0;overflow:hidden}
+.ms-cell span{font-size:10.5px;font-weight:800;color:var(--uc);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px}
+.ms-x{position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#e9eef8;font-size:12px;line-height:18px;padding:0}
+.ms-empty{flex:1;border:1px dashed #2b3550;border-radius:6px;display:grid;place-items:center;text-align:center;font-size:10.5px;color:var(--muted);padding:6px}
+.ms-pal{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;padding:12px 20px 0}
+.ms-chip{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:10px;align-items:center;text-align:left;background:#0b101a;border:1px solid var(--line);border-left:4px solid var(--uc);border-radius:10px;padding:8px 10px;cursor:grab}
+.ms-chip i{grid-row:1/3;font-style:normal;font-size:18px;color:var(--uc);width:22px;text-align:center}
+.ms-chip span{font-weight:800;font-size:12px}.ms-chip small{font-size:10.5px;color:var(--muted)}
+.ms-chip.off{opacity:.55}.ms-chip.on{border-color:var(--uc);box-shadow:0 0 0 3px color-mix(in srgb,var(--uc) 25%,transparent);background:#101828}
+.ms-chip:active{cursor:grabbing}
+.ms-foot{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:16px 20px 6px;position:sticky;bottom:0;background:var(--panel)}
+.ms-foot .btn{padding:12px 22px;font-size:13px}
+.ms-foot .btn:disabled{background:#2b3550}
+.tog.warn{border-color:var(--yellow);color:var(--yellow)}
+.ms-note{padding:0 20px 18px}
+@media (max-width:640px){.ms-scr{height:150px}.ms-pal{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body data-view="pista" data-mode="pit">
@@ -635,24 +679,21 @@ body.solo .p-feed.on .feed{max-height:none}
   </div>
 </div>
 <div class="modal" id="msModal" hidden role="dialog" aria-modal="true" aria-labelledby="msH">
-  <div class="mbox" style="width:min(640px,100%)">
-    <div class="panel-h"><h2 id="msH">Gestione multi-schermo</h2><button class="tog sq mclose" type="button" aria-label="Chiudi">×</button></div>
-    <div class="pad">
-      <p class="testbox ko" id="msNote" hidden>Dentro Claude non si possono aprire altre finestre. Usa il sito su GitHub Pages con Chrome o Edge da computer.</p>
-      <div class="row"><button class="tog" id="msDetectBtn" type="button">RILEVA SCHERMI</button>
-        <label class="row" id="msCount" hidden style="gap:6px"><span class="sub">Quanti schermi hai?</span><select id="msN"><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></label></div>
-      <p class="testbox" id="msDetect">Rilevamento in corso… il browser può chiederti il permesso di gestire le finestre.</p>
-      <div id="msBody" hidden>
-        <svg id="msMap" viewBox="0 0 520 170" class="chart" role="img" aria-label="Disposizione degli schermi"></svg>
-        <div class="seg" id="msModeSeg" role="group" aria-label="Modalità" style="margin-top:12px"><button data-m="auto" aria-pressed="true">AUTOMATICO</button><button data-m="manual" aria-pressed="false">MANUALE</button></div>
-        <div id="msAuto"><p class="note" style="margin-top:10px">L'app sceglie da sola: la mappa va sullo schermo più grande, la telemetria su un altro, classifica e radio preferiscono gli schermi verticali. Questa finestra tiene i comandi e il meteo. L'anteprima sopra mostra il risultato.</p>
-          <button class="btn" id="msGo" type="button" style="margin-top:12px;width:100%">DISPONI AUTOMATICAMENTE</button></div>
-        <div id="msManual" hidden><table class="cmp" id="msTbl"></table><button class="btn" id="msGo2" type="button" style="margin-top:12px;width:100%">APRI FINESTRE</button></div>
-        <div class="tools" id="msWins" style="margin-top:10px"></div>
-        <button class="tog" id="msClose" type="button" hidden style="margin-top:10px">CHIUDI TUTTE LE FINESTRE</button>
-        <p class="note" style="margin-top:10px">Le finestre restano sincronizzate con questa: sessione, pilota selezionato, TV delay e dati live. Se il browser blocca i popup, consentili per questo sito.</p>
-      </div>
+  <div class="mbox ms">
+    <div class="ms-head"><div><h2 id="msH">Multi-schermo</h2><p class="sub">Distribuisci le sezioni dell'app sui tuoi monitor</p></div><button class="tog sq mclose" type="button" aria-label="Chiudi">×</button></div>
+    <p class="ms-alert" id="msNote" hidden>Dentro Claude non si possono aprire altre finestre. Apri il sito su GitHub Pages con Chrome o Edge da computer.</p>
+    <div class="ms-bar">
+      <span class="ms-status wait" id="msDetect"><i></i><span>Rilevamento schermi…</span></span>
+      <span class="ms-count" id="msCount" hidden><span>Schermi</span><button type="button" id="msMinus" aria-label="Uno schermo in meno">−</button><b id="msNv">2</b><button type="button" id="msPlus" aria-label="Uno schermo in più">+</button></span>
+      <button class="tog" id="msDetectBtn" type="button">↻ RILEVA</button>
     </div>
+    <div class="ms-bar"><div class="seg" id="msModeSeg" role="group" aria-label="Modalità"><button data-m="auto" aria-pressed="true">⚡ AUTOMATICO</button><button data-m="manual" aria-pressed="false">✋ MANUALE</button></div><p class="sub" id="msHint"></p></div>
+    <div id="msBody" hidden>
+      <div class="ms-stage" id="msStage"></div>
+      <div class="ms-pal" id="msPal" hidden></div>
+    </div>
+    <div class="ms-foot"><div class="tools" id="msWins"></div><span class="spacer"></span><span id="msFootMain" class="tools" hidden><button class="tog" id="msClose" type="button" hidden>CHIUDI</button><button class="btn" id="msGo" type="button">APRI</button></span></div>
+    <p class="note ms-note">Tutte le finestre restano sincronizzate: sessione, pilota, TV delay e dati live. Se il browser blocca i popup, consentili per questo sito.</p>
   </div>
 </div>
 <div class="toast" id="toast" role="status"></div>
@@ -2328,17 +2369,18 @@ window.addEventListener("beforeunload",()=>{if(chan&&MSC.role==="lead"&&MSC.wins
 window.onFollowerSelect=id=>{if(following&&chan)try{chan.postMessage({type:"sel",id});}catch(e){}};
 
 /* ---------- rilevamento schermi ---------- */
+function msStatus(kind,txt){const el=$("msDetect");el.className="ms-status "+kind;el.querySelector("span").textContent=txt;}
 async function detectScreens(){
-  const res=$("msDetect");
+  msStatus("wait","Rilevamento schermi… il browser può chiederti il permesso");
   if("getScreenDetails" in window){
     try{
       const d=await window.getScreenDetails();
       MSC.api=true;MSC.screens=d.screens.map((s,i)=>({i,label:s.label||("Schermo "+(i+1)),x:s.availLeft,y:s.availTop,w:s.availWidth,h:s.availHeight,primary:!!s.isPrimary,dpr:s.devicePixelRatio||1}));
       MSC.current=Math.max(0,d.screens.indexOf(d.currentScreen));
-      res.textContent=MSC.screens.length+" schermi rilevati. Le finestre si aprono già posizionate.";res.className="testbox ok";
+      msStatus("ok",MSC.screens.length+" schermi rilevati · le finestre si aprono già al loro posto");
       d.addEventListener&&d.addEventListener("screenschange",()=>{toast("Configurazione schermi cambiata: rileva di nuovo.");});
-    }catch(e){MSC.api=false;res.textContent="Permesso negato o non disponibile: indica tu quanti schermi hai. Le finestre si apriranno e andranno trascinate a mano.";res.className="testbox ko";manualScreens();}
-  }else{MSC.api=false;res.textContent="Questo browser non sa dove sono gli altri schermi (serve Chrome o Edge su computer). Indica quanti schermi hai: le finestre andranno trascinate a mano.";res.className="testbox ko";manualScreens();}
+    }catch(e){MSC.api=false;msStatus("warn","Permesso negato: indica quanti schermi hai, poi trascina le finestre sul monitor giusto");manualScreens();}
+  }else{MSC.api=false;msStatus("warn","Questo browser non vede gli altri schermi (serve Chrome o Edge): indica quanti sono, poi trascina le finestre");manualScreens();}
   renderMs();
 }
 function manualScreens(){
@@ -2383,33 +2425,6 @@ function currentPlan(){
 
 /* ---------- interfaccia della finestra di gestione ---------- */
 MSC.modeSel="auto";
-function renderMs(){
-  const S=MSC.screens;$("msBody").hidden=!S;
-  if(!S)return;
-  $("msCount").hidden=MSC.api;
-  $$("#msModeSeg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.m===MSC.modeSel));
-  $("msAuto").hidden=MSC.modeSel!=="auto";$("msManual").hidden=MSC.modeSel!=="manual";
-  const plan=currentPlan();
-  /* mappa degli schermi */
-  let minX=1e9,minY=1e9,maxX=-1e9,maxY=-1e9;S.forEach(s=>{minX=Math.min(minX,s.x);minY=Math.min(minY,s.y);maxX=Math.max(maxX,s.x+s.w);maxY=Math.max(maxY,s.y+s.h);});
-  const W=520,H=170,k=Math.min((W-20)/(maxX-minX),(H-20)/(maxY-minY)),ox=(W-(maxX-minX)*k)/2,oy=(H-(maxY-minY)*k)/2;
-  let g="";S.forEach((s,i)=>{const x=ox+(s.x-minX)*k,y=oy+(s.y-minY)*k,w=s.w*k-4,h=s.h*k-4,p=plan&&plan[i]?plan[i]:null,cur=i===MSC.current;
-    g+='<clipPath id="msc'+i+'"><rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+h.toFixed(1)+'"/></clipPath>';
-    g+='<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+h.toFixed(1)+'" rx="5" fill="#0e1422" stroke="'+(cur?"#E10600":"#3a4560")+'" stroke-width="'+(cur?2:1.2)+'"/><g clip-path="url(#msc'+i+')">';
-    g+='<text x="'+(x+8).toFixed(1)+'" y="'+(y+16).toFixed(1)+'" font-size="11" font-weight="800" fill="#e9eef8" font-family="monospace">'+(i+1)+' · '+s.w+'×'+s.h+(cur?" · QUI":"")+'</text>';
-    const items=p===null?["App completa"]:(p&&p.length?p.map(k2=>UK[k2].n):["(vuoto)"]);
-    items.slice(0,5).forEach((t,j)=>{g+='<text x="'+(x+8).toFixed(1)+'" y="'+(y+33+j*13).toFixed(1)+'" font-size="9.5" fill="'+(p&&p.length||p===null?"#06B6D4":"#566078")+'" font-family="monospace">'+escapeHtml(t)+'</text>';});g+='</g>';});
-  $("msMap").innerHTML=g;
-  /* tabella manuale */
-  const opts=['<option value="-1">Non mostrare</option>'].concat(S.map((s,i)=>'<option value="'+i+'">Schermo '+(i+1)+(i===MSC.current?" (questo)":"")+' · '+s.w+'×'+s.h+'</option>')).join("");
-  $("msTbl").innerHTML=UNITS.map(u=>'<tr><td>'+u.n+'</td><td><select data-u="'+u.k+'" aria-label="Schermo per '+u.n+'">'+opts+'</select></td></tr>').join("");
-  $$("#msTbl select").forEach(s=>{const v=MSC.manual[s.dataset.u];s.value=String(v==null?-1:v);});
-  /* finestre aperte */
-  const st=$("msWins");st.innerHTML="";
-  MSC.pending.forEach((p,j)=>{const b=document.createElement("button");b.type="button";b.className="tog";b.textContent="Apri schermo "+(p.i+1)+" ("+p.units.map(k2=>UK[k2].n).join(", ")+")";b.addEventListener("click",()=>{openOne(p);MSC.pending.splice(MSC.pending.indexOf(p),1);renderMs();});st.appendChild(b);});
-  $("msClose").hidden=!MSC.wins.some(w=>w&&!w.closed);
-}
-function escapeHtml(t){return String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
 function appBase(){return location.href.split("#")[0].split("?")[0];}
 function openOne(p){
   const s=MSC.screens[p.i],url=appBase()+"?solo="+p.units.join(",")+"&follow=1";
@@ -2433,15 +2448,75 @@ function launch(){
   if(MSC.pending.length)toast("Il browser ha bloccato alcune finestre: aprile una alla volta dai pulsanti qui sotto, oppure consenti i popup per questo sito.");
   else{closeModals();toast(todo.length?"Aperte "+todo.length+" finestre. In ognuna puoi premere SCHERMO INTERO.":"Layout applicato a questo schermo.");}
 }
+/* ---------- interfaccia della finestra di gestione (v2) ---------- */
+const UCOL={map:"#06B6D4",tele:"#A855F7",table:"#10B981",console:"#f59b42",show:"#ec4899",feed:"#F59E0B",tiles:"#8792aa"};
+const USHORT={map:"Mappa",tele:"Telemetria",table:"Classifica",console:"Console",show:"3D",feed:"Radio & FIA",tiles:"Meteo"};
+const UICON={map:"◎",tele:"∿",table:"≡",console:"◧",show:"◆",feed:"◉",tiles:"☀"};
+let msArmed=null;
+function gridSpec(list){
+  const body=list.filter(k=>k!=="tiles").sort((a,b)=>PRIMARY_ORDER.indexOf(a)-PRIMARY_ORDER.indexOf(b)),tiles=list.indexOf("tiles")>=0;
+  const nc=body.length<=1?1:body.length<=4?2:3,rest=body.slice(1),nr=Math.max(1,nc===2?rest.length:Math.ceil(rest.length/2)),rows=[],tr=[];
+  if(tiles){rows.push(Array(nc).fill("tl").join(" "));tr.push("22%");}
+  for(let r=0;r<nr;r++){let row=["u0"];if(nc===2)row.push(rest[r]?"u"+(r+1):"u0");if(nc===3){row.push(rest[r*2]?"u"+(r*2+1):"u0");row.push(rest[r*2+1]?"u"+(r*2+2):rest[r*2]?"u"+(r*2+1):"u0");}if(nc===1)row=["u0"];rows.push(row.join(" "));tr.push("1fr");}
+  return{body,tiles,cols:nc===1?"1fr":nc===2?"1.55fr 1fr":"1.5fr 1fr 1fr",areas:rows.map(r=>"'"+r+"'").join(" "),trs:tr.join(" ")};
+}
+function msPlan(){return currentPlan();}
+function cellHTML(k,removable){return'<div class="ms-cell" style="grid-area:'+k.area+';--uc:'+UCOL[k.k]+'"><span>'+UICON[k.k]+' '+USHORT[k.k]+'</span>'+(removable?'<button type="button" class="ms-x" data-rm="'+k.k+'" aria-label="Togli '+UK[k.k].n+'">×</button>':'')+'</div>';}
+function renderMs(){
+  const S=MSC.screens,manual=MSC.modeSel==="manual";
+  $("msBody").hidden=!S;$("msFootMain").hidden=!S;
+  $$("#msModeSeg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.m===MSC.modeSel));
+  $("msCount").hidden=!S||MSC.api;$("msNv").textContent=String(MSC.count);
+  if(!S)return;
+  const plan=msPlan(),stage=$("msStage");stage.textContent="";
+  const order=S.map((s,i)=>i).sort((a,b)=>S[a].x-S[b].x||S[a].y-S[b].y);
+  for(const i of order){
+    const s=S[i],cur=i===MSC.current,list=plan[i],card=document.createElement("div");
+    card.className="ms-scr"+(cur?" cur":"")+(manual?" drop":"")+(msArmed&&manual?" armed":"");card.dataset.i=i;
+    card.style.aspectRatio=(s.w/s.h).toFixed(3);
+    const tag=cur?'<em class="ms-tag cur">QUESTA FINESTRA · COMANDI</em>':(list&&list.length?'<em class="ms-tag">NUOVA FINESTRA</em>':'<em class="ms-tag off">NON USATO</em>');
+    let inner;
+    if(list===null)inner='<div class="ms-grid" style="grid-template-columns:1fr"><div class="ms-cell" style="--uc:#e9eef8"><span>App completa</span></div></div>';
+    else if(!list.length)inner='<div class="ms-empty">'+(manual?(msArmed?"Tocca per mettere qui "+USHORT[msArmed]:"Trascina qui una sezione"):"Nessuna sezione")+'</div>';
+    else{const g=gridSpec(list);let cells=g.body.map((k,j)=>cellHTML({k,area:"u"+j},manual)).join("");if(g.tiles)cells+=cellHTML({k:"tiles",area:"tl"},manual);
+      inner='<div class="ms-grid" style="grid-template-columns:'+g.cols+';grid-template-rows:'+g.trs+';grid-template-areas:'+g.areas+'">'+cells+'</div>';}
+    card.innerHTML='<div class="ms-scr-h"><b>'+(order.indexOf(i)+1)+'</b><span>'+escapeHtml(s.virtual?(cur?"Questo schermo":"Schermo "+(order.indexOf(i)+1)):s.label)+'</span><small>'+s.w+'×'+s.h+'</small></div>'+inner+tag;
+    stage.appendChild(card);
+  }
+  /* tavolozza sezioni (manuale) */
+  const pal=$("msPal");pal.hidden=!manual;
+  if(manual){pal.innerHTML=UNITS.map(u=>{const v=MSC.manual[u.k],where=v==null||v<0?"nascosta":"schermo "+(order.indexOf(v)+1);
+    return'<button type="button" class="ms-chip'+(msArmed===u.k?" on":"")+(v==null||v<0?" off":"")+'" draggable="true" data-u="'+u.k+'" style="--uc:'+UCOL[u.k]+'" aria-pressed="'+(msArmed===u.k)+'"><i>'+UICON[u.k]+'</i><span>'+u.n+'</span><small>'+where+'</small></button>';}).join("");}
+  /* suggerimento */
+  const others=plan.reduce((n,p,i)=>n+(i!==MSC.current&&p&&p.length?1:0),0),mine=plan[MSC.current];
+  $("msHint").textContent=manual?(msArmed?"Ora tocca lo schermo dove vuoi "+UK[msArmed].n+".":"Trascina una sezione su uno schermo, oppure toccala e poi tocca lo schermo. La × toglie una sezione."):
+    "Mappa sullo schermo più grande, telemetria su un altro, liste lunghe sugli schermi verticali. Questa finestra tiene comandi e meteo.";
+  const go=$("msGo");go.textContent=others?"APRI "+others+(others>1?" FINESTRE":" FINESTRA"):(mine&&mine.length?"APPLICA A QUESTO SCHERMO":"NIENTE DA APRIRE");go.disabled=!others&&!(mine&&mine.length);
+  /* finestre bloccate */
+  const st=$("msWins");st.innerHTML="";
+  MSC.pending.forEach(p=>{const b=document.createElement("button");b.type="button";b.className="tog warn";b.textContent="⚠ Apri schermo "+(order.indexOf(p.i)+1);b.addEventListener("click",()=>{if(openOne(p)){MSC.pending.splice(MSC.pending.indexOf(p),1);}renderMs();});st.appendChild(b);});
+  const open=MSC.wins.filter(w=>w&&!w.closed).length;$("msClose").hidden=!open&&!SOLO;$("msClose").textContent=open?"CHIUDI "+open+(open>1?" FINESTRE":" FINESTRA"):"RIPRISTINA LAYOUT";
+}
+function escapeHtml(t){return String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function msAssign(k,i){MSC.manual[k]=i;msArmed=null;renderMs();}
+function msSeedManual(){if(Object.keys(MSC.manual).length)return;const p=autoPlan();p.forEach((us,i)=>(us||[]).forEach(k=>{MSC.manual[k]=i;}));if(p[MSC.current]===null)UNITS.forEach(u=>{MSC.manual[u.k]=MSC.current;});}
 $("msBtn").addEventListener("click",()=>{$("msNote").hidden=!inClaude;openModal("msModal");if(!MSC.screens)detectScreens();else renderMs();});
 $("msDetectBtn").addEventListener("click",detectScreens);
-$("msN").addEventListener("change",e=>{MSC.count=clamp(+e.target.value|0,2,6);manualScreens();renderMs();});
-$("msModeSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;MSC.modeSel=b.dataset.m;
-  if(MSC.modeSel==="manual"&&!Object.keys(MSC.manual).length){const p=autoPlan();p.forEach((us,i)=>(us||[]).forEach(k=>{MSC.manual[k]=i;}));if(p[MSC.current]===null)UNITS.forEach(u=>{MSC.manual[u.k]=MSC.current;});}
-  renderMs();});
-$("msTbl").addEventListener("change",e=>{const s=e.target.closest("select");if(!s)return;MSC.manual[s.dataset.u]=+s.value;renderMs();});
-$("msGo").addEventListener("click",launch);$("msGo2").addEventListener("click",launch);
-$("msClose").addEventListener("click",()=>{MSC.wins.forEach(w=>{try{w&&!w.closed&&w.close();}catch(e){}});MSC.wins=[];MSC.pending=[];applySolo(null);renderMs();toast("Finestre chiuse, layout ripristinato.");});
+const msSetN=n=>{MSC.count=clamp(n,2,6);manualScreens();if(MSC.modeSel==="manual")Object.keys(MSC.manual).forEach(k=>{if(MSC.manual[k]>=MSC.count)MSC.manual[k]=-1;});renderMs();};
+$("msMinus").addEventListener("click",()=>msSetN(MSC.count-1));$("msPlus").addEventListener("click",()=>msSetN(MSC.count+1));
+$("msModeSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;MSC.modeSel=b.dataset.m;msArmed=null;if(MSC.modeSel==="manual")msSeedManual();renderMs();});
+$("msPal").addEventListener("click",e=>{const b=e.target.closest(".ms-chip");if(!b)return;msArmed=msArmed===b.dataset.u?null:b.dataset.u;renderMs();});
+$("msPal").addEventListener("dragstart",e=>{const b=e.target.closest(".ms-chip");if(!b)return;e.dataTransfer.setData("text/plain",b.dataset.u);e.dataTransfer.effectAllowed="move";});
+const stg=$("msStage");
+stg.addEventListener("click",e=>{
+  const x=e.target.closest(".ms-x");if(x){MSC.manual[x.dataset.rm]=-1;renderMs();return;}
+  const c=e.target.closest(".ms-scr");if(c&&MSC.modeSel==="manual"&&msArmed)msAssign(msArmed,+c.dataset.i);
+});
+stg.addEventListener("dragover",e=>{const c=e.target.closest(".ms-scr");if(c&&MSC.modeSel==="manual"){e.preventDefault();$$(".ms-scr.over").forEach(o=>o!==c&&o.classList.remove("over"));c.classList.add("over");}});
+stg.addEventListener("dragleave",e=>{const c=e.target.closest(".ms-scr");if(c&&!c.contains(e.relatedTarget))c.classList.remove("over");});
+stg.addEventListener("drop",e=>{const c=e.target.closest(".ms-scr");if(!c)return;e.preventDefault();const k=e.dataTransfer.getData("text/plain");if(UK[k])msAssign(k,+c.dataset.i);});
+$("msGo").addEventListener("click",launch);
+$("msClose").addEventListener("click",()=>{MSC.wins.forEach(w=>{try{w&&!w.closed&&w.close();}catch(e){}});MSC.wins=[];MSC.pending=[];applySolo(null);renderMs();toast("Finestre chiuse, layout completo ripristinato.");});
 
 /* ---------- avvio come finestra secondaria ---------- */
 function bootFollower(){
