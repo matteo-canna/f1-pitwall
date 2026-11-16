@@ -363,6 +363,23 @@ body.solo .p-feed.on .feed{max-height:none}
 .tog.warn{border-color:var(--yellow);color:var(--yellow)}
 .ms-note{padding:0 20px 18px}
 @media (max-width:640px){.ms-scr{height:150px}.ms-pal{grid-template-columns:1fr 1fr}}
+
+/* ---- v3: anteprima modificabile ---- */
+.ms-cell[draggable]{cursor:grab;transition:transform .12s,box-shadow .12s}
+.ms-cell[draggable]:hover{box-shadow:inset 0 0 0 1px var(--uc)}
+.ms-cell.armed{box-shadow:0 0 0 2px var(--uc),0 0 14px color-mix(in srgb,var(--uc) 50%,transparent);z-index:2}
+.ms-cell.dragging,.ms-chip.dragging{opacity:.4}
+.ms-cell:focus-visible{outline:2px solid var(--uc);outline-offset:1px}
+.ms-x{opacity:.75}.ms-cell:hover .ms-x{opacity:1}
+.ms-scr.armed{cursor:pointer;border-style:dashed;border-color:var(--cyan)}
+.ms-scr.armed:hover{border-color:var(--cyan);box-shadow:0 0 0 4px rgba(6,182,212,.18)}
+#msModal.is-drag .ms-scr{border-style:dashed}
+.ms-palbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 20px 0}
+.ms-palbar .sub{font-size:11px;letter-spacing:.06em}
+.ms-trash{border:1px dashed #3a4560;border-radius:999px;padding:7px 14px;font-size:11.5px;color:var(--muted);opacity:.5;transition:all .15s}
+#msModal.is-drag .ms-trash{opacity:1;border-color:var(--accent);color:#ff8a85}
+.ms-trash.over{background:rgba(225,6,0,.15);transform:scale(1.04)}
+#msReset{margin-left:auto}
 </style>
 </head>
 <body data-view="pista" data-mode="pit">
@@ -687,9 +704,10 @@ body.solo .p-feed.on .feed{max-height:none}
       <span class="ms-count" id="msCount" hidden><span>Schermi</span><button type="button" id="msMinus" aria-label="Uno schermo in meno">−</button><b id="msNv">2</b><button type="button" id="msPlus" aria-label="Uno schermo in più">+</button></span>
       <button class="tog" id="msDetectBtn" type="button">↻ RILEVA</button>
     </div>
-    <div class="ms-bar"><div class="seg" id="msModeSeg" role="group" aria-label="Modalità"><button data-m="auto" aria-pressed="true">⚡ AUTOMATICO</button><button data-m="manual" aria-pressed="false">✋ MANUALE</button></div><p class="sub" id="msHint"></p></div>
+    <div class="ms-bar"><div class="seg" id="msModeSeg" role="group" aria-label="Modalità"><button data-m="auto" aria-pressed="true">⚡ AUTOMATICO</button><button data-m="manual" aria-pressed="false">✋ MANUALE</button></div><p class="sub" id="msHint"></p><button class="tog" id="msReset" type="button" hidden>↺ RIPRISTINA AUTOMATICO</button></div>
     <div id="msBody" hidden>
       <div class="ms-stage" id="msStage"></div>
+      <div class="ms-palbar"><span class="sub" id="msPalH">SEZIONI</span><span class="ms-trash" id="msTrash">🗑 Trascina qui per togliere</span></div>
       <div class="ms-pal" id="msPal" hidden></div>
     </div>
     <div class="ms-foot"><div class="tools" id="msWins"></div><span class="spacer"></span><span id="msFootMain" class="tools" hidden><button class="tog" id="msClose" type="button" hidden>CHIUDI</button><button class="btn" id="msGo" type="button">APRI</button></span></div>
@@ -2417,7 +2435,7 @@ function autoPlan(){
   return plan;
 }
 function currentPlan(){
-  if(MSC.modeSel==="auto")return autoPlan();
+  if(MSC.modeSel==="auto"&&!MSC.autoEdited)return autoPlan();
   const plan=MSC.screens.map(()=>[]);
   UNITS.forEach(u=>{const v=MSC.manual[u.k];if(v!=null&&v>=0&&v<plan.length)plan[v].push(u.k);});
   return plan;
@@ -2448,7 +2466,7 @@ function launch(){
   if(MSC.pending.length)toast("Il browser ha bloccato alcune finestre: aprile una alla volta dai pulsanti qui sotto, oppure consenti i popup per questo sito.");
   else{closeModals();toast(todo.length?"Aperte "+todo.length+" finestre. In ognuna puoi premere SCHERMO INTERO.":"Layout applicato a questo schermo.");}
 }
-/* ---------- interfaccia della finestra di gestione (v2) ---------- */
+/* ---------- interfaccia della finestra di gestione (v3: anteprima modificabile) ---------- */
 const UCOL={map:"#06B6D4",tele:"#A855F7",table:"#10B981",console:"#f59b42",show:"#ec4899",feed:"#F59E0B",tiles:"#8792aa"};
 const USHORT={map:"Mappa",tele:"Telemetria",table:"Classifica",console:"Console",show:"3D",feed:"Radio & FIA",tiles:"Meteo"};
 const UICON={map:"◎",tele:"∿",table:"≡",console:"◧",show:"◆",feed:"◉",tiles:"☀"};
@@ -2456,65 +2474,86 @@ let msArmed=null;
 function gridSpec(list){
   const body=list.filter(k=>k!=="tiles").sort((a,b)=>PRIMARY_ORDER.indexOf(a)-PRIMARY_ORDER.indexOf(b)),tiles=list.indexOf("tiles")>=0;
   const nc=body.length<=1?1:body.length<=4?2:3,rest=body.slice(1),nr=Math.max(1,nc===2?rest.length:Math.ceil(rest.length/2)),rows=[],tr=[];
-  if(tiles){rows.push(Array(nc).fill("tl").join(" "));tr.push("22%");}
-  for(let r=0;r<nr;r++){let row=["u0"];if(nc===2)row.push(rest[r]?"u"+(r+1):"u0");if(nc===3){row.push(rest[r*2]?"u"+(r*2+1):"u0");row.push(rest[r*2+1]?"u"+(r*2+2):rest[r*2]?"u"+(r*2+1):"u0");}if(nc===1)row=["u0"];rows.push(row.join(" "));tr.push("1fr");}
+  if(tiles){rows.push(Array(nc).fill("tl").join(" "));tr.push(body.length?"22%":"1fr");}
+  if(body.length)for(let r=0;r<nr;r++){let row=["u0"];if(nc===2)row.push(rest[r]?"u"+(r+1):"u0");if(nc===3){row.push(rest[r*2]?"u"+(r*2+1):"u0");row.push(rest[r*2+1]?"u"+(r*2+2):rest[r*2]?"u"+(r*2+1):"u0");}if(nc===1)row=["u0"];rows.push(row.join(" "));tr.push("1fr");}
   return{body,tiles,cols:nc===1?"1fr":nc===2?"1.55fr 1fr":"1.5fr 1fr 1fr",areas:rows.map(r=>"'"+r+"'").join(" "),trs:tr.join(" ")};
 }
-function msPlan(){return currentPlan();}
-function cellHTML(k,removable){return'<div class="ms-cell" style="grid-area:'+k.area+';--uc:'+UCOL[k.k]+'"><span>'+UICON[k.k]+' '+USHORT[k.k]+'</span>'+(removable?'<button type="button" class="ms-x" data-rm="'+k.k+'" aria-label="Togli '+UK[k.k].n+'">×</button>':'')+'</div>';}
+/* converte la proposta automatica in una disposizione modificabile */
+function planToManual(p){MSC.manual={};UNITS.forEach(u=>{MSC.manual[u.k]=-1;});(p||[]).forEach((us,i)=>{if(us===null)UNITS.forEach(u=>{MSC.manual[u.k]=i;});else(us||[]).forEach(k=>{MSC.manual[k]=i;});});}
+function msEdit(){if(MSC.modeSel==="auto"&&!MSC.autoEdited){planToManual(autoPlan());MSC.autoEdited=true;}}
+function msAssign(k,i){msEdit();MSC.manual[k]=i;msArmed=null;renderMs();}
+function msRemove(k){msEdit();MSC.manual[k]=-1;if(msArmed===k)msArmed=null;renderMs();}
+function cellHTML(k,area){const armed=msArmed===k;return'<div class="ms-cell'+(armed?" armed":"")+'" draggable="true" data-u="'+k+'" tabindex="0" role="button" aria-pressed="'+armed+'" title="Trascina su un altro schermo, oppure tocca e poi tocca lo schermo" style="grid-area:'+area+';--uc:'+UCOL[k]+'"><span>'+UICON[k]+' '+USHORT[k]+'</span><button type="button" class="ms-x" data-rm="'+k+'" aria-label="Togli '+UK[k].n+'">×</button></div>';}
 function renderMs(){
-  const S=MSC.screens,manual=MSC.modeSel==="manual";
+  const S=MSC.screens,manual=MSC.modeSel==="manual",edited=manual||MSC.autoEdited;
   $("msBody").hidden=!S;$("msFootMain").hidden=!S;
   $$("#msModeSeg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.m===MSC.modeSel));
   $("msCount").hidden=!S||MSC.api;$("msNv").textContent=String(MSC.count);
+  $("msReset").hidden=!(MSC.modeSel==="auto"&&MSC.autoEdited);
   if(!S)return;
-  const plan=msPlan(),stage=$("msStage");stage.textContent="";
+  const plan=currentPlan(),stage=$("msStage");stage.textContent="";
   const order=S.map((s,i)=>i).sort((a,b)=>S[a].x-S[b].x||S[a].y-S[b].y);
   for(const i of order){
     const s=S[i],cur=i===MSC.current,list=plan[i],card=document.createElement("div");
-    card.className="ms-scr"+(cur?" cur":"")+(manual?" drop":"")+(msArmed&&manual?" armed":"");card.dataset.i=i;
-    card.style.aspectRatio=(s.w/s.h).toFixed(3);
+    card.className="ms-scr drop"+(cur?" cur":"")+(msArmed?" armed":"");card.dataset.i=i;card.style.aspectRatio=(s.w/s.h).toFixed(3);
     const tag=cur?'<em class="ms-tag cur">QUESTA FINESTRA · COMANDI</em>':(list&&list.length?'<em class="ms-tag">NUOVA FINESTRA</em>':'<em class="ms-tag off">NON USATO</em>');
     let inner;
-    if(list===null)inner='<div class="ms-grid" style="grid-template-columns:1fr"><div class="ms-cell" style="--uc:#e9eef8"><span>App completa</span></div></div>';
-    else if(!list.length)inner='<div class="ms-empty">'+(manual?(msArmed?"Tocca per mettere qui "+USHORT[msArmed]:"Trascina qui una sezione"):"Nessuna sezione")+'</div>';
-    else{const g=gridSpec(list);let cells=g.body.map((k,j)=>cellHTML({k,area:"u"+j},manual)).join("");if(g.tiles)cells+=cellHTML({k:"tiles",area:"tl"},manual);
+    if(list===null)inner='<div class="ms-empty">App completa · trascina qui una sezione per dividerla</div>';
+    else if(!list.length)inner='<div class="ms-empty">'+(msArmed?"Tocca per mettere qui "+USHORT[msArmed]:"Trascina qui una sezione")+'</div>';
+    else{const g=gridSpec(list);let cells=g.body.map((k,j)=>cellHTML(k,"u"+j)).join("");if(g.tiles)cells+=cellHTML("tiles","tl");
       inner='<div class="ms-grid" style="grid-template-columns:'+g.cols+';grid-template-rows:'+g.trs+';grid-template-areas:'+g.areas+'">'+cells+'</div>';}
     card.innerHTML='<div class="ms-scr-h"><b>'+(order.indexOf(i)+1)+'</b><span>'+escapeHtml(s.virtual?(cur?"Questo schermo":"Schermo "+(order.indexOf(i)+1)):s.label)+'</span><small>'+s.w+'×'+s.h+'</small></div>'+inner+tag;
     stage.appendChild(card);
   }
-  /* tavolozza sezioni (manuale) */
-  const pal=$("msPal");pal.hidden=!manual;
-  if(manual){pal.innerHTML=UNITS.map(u=>{const v=MSC.manual[u.k],where=v==null||v<0?"nascosta":"schermo "+(order.indexOf(v)+1);
-    return'<button type="button" class="ms-chip'+(msArmed===u.k?" on":"")+(v==null||v<0?" off":"")+'" draggable="true" data-u="'+u.k+'" style="--uc:'+UCOL[u.k]+'" aria-pressed="'+(msArmed===u.k)+'"><i>'+UICON[u.k]+'</i><span>'+u.n+'</span><small>'+where+'</small></button>';}).join("");}
+  /* sezioni: tutte in manuale, solo quelle tolte in automatico */
+  const where=k=>{for(let i=0;i<plan.length;i++){const p=plan[i];if(p===null||(p&&p.indexOf(k)>=0))return i;}return-1;};
+  const shown=manual?UNITS:UNITS.filter(u=>where(u.k)<0),pal=$("msPal");
+  pal.hidden=!shown.length;$("msPalH").hidden=!shown.length;
+  setT($("msPalH"),manual?"SEZIONI · trascinale sugli schermi":"SEZIONI TOLTE · trascinale su uno schermo per rimetterle");
+  pal.innerHTML=shown.map(u=>{const w=where(u.k),txt=w<0?"nascosta":"schermo "+(order.indexOf(w)+1);
+    return'<button type="button" class="ms-chip'+(msArmed===u.k?" on":"")+(w<0?" off":"")+'" draggable="true" data-u="'+u.k+'" style="--uc:'+UCOL[u.k]+'" aria-pressed="'+(msArmed===u.k)+'"><i>'+UICON[u.k]+'</i><span>'+u.n+'</span><small>'+txt+'</small></button>';}).join("");
   /* suggerimento */
   const others=plan.reduce((n,p,i)=>n+(i!==MSC.current&&p&&p.length?1:0),0),mine=plan[MSC.current];
-  $("msHint").textContent=manual?(msArmed?"Ora tocca lo schermo dove vuoi "+UK[msArmed].n+".":"Trascina una sezione su uno schermo, oppure toccala e poi tocca lo schermo. La × toglie una sezione."):
-    "Mappa sullo schermo più grande, telemetria su un altro, liste lunghe sugli schermi verticali. Questa finestra tiene comandi e meteo.";
+  $("msHint").textContent=msArmed?"Ora tocca lo schermo dove vuoi spostare "+UK[msArmed].n+".":
+    manual?"Trascina le sezioni sugli schermi, oppure toccane una e poi tocca lo schermo. La × toglie una sezione.":
+    MSC.autoEdited?"Proposta automatica modificata da te. Trascina le sezioni tra gli schermi o toglile con la ×.":
+    "Proposta automatica: puoi trascinare le sezioni da uno schermo all'altro o toglierle con la ×.";
   const go=$("msGo");go.textContent=others?"APRI "+others+(others>1?" FINESTRE":" FINESTRA"):(mine&&mine.length?"APPLICA A QUESTO SCHERMO":"NIENTE DA APRIRE");go.disabled=!others&&!(mine&&mine.length);
-  /* finestre bloccate */
   const st=$("msWins");st.innerHTML="";
   MSC.pending.forEach(p=>{const b=document.createElement("button");b.type="button";b.className="tog warn";b.textContent="⚠ Apri schermo "+(order.indexOf(p.i)+1);b.addEventListener("click",()=>{if(openOne(p)){MSC.pending.splice(MSC.pending.indexOf(p),1);}renderMs();});st.appendChild(b);});
   const open=MSC.wins.filter(w=>w&&!w.closed).length;$("msClose").hidden=!open&&!SOLO;$("msClose").textContent=open?"CHIUDI "+open+(open>1?" FINESTRE":" FINESTRA"):"RIPRISTINA LAYOUT";
 }
 function escapeHtml(t){return String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
-function msAssign(k,i){MSC.manual[k]=i;msArmed=null;renderMs();}
-function msSeedManual(){if(Object.keys(MSC.manual).length)return;const p=autoPlan();p.forEach((us,i)=>(us||[]).forEach(k=>{MSC.manual[k]=i;}));if(p[MSC.current]===null)UNITS.forEach(u=>{MSC.manual[u.k]=MSC.current;});}
 $("msBtn").addEventListener("click",()=>{$("msNote").hidden=!inClaude;openModal("msModal");if(!MSC.screens)detectScreens();else renderMs();});
-$("msDetectBtn").addEventListener("click",detectScreens);
-const msSetN=n=>{MSC.count=clamp(n,2,6);manualScreens();if(MSC.modeSel==="manual")Object.keys(MSC.manual).forEach(k=>{if(MSC.manual[k]>=MSC.count)MSC.manual[k]=-1;});renderMs();};
+$("msDetectBtn").addEventListener("click",()=>{MSC.autoEdited=false;detectScreens();});
+const msSetN=n=>{MSC.count=clamp(n,2,6);manualScreens();Object.keys(MSC.manual).forEach(k=>{if(MSC.manual[k]>=MSC.count)MSC.manual[k]=-1;});renderMs();};
 $("msMinus").addEventListener("click",()=>msSetN(MSC.count-1));$("msPlus").addEventListener("click",()=>msSetN(MSC.count+1));
-$("msModeSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;MSC.modeSel=b.dataset.m;msArmed=null;if(MSC.modeSel==="manual")msSeedManual();renderMs();});
-$("msPal").addEventListener("click",e=>{const b=e.target.closest(".ms-chip");if(!b)return;msArmed=msArmed===b.dataset.u?null:b.dataset.u;renderMs();});
-$("msPal").addEventListener("dragstart",e=>{const b=e.target.closest(".ms-chip");if(!b)return;e.dataTransfer.setData("text/plain",b.dataset.u);e.dataTransfer.effectAllowed="move";});
+$("msModeSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b||b.dataset.m===MSC.modeSel)return;
+  if(b.dataset.m==="manual"&&!MSC.autoEdited)planToManual(autoPlan());
+  MSC.modeSel=b.dataset.m;msArmed=null;renderMs();});
+$("msReset").addEventListener("click",()=>{MSC.autoEdited=false;msArmed=null;renderMs();toast("Proposta automatica ripristinata.");});
+/* tocco: arma una sezione (scheda o cella) poi tocca lo schermo */
+function armToggle(k){msArmed=msArmed===k?null:k;renderMs();}
+$("msPal").addEventListener("click",e=>{const b=e.target.closest(".ms-chip");if(b)armToggle(b.dataset.u);});
 const stg=$("msStage");
 stg.addEventListener("click",e=>{
-  const x=e.target.closest(".ms-x");if(x){MSC.manual[x.dataset.rm]=-1;renderMs();return;}
-  const c=e.target.closest(".ms-scr");if(c&&MSC.modeSel==="manual"&&msArmed)msAssign(msArmed,+c.dataset.i);
+  const x=e.target.closest(".ms-x");if(x){e.stopPropagation();msRemove(x.dataset.rm);return;}
+  const cell=e.target.closest(".ms-cell[data-u]"),card=e.target.closest(".ms-scr");
+  if(msArmed&&card){const from=cell&&cell.dataset.u;if(from===msArmed){armToggle(from);return;}msAssign(msArmed,+card.dataset.i);return;}
+  if(cell)armToggle(cell.dataset.u);
 });
-stg.addEventListener("dragover",e=>{const c=e.target.closest(".ms-scr");if(c&&MSC.modeSel==="manual"){e.preventDefault();$$(".ms-scr.over").forEach(o=>o!==c&&o.classList.remove("over"));c.classList.add("over");}});
+stg.addEventListener("keydown",e=>{const cell=e.target.closest(".ms-cell[data-u]");if(!cell)return;if(e.key==="Enter"||e.key===" "){e.preventDefault();armToggle(cell.dataset.u);}else if(e.key==="Delete"||e.key==="Backspace"){e.preventDefault();msRemove(cell.dataset.u);}});
+/* trascinamento: da schede e da celle verso gli schermi, e verso la tavolozza per togliere */
+let dragK=null;
+document.addEventListener("dragstart",e=>{const el=e.target.closest&&e.target.closest("#msModal [draggable][data-u]");if(!el)return;dragK=el.dataset.u;try{e.dataTransfer.setData("text/plain",dragK);e.dataTransfer.effectAllowed="move";}catch(x){}el.classList.add("dragging");$("msModal").classList.add("is-drag");});
+document.addEventListener("dragend",()=>{dragK=null;$$(".ms-scr.over,.dragging").forEach(o=>o.classList.remove("over","dragging"));$("msModal").classList.remove("is-drag");$("msTrash").classList.remove("over");});
+stg.addEventListener("dragover",e=>{const c=e.target.closest(".ms-scr");if(c&&dragK){e.preventDefault();$$(".ms-scr.over").forEach(o=>o!==c&&o.classList.remove("over"));c.classList.add("over");}});
 stg.addEventListener("dragleave",e=>{const c=e.target.closest(".ms-scr");if(c&&!c.contains(e.relatedTarget))c.classList.remove("over");});
-stg.addEventListener("drop",e=>{const c=e.target.closest(".ms-scr");if(!c)return;e.preventDefault();const k=e.dataTransfer.getData("text/plain");if(UK[k])msAssign(k,+c.dataset.i);});
+stg.addEventListener("drop",e=>{const c=e.target.closest(".ms-scr");if(!c)return;e.preventDefault();const k=dragK||e.dataTransfer.getData("text/plain");if(UK[k])msAssign(k,+c.dataset.i);});
+const trash=$("msTrash");
+trash.addEventListener("dragover",e=>{if(dragK){e.preventDefault();trash.classList.add("over");}});
+trash.addEventListener("dragleave",()=>trash.classList.remove("over"));
+trash.addEventListener("drop",e=>{e.preventDefault();const k=dragK||e.dataTransfer.getData("text/plain");if(UK[k])msRemove(k);});
 $("msGo").addEventListener("click",launch);
 $("msClose").addEventListener("click",()=>{MSC.wins.forEach(w=>{try{w&&!w.closed&&w.close();}catch(e){}});MSC.wins=[];MSC.pending=[];applySolo(null);renderMs();toast("Finestre chiuse, layout completo ripristinato.");});
 
