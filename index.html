@@ -2512,16 +2512,23 @@ function gridSpec(list){const g=layoutGrid(list,MSC.sz);return{body:g.body,tiles
 MSC.sz={};
 function msResize(k,d){
   const cur=szOf(k,MSC.sz),nv=clamp(cur+d,1,4);if(nv===cur)return;
-  msEdit();MSC.sz[k]=nv;
-  if(nv===4){const plan=currentPlan(),i=plan.findIndex(p=>p&&p.indexOf(k)>=0);
-    if(i>=0){const others=plan[i].filter(x=>x!==k);others.forEach(x=>{MSC.manual[x]=-1;});if(others.length)toast(UK[k].n+" a schermo intero: "+others.map(x=>USHORT[x]).join(", ")+" messe tra le sezioni tolte.");}}
+  msEdit();MSC.sz[k]=nv;MSC.disp=MSC.disp||{};
+  const plan=currentPlan(),i=plan.findIndex(p=>p&&p.indexOf(k)>=0);
+  if(nv===4){
+    if(i>=0){const others=plan[i].filter(x=>x!==k);MSC.disp[k]={i,units:others};others.forEach(x=>{MSC.manual[x]=-1;});
+      if(others.length)toast(UK[k].n+" a schermo intero: "+others.map(x=>USHORT[x]).join(", ")+" messe da parte. Con − tornano al loro posto.");}
+  }else if(cur===4){
+    /* uscendo dallo schermo intero tornano le sezioni messe da parte, se nel frattempo non sono state spostate */
+    const d=MSC.disp[k];delete MSC.disp[k];
+    if(d&&i===d.i){const back=d.units.filter(x=>MSC.manual[x]===-1);back.forEach(x=>{MSC.manual[x]=d.i;});if(back.length)toast(back.map(x=>USHORT[x]).join(", ")+" di nuovo sullo schermo.");}
+  }
   renderMs();
 }
 /* converte la proposta automatica in una disposizione modificabile */
 function planToManual(p){MSC.manual={};UNITS.forEach(u=>{MSC.manual[u.k]=-1;});(p||[]).forEach((us,i)=>{if(us===null)UNITS.forEach(u=>{MSC.manual[u.k]=i;});else(us||[]).forEach(k=>{MSC.manual[k]=i;});});}
 function msEdit(){if(MSC.modeSel==="auto"&&!MSC.autoEdited){planToManual(autoPlan());MSC.autoEdited=true;}}
-function msAssign(k,i){msEdit();const pl=currentPlan();(pl[i]||[]).forEach(x=>{if(szOf(x,MSC.sz)===4&&x!==k)MSC.sz[x]=3;});if(szOf(k,MSC.sz)===4&&(pl[i]||[]).length)MSC.sz[k]=3;MSC.manual[k]=i;msArmed=null;renderMs();}
-function msRemove(k){msEdit();MSC.manual[k]=-1;if(msArmed===k)msArmed=null;renderMs();}
+function msAssign(k,i){msEdit();const pl=currentPlan();(pl[i]||[]).forEach(x=>{if(szOf(x,MSC.sz)===4&&x!==k){MSC.sz[x]=3;if(MSC.disp)delete MSC.disp[x];}});if(szOf(k,MSC.sz)===4&&(pl[i]||[]).length)MSC.sz[k]=3;MSC.manual[k]=i;msArmed=null;renderMs();}
+function msRemove(k){msEdit();if(MSC.disp)delete MSC.disp[k];MSC.manual[k]=-1;if(msArmed===k)msArmed=null;renderMs();}
 function cellHTML(k,area){const armed=msArmed===k,s=szOf(k,MSC.sz);return'<div class="ms-cell'+(armed?" armed":"")+(s===4?" full":"")+'" draggable="true" data-u="'+k+'" tabindex="0" role="button" aria-pressed="'+armed+'" title="Trascina su un altro schermo, oppure tocca e poi tocca lo schermo" style="grid-area:'+area+';--uc:'+UCOL[k]+'"><span>'+UICON[k]+' '+USHORT[k]+'</span><button type="button" class="ms-x" data-rm="'+k+'" aria-label="Togli '+UK[k].n+'">×</button><span class="ms-sz"><button type="button" data-sz="-1" data-k="'+k+'" aria-label="Rimpicciolisci '+UK[k].n+'"'+(s<=1?" disabled":"")+'>−</button><b title="Misura">'+SZNAME[s]+'</b><button type="button" data-sz="1" data-k="'+k+'" aria-label="Ingrandisci '+UK[k].n+'"'+(s>=4?" disabled":"")+'>+</button></span></div>';}
 function renderMs(){
   const S=MSC.screens,manual=MSC.modeSel==="manual",edited=manual||MSC.autoEdited;
@@ -2570,7 +2577,7 @@ $("msMinus").addEventListener("click",()=>msSetN(MSC.count-1));$("msPlus").addEv
 $("msModeSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b||b.dataset.m===MSC.modeSel)return;
   if(b.dataset.m==="manual"&&!MSC.autoEdited)planToManual(autoPlan());
   MSC.modeSel=b.dataset.m;msArmed=null;renderMs();});
-$("msReset").addEventListener("click",()=>{MSC.autoEdited=false;MSC.sz={};msArmed=null;renderMs();toast("Proposta automatica ripristinata.");});
+$("msReset").addEventListener("click",()=>{MSC.autoEdited=false;MSC.sz={};MSC.disp={};msArmed=null;renderMs();toast("Proposta automatica ripristinata.");});
 /* tocco: arma una sezione (scheda o cella) poi tocca lo schermo */
 function armToggle(k){msArmed=msArmed===k?null:k;renderMs();}
 $("msPal").addEventListener("click",e=>{const b=e.target.closest(".ms-chip");if(b)armToggle(b.dataset.u);});
@@ -2852,10 +2859,22 @@ window.holo3d=null;
     floor.visible=!on;sh.visible=!on;
   }
   let holoOn=false,visorK=0,camK=0;
-  function size(){const r=box.getBoundingClientRect();if(!r.width)return;R.setPixelRatio(Math.min(2,window.devicePixelRatio||1));R.setSize(r.width,r.height,false);cam.aspect=r.width/r.height;cam.updateProjectionMatrix();}
+  function size(){const r=box.getBoundingClientRect();if(!r.width)return;if(!Q.level)R.setPixelRatio(Math.min(2,window.devicePixelRatio||1));else if(Q.level<3)R.setPixelRatio(1);else R.setPixelRatio(Q.level>=4?0.5:0.75);R.setSize(r.width,r.height,false);cam.aspect=r.width/r.height;cam.updateProjectionMatrix();}
   if(window.ResizeObserver)new ResizeObserver(size).observe(box);
   let lastScr=0;
+  /* qualità adattiva: se la scheda grafica non regge, riduce risoluzione, ombre e riflesso */
+  const Q={level:0,ms:0,n:0,last:0,skip:0,drawn:0};
+  function degrade(){
+    Q.level++;
+    if(Q.level===1){R.setPixelRatio(1);size();}
+    else if(Q.level===2){R.shadowMap.enabled=false;key.castShadow=false;sh.visible=false;scene.traverse(o=>{if(o.material)o.material.needsUpdate=true;});}
+    else if(Q.level===3){mirror.visible=false;R.setPixelRatio(0.75);size();}
+    else if(Q.level===4){R.setPixelRatio(0.5);size();}
+    const n=$("holoNote");if(n)n.textContent="Qualità 3D ridotta automaticamente per mantenere l'app fluida";
+  }
   function render(now,t){
+    /* al livello massimo di riduzione disegna a 30 fotogrammi al secondo */
+    if(Q.level>=3&&now-Q.drawn<(Q.level>=4?180:33)){return;}Q.drawn=now;
     if(cur.id!==sel||cur.wheel!==H3.wheel)build();
     if(holoOn!==H3.holo){holoOn=H3.holo;setHolo(holoOn);}
     if(H3.spin&&!H3.drag){H3.yaw=(H3.yaw+0.3)%360;const sl=$("hYaw");if(document.activeElement!==sl)sl.value=Math.round(H3.yaw);}
@@ -2866,6 +2885,12 @@ window.holo3d=null;
     const ty=0.9+camK*0.72,dist=(3.45*fit)*(1-camK)+0.9*camK;cam.position.set(0,ty+0.25*(1-camK)+0.02*camK,dist);cam.lookAt(0,ty,0);
     if(t&&cur.wheelG&&now-lastScr>150){lastScr=now;screenDraw(t);const lit=Math.round(clamp((t.rpm-8000)/5000,0,1)*8);for(let i=0;i<8;i++)M.led[i].emissiveIntensity=i<lit?3:0.1;}
     R.render(scene,cam);
+    /* misura l'intervallo reale tra un fotogramma e l'altro (comprende il lavoro della scheda grafica) */
+    const gap=Q.last?now-Q.last:0;Q.last=now;
+    if(gap>0&&gap<1000&&!document.hidden){Q.ms+=gap;Q.n++;}
+    if(Q.n>=8){const avg=Q.ms/Q.n;Q.ms=0;Q.n=0;
+      if(avg>250&&Q.level<4){while(Q.level<4)degrade();}
+      else if(avg>(Q.level>=3?90:40)&&Q.level<4)degrade();}
   }
   /* sincronizza la visiera anche nella copia riflessa */
   const syncMirror=()=>{const i=driver.children.indexOf(cur.helmet),mh=mirror.children[i];if(!mh)return;const vi=cur.helmet.children.indexOf(cur.visorP);if(mh.children[vi])mh.children[vi].rotation.x=cur.visorP.rotation.x;};
