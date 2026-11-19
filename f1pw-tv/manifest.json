@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "F1 Pit Wall – Diretta TV nel riquadro",
+  "version": "1.0.0",
+  "description": "Permette al riquadro Diretta TV del F1 Pit Wall di mostrare NOW, Sky Go, F1 TV, DAZN o TV8. Agisce solo quando questi siti sono dentro un riquadro.",
+  "permissions": [
+    "declarativeNetRequest"
+  ],
+  "host_permissions": [
+    "https://*.nowtv.it/*",
+    "https://*.sky.it/*",
+    "https://*.formula1.com/*",
+    "https://*.dazn.com/*",
+    "https://*.tv8.it/*",
+    "https://matteo-canna.github.io/*"
+  ],
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "riquadro",
+        "enabled": true,
+        "path": "regole.json"
+      }
+    ]
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://matteo-canna.github.io/*",
+        "file:///*"
+      ],
+      "js": [
+        "segnale.js"
+      ],
+      "run_at": "document_start"
+    }
+  ]
+}

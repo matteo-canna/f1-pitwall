@@ -405,6 +405,12 @@ body.home .top .hostctl,body.home #liveBtn,body.home #apiBtn,body.home #msBtn,bo
 .tvemb{display:flex;gap:8px;align-items:center;padding:10px 16px 14px}
 body.solo .p-tv.on{display:flex!important;flex-direction:column}
 body.solo .p-tv.on .tvstage{flex:1;aspect-ratio:auto;min-height:140px;margin-bottom:12px}
+
+.tvext{margin:12px 16px 0;border:1px solid rgba(245,158,11,.45);border-radius:10px;padding:12px 14px;font-size:12.5px;background:rgba(245,158,11,.06)}
+.tvext ol{margin:8px 0;padding-left:20px;display:grid;gap:4px}
+.tvext a{color:var(--cyan)}.tvext code{background:#0b101a;border:1px solid var(--line);border-radius:4px;padding:0 4px;font-size:11.5px}
+.tvext .tog{margin-top:8px}
+.tvstage:fullscreen{border:0;border-radius:0}
 </style>
 </head>
 <body data-view="pista" data-mode="pit">
@@ -525,14 +531,27 @@ body.solo .p-tv.on .tvstage{flex:1;aspect-ratio:auto;min-height:140px;margin-bot
         <select id="tvSvc" aria-label="Servizio di streaming"></select>
         <span id="tvUrlRow" class="urlrow" hidden><input id="tvUrl" type="url" placeholder="https://… indirizzo del sito" aria-label="Indirizzo del sito" style="flex:1;min-width:0;background:transparent;border:0"></span>
         <button class="btn" id="tvGo" type="button">▶ COLLEGA</button>
+        <button class="tog" id="tvFs" type="button" hidden>⛶ SCHERMO INTERO</button>
+        <button class="tog" id="tvPop" type="button" hidden>APRI IN FINESTRA</button>
         <button class="tog" id="tvStop" type="button" hidden>CHIUDI</button>
       </div>
       <p class="ms-alert" id="tvMsg" hidden></p>
       <div class="tvstage" id="tvStage">
-        <iframe id="tvFrame" title="Diretta TV" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="origin" hidden></iframe>
+        <iframe id="tvFrame" title="Diretta TV" allow="autoplay; encrypted-media; fullscreen; picture-in-picture; storage-access" referrerpolicy="strict-origin-when-cross-origin" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation allow-storage-access-by-user-activation" hidden></iframe>
         <div class="tvidle" id="tvIdle"><b>▶</b><p id="tvIdleTxt"></p><p class="note">Regola lo slider TV SYNC per allineare i dati dell'app alla diretta.</p></div>
       </div>
-      <label class="tvemb note"><input type="checkbox" id="tvEmbed"> Mostra direttamente nel riquadro (solo siti che lo consentono, non Sky Go, NOW, F1 TV o DAZN)</label>
+      <div class="tvext" id="tvExtBox" hidden>
+        <b>Per vedere la diretta qui dentro: estensione "Diretta TV" (una volta sola)</b>
+        <ol>
+          <li><a id="tvExtZip" target="_blank" rel="noopener">Scarica l'estensione</a> ed estrai lo zip in una cartella che non cancellerai.</li>
+          <li>Apri <code>chrome://extensions</code> e attiva <b>Modalità sviluppatore</b> in alto a destra.</li>
+          <li>Premi <b>Carica estensione non pacchettizzata</b> e scegli la cartella <code>f1pw-tv</code>.</li>
+          <li>Ricarica questa pagina e premi <b>COLLEGA</b>.</li>
+        </ol>
+        <p class="note">Agisce solo su NOW, Sky Go, F1 TV, DAZN e TV8 e solo quando sono dentro questo riquadro. Se l'accesso non resta salvato, in <code>chrome://settings/cookies</code> aggiungi <code>[*.]nowtv.it</code> tra i siti autorizzati a usare cookie di terze parti.</p>
+        <button class="tog" id="tvExtRe" type="button">HO INSTALLATO L'ESTENSIONE</button>
+      </div>
+      <label class="tvemb note" id="tvEmbedRow" hidden><input type="checkbox" id="tvEmbed"> Mostra questo sito direttamente nel riquadro (solo siti che lo consentono)</label>
     </section>
     <section class="panel p-feed" data-tab="pista" aria-label="Team radio e direzione gara">
       <div class="panel-h"><h2>Team radio &amp; FIA race control</h2><p id="feedSub" style="color:var(--green)">RADIO SIMULATA</p></div>
@@ -2532,7 +2551,8 @@ function launch(){
   for(const p of todo){if(!openOne(p))MSC.pending.push(p);}
   const mine=plan[MSC.current];
   SZ=Object.assign({},MSC.sz);applySolo(mine&&mine.length?mine:null,true);
-  if(tvScreen>=0&&tvUrl()){
+  if(tvScreen>=0&&tvUrl()&&tvInline()){if(tvScreen===MSC.current)requestAnimationFrame(()=>{if(!TV.loaded)tvConnect();});}
+  else if(tvScreen>=0&&tvUrl()){
     const sc=MSC.screens[tvScreen];
     if(tvScreen===MSC.current)requestAnimationFrame(()=>tvOpen());
     else tvOpen(MSC.api&&!sc.virtual?{x:sc.x+Math.round(sc.w*0.05),y:sc.y+Math.round(sc.h*0.08),w:Math.round(sc.w*0.6),h:Math.round(sc.h*0.6)}:null);
@@ -2657,33 +2677,37 @@ function bootFollower(){
 }
 
 /* =====================================================================
-   Diretta TV: il servizio di streaming si apre in una vera finestra di
-   Chrome (con il tuo accesso) agganciata sopra il riquadro "Diretta TV"
+   Diretta TV
+   - con l'estensione "F1 Pit Wall – Diretta TV" il servizio si carica
+     direttamente nel riquadro (login compreso)
+   - senza estensione si apre in una finestra di Chrome agganciata sopra
    ===================================================================== */
 const TV_SVC=[
-  {k:"skygo",n:"Sky Go",u:"https://skygo.sky.it/"},
-  {k:"now",n:"NOW",u:"https://www.nowtv.it/"},
-  {k:"f1tv",n:"F1 TV",u:"https://f1tv.formula1.com/"},
-  {k:"tv8",n:"TV8",u:"https://www.tv8.it/streaming"},
-  {k:"dazn",n:"DAZN",u:"https://www.dazn.com/"},
-  {k:"custom",n:"Altro sito…",u:""}
+  {k:"now",n:"NOW",u:"https://www.nowtv.it/",frame:true},
+  {k:"skygo",n:"Sky Go",u:"https://skygo.sky.it/",frame:true},
+  {k:"f1tv",n:"F1 TV",u:"https://f1tv.formula1.com/",frame:true},
+  {k:"tv8",n:"TV8",u:"https://www.tv8.it/streaming",frame:true},
+  {k:"dazn",n:"DAZN",u:"https://www.dazn.com/",frame:true},
+  {k:"custom",n:"Altro sito…",u:"",frame:false}
 ];
-const TV={cfg:store.get("tvsvc",{svc:"skygo",url:"",embed:false}),win:null,on:false,at:null};
-if(typeof TV.cfg!=="object"||!TV.cfg)TV.cfg={svc:"skygo",url:"",embed:false};
-function tvUrl(){const s=TV_SVC.find(x=>x.k===TV.cfg.svc)||TV_SVC[0];const u=s.k==="custom"?TV.cfg.url:s.u;return/^https:\/\//i.test(u||"")?u:"";}
+const EXT_ZIP="https://github.com/matteo-canna/f1-pitwall/raw/main/estensione-diretta-tv.zip";
+const TV={cfg:store.get("tvsvc",{svc:"now",url:"",embed:false}),win:null,on:false,at:null,ext:null};
+if(typeof TV.cfg!=="object"||!TV.cfg)TV.cfg={svc:"now",url:"",embed:false};
+function tvExt(){return document.documentElement.getAttribute("data-f1pw-tv");}
+function tvSvc(){return TV_SVC.find(x=>x.k===TV.cfg.svc)||TV_SVC[0];}
+function tvUrl(){const s=tvSvc(),u=s.k==="custom"?TV.cfg.url:s.u;return/^https:\/\//i.test(u||"")?u:"";}
+/* nel riquadro: servizi supportati con l'estensione, oppure siti personalizzati se scelto */
+function tvInline(){const s=tvSvc();return!!tvUrl()&&!inClaude&&((s.frame&&!!tvExt())||(s.k==="custom"&&!!TV.cfg.embed));}
 function tvSave(){store.set("tvsvc",TV.cfg);}
-/* rettangolo del riquadro in coordinate dello schermo */
 function tvRect(){
   const ph=$("tvStage"),r=ph.getBoundingClientRect();if(!r.width||!r.height)return null;
   const bx=Math.max(0,(window.outerWidth-window.innerWidth)/2),by=Math.max(0,window.outerHeight-window.innerHeight-bx);
   return{x:Math.round(window.screenX+bx+r.left),y:Math.round(window.screenY+by+r.top),w:Math.round(r.width),h:Math.round(r.height)};
 }
-/* apre (o riapre al posto giusto) la finestra della diretta: va chiamata da un clic */
 function tvOpen(rect){
   const url=tvUrl();if(!url){tvMsg("Scegli un servizio o scrivi l'indirizzo del sito (deve iniziare con https://).",true);return false;}
   if(inClaude){tvMsg("Dentro Claude non si possono aprire altre finestre: usa il sito su GitHub Pages con Chrome o Edge.",true);return false;}
   const R=rect||tvRect()||{x:window.screenX+40,y:window.screenY+40,w:960,h:560};
-  /* se esiste già la chiudo: dopo l'accesso il browser non permette più di spostarla */
   try{if(TV.win&&!TV.win.closed)TV.win.close();}catch(e){}
   let w=null;try{w=window.open("about:blank","f1pw_tv","popup=yes,left="+R.x+",top="+R.y+",width="+R.w+",height="+R.h);}catch(e){}
   if(!w){tvMsg("Il browser ha bloccato la finestra: consenti i popup per questo sito e riprova.",true);return false;}
@@ -2691,36 +2715,50 @@ function tvOpen(rect){
   try{w.location.href=url;}catch(e){}
   TV.win=w;TV.on=true;TV.at=R;tvRender();tvMsg("");return true;
 }
-function tvClose(){try{TV.win&&TV.win.close();}catch(e){}TV.win=null;TV.on=false;tvRender();}
+function tvClose(){try{TV.win&&TV.win.close();}catch(e){}TV.win=null;TV.on=false;TV.loaded=false;const fr=$("tvFrame");fr.removeAttribute("src");fr.dataset.src="";tvRender();}
 function tvMsg(t,warn){const el=$("tvMsg");el.hidden=!t;el.textContent=t||"";el.className="ms-alert"+(warn?"":" ok");}
+/* collega: nel riquadro se possibile, altrimenti finestra agganciata */
+function tvConnect(){
+  if(tvInline()){const fr=$("tvFrame"),url=tvUrl();TV.loaded=true;fr.dataset.src=url;fr.src=url;TV.on=true;tvMsg("");tvRender();
+    clearTimeout(TV.chk);TV.chk=setTimeout(()=>{if(TV.loaded&&!TV.gotLoad)tvMsg("Il sito non risponde nel riquadro. Se resta vuoto, premi APRI IN FINESTRA.",true);},12000);return true;}
+  return tvOpen();
+}
 function tvRender(){
-  const s=TV_SVC.find(x=>x.k===TV.cfg.svc)||TV_SVC[0],url=tvUrl(),alive=!!(TV.win&&!TV.win.closed),emb=!!TV.cfg.embed&&!!url;
+  const s=tvSvc(),url=tvUrl(),ext=tvExt(),inl=tvInline(),alive=!!(TV.win&&!TV.win.closed),fr=$("tvFrame"),showFrame=inl&&TV.loaded&&!!fr.dataset.src;
   $("tvSvc").value=s.k;$("tvUrlRow").hidden=s.k!=="custom";$("tvUrl").value=TV.cfg.url||"";
-  $("tvEmbed").checked=!!TV.cfg.embed;
-  $("tvGo").textContent=alive?"↻ RIPOSIZIONA":"▶ COLLEGA "+(s.k==="custom"?"SITO":s.n.toUpperCase());
-  $("tvStop").hidden=!alive;
-  const fr=$("tvFrame");
-  if(emb){if(fr.dataset.src!==url){fr.dataset.src=url;fr.src=url;}fr.hidden=false;}else{if(fr.src){fr.removeAttribute("src");fr.dataset.src="";}fr.hidden=true;}
-  $("tvIdle").hidden=emb;
-  setT($("tvState"),emb?"Mostrato nel riquadro (solo siti che lo consentono)":alive?s.n+" in una finestra agganciata qui sopra":"Non collegato");
-  $("tvState").className="tag "+(alive||emb?"clear":"");
-  $("tvIdleTxt").textContent=alive?"La diretta è nella finestra di "+s.n+" posizionata sopra questo riquadro. Se hai spostato o ridimensionato l'app, premi RIPOSIZIONA.":
-    "Premi COLLEGA: "+s.n+" si apre in una finestra di Chrome esattamente sopra questo riquadro. Accedi con il tuo account come al solito; l'accesso resta salvato nel browser.";
+  $("tvEmbed").checked=!!TV.cfg.embed;$("tvEmbedRow").hidden=s.k!=="custom";
+  $("tvGo").textContent=showFrame?"↻ RICARICA":alive?"↻ RIPOSIZIONA":"▶ COLLEGA "+(s.k==="custom"?"SITO":s.n.toUpperCase());
+  $("tvStop").hidden=!(alive||showFrame);$("tvFs").hidden=!showFrame;$("tvPop").hidden=!showFrame;
+  fr.hidden=!showFrame;$("tvIdle").hidden=showFrame;
+  /* estensione */
+  const needExt=s.frame&&!ext;$("tvExtBox").hidden=!needExt||inClaude;
+  const st=$("tvState");
+  if(showFrame){st.textContent=s.n+" nel riquadro";st.className="tag clear";}
+  else if(alive){st.textContent=s.n+" in finestra agganciata";st.className="tag clear";}
+  else{st.textContent=s.frame?(ext?"Estensione attiva · pronto":"Estensione non installata"):"Non collegato";st.className="tag"+(s.frame&&ext?" clear":"");}
+  $("tvIdleTxt").textContent=alive?"La diretta è nella finestra di "+s.n+" sopra questo riquadro. Se hai spostato l'app, premi RIPOSIZIONA.":
+    inl?"Premi COLLEGA: "+s.n+" si carica qui dentro. Accedi con il tuo account come sul sito; l'accesso resta salvato in Chrome.":
+    s.frame?"Per vedere "+s.n+" qui dentro serve l'estensione (istruzioni sotto). Senza, COLLEGA lo apre in una finestra appoggiata sopra il riquadro.":
+    "Premi COLLEGA: il sito si apre in una finestra di Chrome appoggiata sopra il riquadro.";
 }
 $("tvSvc").innerHTML=TV_SVC.map(x=>'<option value="'+x.k+'">'+x.n+'</option>').join("");
-$("tvSvc").addEventListener("change",e=>{TV.cfg.svc=e.target.value;tvSave();tvRender();});
+$("tvSvc").addEventListener("change",e=>{TV.cfg.svc=e.target.value;tvSave();if(TV.loaded)tvClose();tvRender();});
 $("tvUrl").addEventListener("change",e=>{TV.cfg.url=e.target.value.trim();tvSave();tvRender();});
 $("tvEmbed").addEventListener("change",e=>{TV.cfg.embed=e.target.checked;tvSave();tvRender();});
-$("tvGo").addEventListener("click",()=>tvOpen());
+$("tvGo").addEventListener("click",tvConnect);
 $("tvStop").addEventListener("click",tvClose);
-/* finestre del multi-schermo con la sezione TV: comunicano alla principale dove si trova il riquadro */
-function tvReport(){if(window.isFollower&&window.isFollower()&&SOLO&&SOLO.indexOf("tv")>=0&&chan){const r=tvRect();if(r)try{chan.postMessage({type:"tvrect",r});}catch(e){}}}
+$("tvPop").addEventListener("click",()=>{tvClose();tvOpen();});
+$("tvFs").addEventListener("click",()=>{try{const p=$("tvStage").requestFullscreen();p&&p.catch&&p.catch(()=>toast("Schermo intero non consentito."));}catch(e){}});
+$("tvFrame").addEventListener("load",()=>{if($("tvFrame").dataset.src){TV.gotLoad=true;clearTimeout(TV.chk);}});
+$("tvExtZip").href=EXT_ZIP;
+$("tvExtRe").addEventListener("click",()=>{tvRender();toast(tvExt()?"Estensione trovata.":"Estensione non trovata: dopo averla caricata ricarica questa pagina.");});
+/* multi-schermo senza estensione: la finestra secondaria comunica dove si trova il riquadro */
+function tvReport(){if(window.isFollower&&window.isFollower()&&SOLO&&SOLO.indexOf("tv")>=0&&chan&&!tvInline()){const r=tvRect();if(r)try{chan.postMessage({type:"tvrect",r});}catch(e){}}}
 setInterval(tvReport,1500);
-window.tvOnRect=r=>{/* la principale sposta la finestra TV appena aperta sopra il riquadro della finestra secondaria */
-  if(!TV.win||TV.win.closed||!r)return;if(TV.at&&Math.abs(TV.at.x-r.x)<3&&Math.abs(TV.at.y-r.y)<3&&Math.abs(TV.at.w-r.w)<3&&Math.abs(TV.at.h-r.h)<3)return;
-  try{TV.win.moveTo(r.x,r.y);TV.win.resizeTo(r.w,r.h);TV.at=r;}catch(e){}
-};
-setInterval(()=>{if(TV.on&&TV.win&&TV.win.closed){TV.win=null;TV.on=false;tvRender();}},1000);
+window.tvOnRect=r=>{if(!TV.win||TV.win.closed||!r)return;if(TV.at&&Math.abs(TV.at.x-r.x)<3&&Math.abs(TV.at.y-r.y)<3&&Math.abs(TV.at.w-r.w)<3&&Math.abs(TV.at.h-r.h)<3)return;try{TV.win.moveTo(r.x,r.y);TV.win.resizeTo(r.w,r.h);TV.at=r;}catch(e){}};
+/* finestra secondaria con la TV: con l'estensione la diretta si carica da sola nel suo riquadro */
+window.tvAutoInline=()=>{if(SOLO&&SOLO.indexOf("tv")>=0&&tvInline()&&!TV.loaded)tvConnect();};
+setInterval(()=>{if(TV.win&&TV.win.closed){TV.win=null;TV.on=!!TV.loaded;tvRender();}},1000);
 tvRender();
 
 /* ---------- avvio ---------- */
@@ -2733,6 +2771,7 @@ function start(saved){
   if(!inClaude&&location.search.length>1)applyParams(location.search);else if(q&&!inClaude)applyParams(q);
   $("shareUrl").textContent=curLink()||"Carica il file su un hosting per avere un link";
   const fol=bootFollower();
+  if(fol&&window.tvAutoInline)setTimeout(window.tvAutoInline,400);
   requestAnimationFrame(frame);if(!fol||MSC.role!=="follow")initShared();
 }
 const hot=window.claude&&window.claude.hot;

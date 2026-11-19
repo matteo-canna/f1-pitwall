@@ -1,0 +1,14 @@
+F1 Pit Wall – Diretta TV nel riquadro
+
+Cosa fa
+Quando il riquadro "Diretta TV" del Pit Wall carica NOW, Sky Go, F1 TV, DAZN o TV8,
+l'estensione toglie le due intestazioni con cui questi siti vietano di essere mostrati
+dentro un'altra pagina. Agisce solo sui riquadri (non quando apri il sito normalmente)
+e solo su questi domini. Non legge password, cookie o dati.
+
+Installazione (Chrome o Edge su computer)
+1. Estrai lo zip in una cartella che non cancellerai.
+2. Apri chrome://extensions (Edge: edge://extensions).
+3. Attiva "Modalità sviluppatore" in alto a destra.
+4. Premi "Carica estensione non pacchettizzata" e scegli la cartella f1pw-tv.
+5. Ricarica la pagina del Pit Wall.
