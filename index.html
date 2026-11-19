@@ -392,6 +392,19 @@ body.home .top .hostctl,body.home #liveBtn,body.home #apiBtn,body.home #msBtn,bo
 .ms-sz button:disabled{opacity:.35}
 .ms-sz b{min-width:14px;text-align:center;font-size:10px;color:var(--uc)}
 .ms-cell.full{box-shadow:inset 0 0 0 2px var(--uc)}
+
+/* ---- diretta TV ---- */
+.tvbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:12px 16px 0}
+.tvbar select{background:#0e1422;border:1px solid var(--line);border-radius:9px;padding:9px 10px}
+.tvbar .urlrow{flex:1 1 220px}
+.p-tv .ms-alert{margin:10px 16px 0}.ms-alert.ok{border-color:var(--green);color:var(--green)}
+.tvstage{position:relative;margin:12px 16px 0;aspect-ratio:16/9;background:#000;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.tvstage iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.tvidle{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:8px;text-align:center;padding:18px;background:radial-gradient(70% 70% at 50% 45%,#141b2b 0%,#000 80%)}
+.tvidle b{font-size:34px;color:#f43f5e;line-height:1}.tvidle p{max-width:46ch;font-size:12.5px;color:#c4cbda}
+.tvemb{display:flex;gap:8px;align-items:center;padding:10px 16px 14px}
+body.solo .p-tv.on{display:flex!important;flex-direction:column}
+body.solo .p-tv.on .tvstage{flex:1;aspect-ratio:auto;min-height:140px;margin-bottom:12px}
 </style>
 </head>
 <body data-view="pista" data-mode="pit">
@@ -505,6 +518,21 @@ body.home .top .hostctl,body.home #liveBtn,body.home #apiBtn,body.home #msBtn,bo
       </div>
       <div class="mapbox" id="mapBox"><canvas id="map" aria-label="Posizione delle vetture in pista"></canvas><span class="flagpill" id="flagPill">GREEN</span><span class="maphint" id="mapHint">Posizioni simulate • tocca una vettura per seguirla</span></div>
       <div class="pitwin"><span id="pitTxt">PIT WINDOW</span><span class="tag clear" id="pitTag">ARIA PULITA (CLEAN AIR)</span></div>
+    </section>
+    <section class="panel p-tv" data-tab="pista" aria-label="Diretta TV">
+      <div class="panel-h"><div><h2>Diretta TV</h2><p>il tuo servizio di streaming, con il tuo accesso</p></div><span class="tag" id="tvState">Non collegato</span></div>
+      <div class="tvbar">
+        <select id="tvSvc" aria-label="Servizio di streaming"></select>
+        <span id="tvUrlRow" class="urlrow" hidden><input id="tvUrl" type="url" placeholder="https://… indirizzo del sito" aria-label="Indirizzo del sito" style="flex:1;min-width:0;background:transparent;border:0"></span>
+        <button class="btn" id="tvGo" type="button">▶ COLLEGA</button>
+        <button class="tog" id="tvStop" type="button" hidden>CHIUDI</button>
+      </div>
+      <p class="ms-alert" id="tvMsg" hidden></p>
+      <div class="tvstage" id="tvStage">
+        <iframe id="tvFrame" title="Diretta TV" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="origin" hidden></iframe>
+        <div class="tvidle" id="tvIdle"><b>▶</b><p id="tvIdleTxt"></p><p class="note">Regola lo slider TV SYNC per allineare i dati dell'app alla diretta.</p></div>
+      </div>
+      <label class="tvemb note"><input type="checkbox" id="tvEmbed"> Mostra direttamente nel riquadro (solo siti che lo consentono, non Sky Go, NOW, F1 TV o DAZN)</label>
     </section>
     <section class="panel p-feed" data-tab="pista" aria-label="Team radio e direzione gara">
       <div class="panel-h"><h2>Team radio &amp; FIA race control</h2><p id="feedSub" style="color:var(--green)">RADIO SIMULATA</p></div>
@@ -2333,10 +2361,11 @@ const UNITS=[
   {k:"console",n:"Console (cockpit, VS, party)",sel:".p-console",w:2,tall:true},
   {k:"show",n:"3D showroom",sel:"#vShow",w:2,wide:true},
   {k:"feed",n:"Team radio & FIA",sel:".p-feed",w:1,tall:true},
-  {k:"tiles",n:"Meteo & controllo sessione",sel:"section.tiles",w:1}
+  {k:"tiles",n:"Meteo & controllo sessione",sel:"section.tiles",w:1},
+  {k:"tv",n:"Diretta TV",sel:".p-tv",w:3,wide:true}
 ];
 const UK={};UNITS.forEach(u=>{UK[u.k]=u;document.querySelector(u.sel).dataset.unit=u.k;});
-const PRIMARY_ORDER=["map","tele","show","table","console","feed"];
+const PRIMARY_ORDER=["tv","map","tele","show","table","console","feed"];
 const MSC={screens:null,api:false,current:0,manual:{},wins:[],pending:[],role:"solo",count:2};
 let chan=null;try{chan=new BroadcastChannel("f1pw-sync");}catch(e){}
 
@@ -2418,6 +2447,7 @@ if(chan)chan.onmessage=e=>{
     if(m.live&&typeof m.live==="object"){const radioVer=live.radioVer;Object.assign(live,m.live);if(m.live.radioVer!==radioVer)lastSlow=0;}
   }else if(!following&&MSC.role==="lead"&&m.type==="sel"&&m.id>=0&&m.id<DRIVERS.length){selectDriver(m.id);postState(true);}
   else if(!following&&m.type==="hello"){postState(true);}
+  else if(!following&&m.type==="tvrect"&&m.r&&window.tvOnRect){window.tvOnRect(m.r);}
   else if(following&&m.type==="bye"){setT($("soloTxt"),"Finestra principale chiusa: questa finestra non è più sincronizzata");$("soloTxt").classList.add("k1r");}
 };
 window.addEventListener("beforeunload",()=>{if(chan&&MSC.role==="lead"&&MSC.wins.length)try{chan.postMessage({type:"bye"});}catch(e){}});
@@ -2450,8 +2480,9 @@ function autoPlan(){
   const area=s=>s.w*s.h,portrait=s=>s.h>s.w*1.05,load=new Array(n).fill(0);
   const byArea=S.map((s,i)=>i).sort((a,b)=>area(S[b])-area(S[a]));
   const largest=byArea[0];
-  const order=["map","tele","table","console","show","feed"];
+  const order=["map","tv","tele","table","console","show","feed"];
   for(const k of order){
+    if(k==="tv"&&!tvUrl())continue;
     const u=UK[k];let best=-1,bs=-1e9;
     for(let i=0;i<n;i++){
       let sc=-load[i]*10;const s=S[i];
@@ -2496,17 +2527,24 @@ function launch(){
   MSC.wins.forEach(w=>{try{w&&!w.closed&&w.close();}catch(e){}});MSC.wins=[];MSC.pending=[];
   MSC.role="lead";
   const todo=plan.map((u,i)=>({i,units:u||[]})).filter(p=>p.i!==MSC.current&&p.units.length);
+  /* diretta TV su un altro schermo: la finestra del servizio si apre su quello schermo e poi si aggancia al riquadro */
+  const tvScreen=plan.findIndex(p=>p&&p.indexOf("tv")>=0);
   for(const p of todo){if(!openOne(p))MSC.pending.push(p);}
   const mine=plan[MSC.current];
   SZ=Object.assign({},MSC.sz);applySolo(mine&&mine.length?mine:null,true);
+  if(tvScreen>=0&&tvUrl()){
+    const sc=MSC.screens[tvScreen];
+    if(tvScreen===MSC.current)requestAnimationFrame(()=>tvOpen());
+    else tvOpen(MSC.api&&!sc.virtual?{x:sc.x+Math.round(sc.w*0.05),y:sc.y+Math.round(sc.h*0.08),w:Math.round(sc.w*0.6),h:Math.round(sc.h*0.6)}:null);
+  }else if(tvScreen>=0)toast("Diretta TV: scegli prima il servizio nel riquadro Diretta TV, poi premi COLLEGA.");
   postState(true);renderMs();
   if(MSC.pending.length)toast("Il browser ha bloccato alcune finestre: aprile una alla volta dai pulsanti qui sotto, oppure consenti i popup per questo sito.");
   else{closeModals();toast(todo.length?"Aperte "+todo.length+" finestre. In ognuna puoi premere SCHERMO INTERO.":"Layout applicato a questo schermo.");}
 }
 /* ---------- interfaccia della finestra di gestione (v3: anteprima modificabile) ---------- */
-const UCOL={map:"#06B6D4",tele:"#A855F7",table:"#10B981",console:"#f59b42",show:"#ec4899",feed:"#F59E0B",tiles:"#8792aa"};
-const USHORT={map:"Mappa",tele:"Telemetria",table:"Classifica",console:"Console",show:"3D",feed:"Radio & FIA",tiles:"Meteo"};
-const UICON={map:"◎",tele:"∿",table:"≡",console:"◧",show:"◆",feed:"◉",tiles:"☀"};
+const UCOL={tv:"#f43f5e",map:"#06B6D4",tele:"#A855F7",table:"#10B981",console:"#f59b42",show:"#ec4899",feed:"#F59E0B",tiles:"#8792aa"};
+const USHORT={tv:"TV",map:"Mappa",tele:"Telemetria",table:"Classifica",console:"Console",show:"3D",feed:"Radio & FIA",tiles:"Meteo"};
+const UICON={tv:"▶",map:"◎",tele:"∿",table:"≡",console:"◧",show:"◆",feed:"◉",tiles:"☀"};
 let msArmed=null;
 function gridSpec(list){const g=layoutGrid(list,MSC.sz);return{body:g.body,tiles:g.tiles,cols:g.cols.replace(/minmax\(0,([^)]+)\)/g,"$1"),areas:g.rows.map(r=>"'"+r+"'").join(" "),trs:g.trs.map(t=>t.replace(/minmax\(0,([^)]+)\)/g,"$1")).join(" ")};}
 MSC.sz={};
@@ -2617,6 +2655,73 @@ function bootFollower(){
     setInterval(()=>{if(leaderSeen&&Date.now()-leaderSeen>5000){setT($("soloTxt"),"In attesa della finestra principale…");}},2000);}
   return true;
 }
+
+/* =====================================================================
+   Diretta TV: il servizio di streaming si apre in una vera finestra di
+   Chrome (con il tuo accesso) agganciata sopra il riquadro "Diretta TV"
+   ===================================================================== */
+const TV_SVC=[
+  {k:"skygo",n:"Sky Go",u:"https://skygo.sky.it/"},
+  {k:"now",n:"NOW",u:"https://www.nowtv.it/"},
+  {k:"f1tv",n:"F1 TV",u:"https://f1tv.formula1.com/"},
+  {k:"tv8",n:"TV8",u:"https://www.tv8.it/streaming"},
+  {k:"dazn",n:"DAZN",u:"https://www.dazn.com/"},
+  {k:"custom",n:"Altro sito…",u:""}
+];
+const TV={cfg:store.get("tvsvc",{svc:"skygo",url:"",embed:false}),win:null,on:false,at:null};
+if(typeof TV.cfg!=="object"||!TV.cfg)TV.cfg={svc:"skygo",url:"",embed:false};
+function tvUrl(){const s=TV_SVC.find(x=>x.k===TV.cfg.svc)||TV_SVC[0];const u=s.k==="custom"?TV.cfg.url:s.u;return/^https:\/\//i.test(u||"")?u:"";}
+function tvSave(){store.set("tvsvc",TV.cfg);}
+/* rettangolo del riquadro in coordinate dello schermo */
+function tvRect(){
+  const ph=$("tvStage"),r=ph.getBoundingClientRect();if(!r.width||!r.height)return null;
+  const bx=Math.max(0,(window.outerWidth-window.innerWidth)/2),by=Math.max(0,window.outerHeight-window.innerHeight-bx);
+  return{x:Math.round(window.screenX+bx+r.left),y:Math.round(window.screenY+by+r.top),w:Math.round(r.width),h:Math.round(r.height)};
+}
+/* apre (o riapre al posto giusto) la finestra della diretta: va chiamata da un clic */
+function tvOpen(rect){
+  const url=tvUrl();if(!url){tvMsg("Scegli un servizio o scrivi l'indirizzo del sito (deve iniziare con https://).",true);return false;}
+  if(inClaude){tvMsg("Dentro Claude non si possono aprire altre finestre: usa il sito su GitHub Pages con Chrome o Edge.",true);return false;}
+  const R=rect||tvRect()||{x:window.screenX+40,y:window.screenY+40,w:960,h:560};
+  /* se esiste già la chiudo: dopo l'accesso il browser non permette più di spostarla */
+  try{if(TV.win&&!TV.win.closed)TV.win.close();}catch(e){}
+  let w=null;try{w=window.open("about:blank","f1pw_tv","popup=yes,left="+R.x+",top="+R.y+",width="+R.w+",height="+R.h);}catch(e){}
+  if(!w){tvMsg("Il browser ha bloccato la finestra: consenti i popup per questo sito e riprova.",true);return false;}
+  try{w.moveTo(R.x,R.y);w.resizeTo(R.w,R.h);}catch(e){}
+  try{w.location.href=url;}catch(e){}
+  TV.win=w;TV.on=true;TV.at=R;tvRender();tvMsg("");return true;
+}
+function tvClose(){try{TV.win&&TV.win.close();}catch(e){}TV.win=null;TV.on=false;tvRender();}
+function tvMsg(t,warn){const el=$("tvMsg");el.hidden=!t;el.textContent=t||"";el.className="ms-alert"+(warn?"":" ok");}
+function tvRender(){
+  const s=TV_SVC.find(x=>x.k===TV.cfg.svc)||TV_SVC[0],url=tvUrl(),alive=!!(TV.win&&!TV.win.closed),emb=!!TV.cfg.embed&&!!url;
+  $("tvSvc").value=s.k;$("tvUrlRow").hidden=s.k!=="custom";$("tvUrl").value=TV.cfg.url||"";
+  $("tvEmbed").checked=!!TV.cfg.embed;
+  $("tvGo").textContent=alive?"↻ RIPOSIZIONA":"▶ COLLEGA "+(s.k==="custom"?"SITO":s.n.toUpperCase());
+  $("tvStop").hidden=!alive;
+  const fr=$("tvFrame");
+  if(emb){if(fr.dataset.src!==url){fr.dataset.src=url;fr.src=url;}fr.hidden=false;}else{if(fr.src){fr.removeAttribute("src");fr.dataset.src="";}fr.hidden=true;}
+  $("tvIdle").hidden=emb;
+  setT($("tvState"),emb?"Mostrato nel riquadro (solo siti che lo consentono)":alive?s.n+" in una finestra agganciata qui sopra":"Non collegato");
+  $("tvState").className="tag "+(alive||emb?"clear":"");
+  $("tvIdleTxt").textContent=alive?"La diretta è nella finestra di "+s.n+" posizionata sopra questo riquadro. Se hai spostato o ridimensionato l'app, premi RIPOSIZIONA.":
+    "Premi COLLEGA: "+s.n+" si apre in una finestra di Chrome esattamente sopra questo riquadro. Accedi con il tuo account come al solito; l'accesso resta salvato nel browser.";
+}
+$("tvSvc").innerHTML=TV_SVC.map(x=>'<option value="'+x.k+'">'+x.n+'</option>').join("");
+$("tvSvc").addEventListener("change",e=>{TV.cfg.svc=e.target.value;tvSave();tvRender();});
+$("tvUrl").addEventListener("change",e=>{TV.cfg.url=e.target.value.trim();tvSave();tvRender();});
+$("tvEmbed").addEventListener("change",e=>{TV.cfg.embed=e.target.checked;tvSave();tvRender();});
+$("tvGo").addEventListener("click",()=>tvOpen());
+$("tvStop").addEventListener("click",tvClose);
+/* finestre del multi-schermo con la sezione TV: comunicano alla principale dove si trova il riquadro */
+function tvReport(){if(window.isFollower&&window.isFollower()&&SOLO&&SOLO.indexOf("tv")>=0&&chan){const r=tvRect();if(r)try{chan.postMessage({type:"tvrect",r});}catch(e){}}}
+setInterval(tvReport,1500);
+window.tvOnRect=r=>{/* la principale sposta la finestra TV appena aperta sopra il riquadro della finestra secondaria */
+  if(!TV.win||TV.win.closed||!r)return;if(TV.at&&Math.abs(TV.at.x-r.x)<3&&Math.abs(TV.at.y-r.y)<3&&Math.abs(TV.at.w-r.w)<3&&Math.abs(TV.at.h-r.h)<3)return;
+  try{TV.win.moveTo(r.x,r.y);TV.win.resizeTo(r.w,r.h);TV.at=r;}catch(e){}
+};
+setInterval(()=>{if(TV.on&&TV.win&&TV.win.closed){TV.win=null;TV.on=false;tvRender();}},1000);
+tvRender();
 
 /* ---------- avvio ---------- */
 function start(saved){
