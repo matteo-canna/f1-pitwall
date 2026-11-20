@@ -431,7 +431,7 @@ body.replay #flagSeg button,body.replay #wxSeg button{pointer-events:none;opacit
 #rpYear{background:#0e1422;border:1px solid var(--line);border-radius:8px;padding:7px 10px}
 
 /* ---- misura schede: menu ⋯ (S / M / L) ---- */
-.view .panel{position:relative}
+.view .panel,.panel.szable{position:relative}
 .cardbtn{position:absolute;top:10px;right:10px;z-index:4;width:30px;height:30px;padding:0;border-radius:8px;border:1px solid var(--line);background:#0b101a;color:var(--muted);font:800 17px/1 var(--f-mono);letter-spacing:0;display:grid;place-items:center;cursor:pointer;transition:color .15s,border-color .15s,background .15s}
 .cardbtn:hover,.cardbtn[aria-expanded="true"]{color:var(--text);border-color:#3b4864;background:#131b2b}
 .cardbtn:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
@@ -489,6 +489,114 @@ body:not(.solo) .p-table[data-sz="l"] .tbl{font-size:14px}
   .cardbtn{top:8px;right:8px;width:34px;height:34px}
   .panel.szable>.panel-h,.panel.szable>.ctabs{padding-right:52px}
 }
+
+/* ---- Schermi: scelta tra schermo singolo e più schermi ---- */
+.mbox.ms.scr{width:min(1080px,100%)}
+.scr-opts{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:8px 20px 8px}
+.scr-opt{display:grid;grid-template-rows:auto auto 1fr auto;gap:8px;text-align:left;background:#0b101a;border:1px solid var(--line);border-radius:14px;padding:16px 16px 14px;cursor:pointer;color:var(--text);transition:border-color .15s,transform .15s,background .15s}
+.scr-opt:hover:not(:disabled){border-color:var(--cyan);background:#0e1524;transform:translateY(-1px)}
+.scr-opt:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.scr-opt:disabled{opacity:.45;cursor:not-allowed}
+.scr-opt svg{width:100%;height:auto;max-height:130px;margin-bottom:4px}
+.scr-opt b{font:800 17px/1.2 var(--f-display)}
+.scr-opt span{font-size:12.5px;color:var(--muted);line-height:1.45}
+.scr-opt em{font:800 10px var(--f-mono);font-style:normal;letter-spacing:.08em;color:var(--cyan)}
+.scr-note{padding:2px 20px 10px}
+#scrOn{margin:4px 20px 6px}
+@media (max-width:640px){.scr-opts{grid-template-columns:1fr}.scr-opt svg{max-height:90px}}
+/* editor schermo singolo */
+.sgl-sec{display:flex;justify-content:space-between;align-items:baseline;gap:6px 14px;flex-wrap:wrap;padding:8px 20px 6px}
+.sgl-sec b{color:var(--text)}
+.sgl-presets{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;padding:0 20px 4px}
+.sgl-pre{display:grid;gap:6px;align-content:start;text-align:left;background:#0b101a;border:1px solid var(--line);border-radius:12px;padding:8px 9px 10px;cursor:pointer;color:var(--text);transition:border-color .15s,background .15s}
+.sgl-pre:hover{border-color:#3b4864}
+.sgl-pre:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.sgl-pre.on{border-color:var(--cyan);box-shadow:inset 0 0 0 1px var(--cyan);background:#0d1626}
+.sgl-pre b{font-size:12.5px;font-weight:800;display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}
+.sgl-pre b i{font:700 9.5px var(--f-mono);font-style:normal;color:var(--cyan)}
+.sgl-pre>span{font-size:10.5px;color:var(--muted);line-height:1.35}
+.sgl-mini{display:block;position:relative;aspect-ratio:var(--ar);background:#05070c;border-radius:6px;border:1px solid #232c40}
+.sgl-pre .sgl-grid{position:absolute;inset:3px;gap:2px}
+.sgl-pre .sgl-z{gap:2px;border:0}
+.sgl-pre .sgl-z.empty{border:0;background:none}
+.sgl-pre .sgl-z i{display:block;height:auto;width:auto;margin:0;border-radius:2px;background:color-mix(in srgb,var(--uc) 60%,#0b101a);min-width:0;min-height:0}
+.sgl-pre .sgl-tvc{background:#e5383b;border:0;border-radius:2px}
+@media (max-width:980px){.sgl-presets{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.sgl-stage{padding:14px;margin:2px 20px 0;border-radius:14px;background:radial-gradient(80% 120% at 50% 100%,#111a2b 0%,#070a11 80%);border:1px solid var(--line)}
+.sgl-screen{display:flex;flex-direction:column;gap:3px;width:min(100%,calc(min(44vh,420px) * var(--ar,1.78)));aspect-ratio:var(--ar,1.78);margin:0 auto;background:#05070c;border:2px solid #2b3550;border-radius:10px;padding:5px;box-shadow:0 10px 30px rgba(0,0,0,.45)}
+.sgl-hd,.sgl-sb{flex:0 0 auto;border-radius:3px;font:700 8.5px var(--f-mono);letter-spacing:.07em;color:#566078;display:flex;align-items:center;padding:0 6px;overflow:hidden;white-space:nowrap}
+.sgl-hd{height:calc(var(--hdp) * 100%);background:#0d1220;border:1px solid #1d2638}
+.sgl-sb{height:calc(var(--sbp) * 100%);min-height:11px;background:#070a11;border:1px solid #1d2638}
+.sgl-grid{flex:1;min-height:0;display:grid;gap:3px;grid-template-areas:"L T R" "L V R" "L B R"}
+.sgl-z{display:flex;gap:3px;min-width:0;min-height:0;border-radius:5px;border:1px dashed transparent;transition:border-color .15s,background .15s;position:relative}
+.sgl-z.zL{grid-area:L;flex-direction:column}.sgl-z.zR{grid-area:R;flex-direction:column}.sgl-z.zT{grid-area:T}.sgl-z.zB{grid-area:B}
+.sgl-z.empty{border-color:#2b3550;background:rgba(255,255,255,.015);align-items:center;justify-content:center}
+.sgl-zl{font:700 9.5px var(--f-mono);letter-spacing:.08em;color:#566078;text-transform:uppercase}
+#scrModal.is-drag .sgl-screen .sgl-z{border-color:#3b4864}
+.sgl-z.over{border-color:var(--cyan)!important;background:rgba(69,200,236,.08)!important}
+.sgl-z:focus-visible{outline:2px solid var(--cyan);outline-offset:1px}
+.sgl-z.ins-end{box-shadow:inset 0 -3px 0 var(--cyan)}.sgl-z.zT.ins-end,.sgl-z.zB.ins-end{box-shadow:inset -3px 0 0 var(--cyan)}
+.sgl-tvc{grid-area:V;border-radius:5px;background:linear-gradient(135deg,#3a0d10,#1c0608);border:1px solid #e5383b;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:0;min-width:0;overflow:hidden;text-align:center}
+.sgl-tvc b{color:#ff6b6e;font:800 12px var(--f-mono);letter-spacing:.08em}.sgl-tvc small{color:#c98a8c;font:600 10px var(--f-mono)}
+.sgl-cell{position:relative;min-width:0;min-height:0;border-radius:4px;background:color-mix(in srgb,var(--uc) 16%,#0b101a);border:1px solid color-mix(in srgb,var(--uc) 60%,transparent);display:flex;align-items:center;justify-content:center;cursor:grab;overflow:hidden;transition:box-shadow .12s}
+.sgl-cell:hover{box-shadow:inset 0 0 0 1px var(--uc)}
+.sgl-cn{font-size:10.5px;font-weight:800;color:var(--uc);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px;display:flex;gap:4px;align-items:center;max-width:100%}
+.sgl-cn em{font-style:normal}
+.sgl-cb{position:absolute;top:2px;right:2px;display:flex;gap:2px}
+.sgl-cb button{width:19px;height:18px;padding:0;border-radius:4px;border:1px solid color-mix(in srgb,var(--uc) 50%,transparent);background:#05070c;color:var(--uc);font:800 9.5px var(--f-mono);cursor:pointer;display:grid;place-items:center}
+.sgl-cb button:hover,.sgl-cb button:focus-visible{background:color-mix(in srgb,var(--uc) 28%,#05070c);color:#fff;outline:none}
+.sgl-cell.armed{box-shadow:0 0 0 2px var(--uc),0 0 14px color-mix(in srgb,var(--uc) 50%,transparent);z-index:2}
+.sgl-cell.dragging{opacity:.4}
+.sgl-cell.ins{box-shadow:0 -3px 0 0 var(--cyan)}
+.sgl-z.zT .sgl-cell.ins,.sgl-z.zB .sgl-cell.ins{box-shadow:-3px 0 0 0 var(--cyan)}
+.sgl-cell:focus-visible{outline:2px solid var(--uc);outline-offset:1px}
+.sgl-ctl{justify-content:space-between;padding-top:10px}
+.sgl-range{display:flex;align-items:center;gap:10px;flex:1 1 360px;font-size:12px;color:var(--muted);font-weight:700}
+.sgl-range input{flex:1;min-width:120px;accent-color:var(--accent)}
+.sgl-range output{font:700 11.5px var(--f-mono);color:var(--text);white-space:nowrap}
+.sgl-chk{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);font-weight:700;cursor:pointer}
+.sgl-chk input{accent-color:var(--cyan);width:16px;height:16px}
+.sgl-allin{padding:0;margin:0}
+#scrModal.is-drag .ms-trash{opacity:1;border-color:var(--accent);color:#ff8a85}
+/* layout reale dello schermo singolo */
+.sglz{display:none}
+body.sgl .sglz:not([hidden]){display:flex;gap:10px;min-width:0;min-height:0}
+body.sgl .sglz.zcol{flex-direction:column}
+body.sgl .sglz>[data-unit].on{flex:var(--fw,2) 1 0px;min-width:0;min-height:0}
+body.sgl.sgl-nohd .top{display:none!important}
+/* TV: solo la barra del servizio sopra al video; la guida dell'estensione si apre sopra al riquadro */
+body.sgl .p-tv.on>.panel-h{display:none}
+body.sgl .p-tv .tvbar{padding:8px 50px 0 10px}
+body.sgl .p-tv.on .tvstage{margin:8px 10px 10px;min-height:0}
+body.sgl .p-tv .tvext{position:absolute;left:10px;right:10px;bottom:10px;z-index:3;max-height:58%;overflow:auto;margin:0;background:rgba(9,13,22,.97);box-shadow:0 -10px 30px rgba(0,0,0,.5)}
+body.sgl .p-tv .tvemb{position:absolute;left:14px;bottom:14px;z-index:3}
+/* barra comandi su una riga */
+body.sgl .top{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;padding-top:8px;padding-bottom:8px}
+body.sgl .top>*{flex:none}
+body.sgl .top .tools2{flex-wrap:nowrap}
+body.sgl .top .gp{max-width:330px}
+/* meteo e controllo sessione in una striscia: scorre di lato se non ci sta */
+body.sgl .zrow>section.tiles.on{grid-template-columns:none!important;grid-auto-flow:column;grid-auto-columns:minmax(232px,1fr);overflow:auto hidden;align-content:stretch;scrollbar-width:thin}
+body.sgl .zrow>section.tiles.on>.t-lap{order:-1}
+body.sgl .zrow>section.tiles.on>.tile{min-height:0}
+body.sgl .zrow .panel-h{padding-top:8px;padding-bottom:8px}
+body.sgl .zcol>section.tiles.on{grid-template-columns:minmax(0,1fr)!important;overflow:auto;align-content:start}
+body.sgl .zcol>#vTele>*{grid-column:1/-1!important}
+body.sgl .zcol>#vShow{grid-template-columns:minmax(0,1fr)!important}
+body.sgl .zrow .p-feed .feed{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+body.sgl .sglz .p-map.on .mapbox{min-height:140px}
+body.sgl .sglz .p-map .panel-h{flex-wrap:nowrap}
+body.sgl .sglz .p-map .panel-h>div:first-child{min-width:0}
+body.sgl .sglz .p-map .panel-h .tools{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;min-width:0}
+body.sgl .sglz .p-map .panel-h .tools>*{flex:none}
+body.sgl .zcol .p-map .panel-h{flex-direction:column;align-items:stretch;gap:6px}
+body.sgl .zcol .p-map #mapSub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* guida estensione compatta sopra la TV: si apre con ISTRUZIONI */
+.tvext #tvExtMore{display:none}
+body.sgl .p-tv .tvext #tvExtMore{display:inline-block}
+body.sgl .p-tv .tvext:not(.open) ol,body.sgl .p-tv .tvext:not(.open) .note{display:none}
+body.sgl .p-tv .tvext:not(.open){padding-top:10px;padding-bottom:10px}
+.sgl-pre-tv{font:700 10px var(--f-mono);color:#ff8a85;letter-spacing:.02em}
 </style>
 </head>
 <body data-view="pista" data-mode="pit">
@@ -531,7 +639,7 @@ body:not(.solo) .p-table[data-sz="l"] .tbl{font-size:14px}
     <button class="tog hostctl" id="rpExit" type="button">ESCI DAL REPLAY</button>
   </div>
 </header>
-<div class="soloBar" id="soloBar" hidden><span class="led ok"></span><span id="soloTxt">—</span><span class="spacer"></span><button class="tog home" id="soloHome" type="button" hidden>⌂ HOME</button><button class="tog" id="soloFs" type="button">SCHERMO INTERO</button><button class="tog" id="soloExit" type="button">LAYOUT COMPLETO</button></div>
+<div class="soloBar" id="soloBar" hidden><span class="led ok"></span><span id="soloTxt">—</span><span class="spacer"></span><button class="tog home" id="soloHome" type="button" hidden>⌂ HOME</button><button class="tog" id="soloLay" type="button" hidden>⚙ DISPOSIZIONE</button><button class="tog" id="soloHd" type="button" hidden aria-pressed="true">☰ COMANDI</button><button class="tog" id="soloFs" type="button">SCHERMO INTERO</button><button class="tog" id="soloExit" type="button">LAYOUT COMPLETO</button></div>
 
 <section class="tiles" aria-label="Stazione meteo e controllo sessione">
   <div class="tile">
@@ -638,7 +746,7 @@ body:not(.solo) .p-table[data-sz="l"] .tbl{font-size:14px}
           <li>Ricarica questa pagina e premi <b>COLLEGA</b>.</li>
         </ol>
         <p class="note">Agisce solo su NOW, Sky Go, F1 TV, DAZN e TV8 e solo quando sono dentro questo riquadro. Se l'accesso non resta salvato, in <code>chrome://settings/cookies</code> aggiungi <code>[*.]nowtv.it</code> tra i siti autorizzati a usare cookie di terze parti.</p>
-        <button class="tog" id="tvExtRe" type="button">HO INSTALLATO L'ESTENSIONE</button>
+        <button class="tog" id="tvExtMore" type="button" aria-expanded="false">ISTRUZIONI</button> <button class="tog" id="tvExtRe" type="button">HO INSTALLATO L'ESTENSIONE</button> <button class="tog" id="tvExtHide" type="button">NASCONDI GUIDA</button>
       </div>
       <label class="tvemb note" id="tvEmbedRow" hidden><input type="checkbox" id="tvEmbed"> Mostra questo sito direttamente nel riquadro (solo siti che lo consentono)</label>
     </section>
@@ -855,7 +963,7 @@ body:not(.solo) .p-table[data-sz="l"] .tbl{font-size:14px}
 </div>
 <div class="modal" id="msModal" hidden role="dialog" aria-modal="true" aria-labelledby="msH">
   <div class="mbox ms">
-    <div class="ms-head"><div><h2 id="msH">Multi-schermo</h2><p class="sub">Distribuisci le sezioni dell'app sui tuoi monitor</p></div><button class="tog sq mclose" type="button" aria-label="Chiudi">×</button></div>
+    <div class="ms-head"><div><h2 id="msH">Più schermi</h2><p class="sub">Distribuisci le sezioni dell'app sui tuoi monitor</p></div><div class="tools"><button class="tog" id="msBack" type="button">← SCHERMI</button><button class="tog sq mclose" type="button" aria-label="Chiudi">×</button></div></div>
     <p class="ms-alert" id="msNote" hidden>Dentro Claude non si possono aprire altre finestre. Apri il sito su GitHub Pages con Chrome o Edge da computer.</p>
     <div class="ms-bar">
       <span class="ms-status wait" id="msDetect"><i></i><span>Rilevamento schermi…</span></span>
@@ -870,6 +978,42 @@ body:not(.solo) .p-table[data-sz="l"] .tbl{font-size:14px}
     </div>
     <div class="ms-foot"><div class="tools" id="msWins"></div><span class="spacer"></span><span id="msFootMain" class="tools" hidden><button class="tog" id="msClose" type="button" hidden>CHIUDI</button><button class="btn" id="msGo" type="button">APRI</button></span></div>
     <p class="note ms-note">Tutte le finestre restano sincronizzate: sessione, pilota, TV delay e dati live. Se il browser blocca i popup, consentili per questo sito.</p>
+  </div>
+</div>
+<div class="modal" id="scrModal" hidden role="dialog" aria-modal="true" aria-labelledby="scrH">
+  <div class="mbox ms scr">
+    <div class="ms-head"><div><h2 id="scrH">Schermi</h2><p class="sub" id="scrSub">Come vuoi usare il pit wall?</p></div><button class="tog sq mclose" type="button" aria-label="Chiudi">×</button></div>
+    <div id="scrChoose">
+      <p class="ms-alert ok" id="scrOn" hidden></p>
+      <div class="scr-opts">
+        <button type="button" class="scr-opt" id="scrOptSingle">
+          <svg viewBox="0 0 160 96" aria-hidden="true"><rect x="2" y="2" width="156" height="86" rx="6" fill="#05070c" stroke="#3b4864" stroke-width="2"/><rect x="10" y="10" width="30" height="70" rx="3" fill="#10B981" opacity=".55"/><rect x="120" y="10" width="30" height="32" rx="3" fill="#06B6D4" opacity=".55"/><rect x="120" y="46" width="30" height="34" rx="3" fill="#F59E0B" opacity=".55"/><rect x="45" y="10" width="70" height="12" rx="3" fill="#8792aa" opacity=".5"/><rect x="45" y="26" width="70" height="40" rx="3" fill="#e5383b"/><path d="M76 39l10 7-10 7z" fill="#fff"/><rect x="45" y="70" width="70" height="10" rx="3" fill="#A855F7" opacity=".55"/><rect x="66" y="88" width="28" height="6" rx="2" fill="#3b4864"/></svg>
+          <b>Schermo singolo</b>
+          <span>La diretta TV grande e al centro, tutte le altre sezioni attorno. Scegli un preset oppure sposta tu le sezioni.</span>
+          <em id="scrSingleTag">UN SOLO MONITOR</em>
+        </button>
+        <button type="button" class="scr-opt" id="scrOptMulti">
+          <svg viewBox="0 0 160 96" aria-hidden="true"><rect x="2" y="14" width="76" height="48" rx="5" fill="#05070c" stroke="#3b4864" stroke-width="2"/><rect x="8" y="20" width="64" height="36" rx="2" fill="#e5383b" opacity=".85"/><path d="M36 32l9 6-9 6z" fill="#fff"/><rect x="82" y="14" width="76" height="48" rx="5" fill="#05070c" stroke="#3b4864" stroke-width="2"/><rect x="88" y="20" width="30" height="36" rx="2" fill="#06B6D4" opacity=".55"/><rect x="121" y="20" width="31" height="17" rx="2" fill="#10B981" opacity=".55"/><rect x="121" y="39" width="31" height="17" rx="2" fill="#A855F7" opacity=".55"/><rect x="30" y="62" width="20" height="8" fill="#3b4864"/><rect x="110" y="62" width="20" height="8" fill="#3b4864"/></svg>
+          <b>Più schermi</b>
+          <span>Una finestra per ogni monitor collegato, tutte sincronizzate. Disposizione automatica o manuale.</span>
+          <em>DUE O PIÙ MONITOR</em>
+        </button>
+      </div>
+      <p class="note scr-note" id="scrNarrow" hidden>Lo schermo singolo richiede uno schermo largo almeno 900 px: usalo da computer o da tablet in orizzontale.</p>
+    </div>
+    <div id="scrSingle" hidden>
+      <div class="sgl-sec"><span class="sub">PRESET CONSIGLIATI</span></div>
+      <div class="sgl-presets" id="sglPresets" role="radiogroup" aria-label="Preset per schermo singolo"></div>
+      <div class="sgl-sec"><span class="sub">DISPOSIZIONE · <b id="sglName">—</b></span><span class="sub" id="sglHint"></span></div>
+      <div class="sgl-stage"><div class="sgl-screen" id="sglScreen"></div></div>
+      <div class="ms-bar sgl-ctl">
+        <label class="sgl-range"><span>Dimensione TV</span><input type="range" id="sglTv" min="40" max="80" step="1" value="56"><output id="sglTvOut" for="sglTv">—</output></label>
+        <label class="sgl-chk"><input type="checkbox" id="sglHd" checked> Barra comandi in alto</label>
+      </div>
+      <div class="ms-palbar"><span class="sub" id="sglPalH">SEZIONI NON MOSTRATE</span><span class="ms-trash" id="sglTrash">Trascina qui per togliere</span></div>
+      <div class="ms-pal" id="sglPal"></div>
+      <div class="ms-foot"><button class="tog" id="sglBack" type="button">← INDIETRO</button><span class="spacer"></span><button class="tog" id="sglOff" type="button" hidden>ESCI DALLO SCHERMO SINGOLO</button><button class="btn" id="sglGo" type="button">APPLICA A QUESTO SCHERMO</button></div>
+    </div>
   </div>
 </div>
 <div class="toast" id="toast" role="status"></div>
@@ -2735,7 +2879,7 @@ function renderMs(){
   const open=MSC.wins.filter(w=>w&&!w.closed).length;$("msClose").hidden=!open&&!SOLO;$("msClose").textContent=open?"CHIUDI "+open+(open>1?" FINESTRE":" FINESTRA"):"RIPRISTINA LAYOUT";
 }
 function escapeHtml(t){return String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
-$("msBtn").addEventListener("click",()=>{$("msNote").hidden=!inClaude;openModal("msModal");if(!MSC.screens)detectScreens();else renderMs();});
+function msOpenMulti(){$("msNote").hidden=!inClaude;openModal("msModal");if(!MSC.screens)detectScreens();else renderMs();}
 $("msDetectBtn").addEventListener("click",()=>{MSC.autoEdited=false;detectScreens();});
 const msSetN=n=>{MSC.count=clamp(n,2,6);manualScreens();Object.keys(MSC.manual).forEach(k=>{if(MSC.manual[k]>=MSC.count)MSC.manual[k]=-1;});renderMs();};
 $("msMinus").addEventListener("click",()=>msSetN(MSC.count-1));$("msPlus").addEventListener("click",()=>msSetN(MSC.count+1));
@@ -2839,7 +2983,7 @@ function tvRender(){
   $("tvStop").hidden=!(alive||showFrame);$("tvFs").hidden=!showFrame;$("tvPop").hidden=!showFrame;
   fr.hidden=!showFrame;$("tvIdle").hidden=showFrame;
   /* estensione */
-  const needExt=s.frame&&!ext;$("tvExtBox").hidden=!needExt||inClaude;
+  const needExt=s.frame&&!ext;$("tvExtBox").hidden=!needExt||inClaude||!!TV.guideOff;
   const st=$("tvState");
   if(showFrame){st.textContent=s.n+" nel riquadro";st.className="tag clear";}
   else if(alive){st.textContent=s.n+" in finestra agganciata";st.className="tag clear";}
@@ -3246,8 +3390,9 @@ const CARD={sz:store.get("cardsz",{}),list:[],menu:null,open:null,wide:{}};
 if(typeof CARD.sz!=="object"||!CARD.sz||Array.isArray(CARD.sz))CARD.sz={};
 const CARD_NAME={1:["S","Piccola"],2:["M","Media"],3:["L","Grande"],4:["⛶","Schermo intero"]};
 function cardSz(k){const v=CARD.sz[k];return v===1||v===3?v:2;}
-function cardIsUnit(c){return c.view==="vPit"&&!!SOLO&&!!c.unit;}
-function cardCur(c){return cardIsUnit(c)?szOf(c.unit,SZ):cardSz(c.k);}
+function cardSgl(c){return!!window.sglOn&&c.view==="vPit"&&!!c.unit;}
+function cardIsUnit(c){return!window.sglOn&&c.view==="vPit"&&!!SOLO&&!!c.unit;}
+function cardCur(c){return cardSgl(c)?window.sglCardCur(c.unit):cardIsUnit(c)?szOf(c.unit,SZ):cardSz(c.k);}
 (function cardInit(){
   ["vPit","vTele","vShow"].forEach(V=>{
     const view=$(V);let i=0;
@@ -3283,12 +3428,12 @@ function cardCur(c){return cardIsUnit(c)?szOf(c.unit,SZ):cardSz(c.k);}
 })();
 function cardMenuOpen(c){
   if(CARD.open)cardMenuClose(false);
-  const m=CARD.menu,unit=cardIsUnit(c),cur=cardCur(c);CARD.open=c;
+  const m=CARD.menu,unit=cardIsUnit(c),sg=cardSgl(c),cur=cardCur(c);CARD.open=c;
   $("cmH").textContent=c.name+" · misura";
   m.querySelectorAll("button[data-v]").forEach(b=>{const v=b.dataset.v;
-    if(v==="4")b.hidden=!unit;if(v==="reset")b.hidden=unit;
+    if(v==="4")b.hidden=!unit;if(v==="reset")b.hidden=unit||sg;
     if(v!=="reset")b.setAttribute("aria-checked",String(+v===cur));});
-  m.querySelector("hr").hidden=unit;
+  m.querySelector("hr").hidden=unit||sg;
   m.hidden=false;c.btn.setAttribute("aria-expanded","true");cardMenuPlace(c);
   (m.querySelector('button[aria-checked="true"]')||m.querySelector("button")).focus();
 }
@@ -3301,6 +3446,7 @@ function cardMenuPlace(c){
 }
 function cardMenuClose(focusBtn){const c=CARD.open;if(!c)return;CARD.menu.hidden=true;c.btn.setAttribute("aria-expanded","false");CARD.open=null;if(focusBtn)c.btn.focus();}
 function cardSet(c,v){
+  if(cardSgl(c)){window.sglCardSet(c.unit,v);return;}
   if(cardIsUnit(c)){
     /* finestra multi-schermo: misura della sezione nella griglia di questa finestra */
     if(v===szOf(c.unit,SZ))return;SZ[c.unit]=v;
@@ -3326,6 +3472,7 @@ function cardArrange(){
   const desk=innerWidth>=900&&!SOLO;
   ["vPit","vShow"].forEach(V=>{
     const w=CARD.wide[V],cs=CARD.list.filter(c=>c.view===V);
+    if(V==="vPit"&&window.sglOn){w.hidden=true;$(V).style.gridTemplateColumns="";return;}
     cs.forEach(c=>{if(desk&&cardSz(c.k)===3)w.appendChild(c.el);else cardRestore(c);});
     w.hidden=!w.children.length;
     const cols=Array.from($(V).children).filter(el=>el.classList.contains("col"));
@@ -3343,7 +3490,7 @@ function cardArrange(){
 }
 function cardApply(){
   CARD.list.forEach(c=>{const v=cardSz(c.k);if(v===2)delete c.el.dataset.sz;else c.el.dataset.sz=v===1?"s":"l";
-    const u=cardIsUnit(c)?szOf(c.unit,SZ):v;c.btn.dataset.cur=u===2?"":CARD_NAME[u][0];});
+    const u=cardSgl(c)?window.sglCardCur(c.unit):cardIsUnit(c)?szOf(c.unit,SZ):v;c.btn.dataset.cur=u===2?"":CARD_NAME[u][0];});
   cardArrange();
   lastSlow=0;dirty=true;
   requestAnimationFrame(()=>{sizeMap();if(window.sizeViews)window.sizeViews();if(window.holo3d&&window.holo3d.size)window.holo3d.size();dirty=true;});
@@ -3356,6 +3503,241 @@ let cardBp=innerWidth>=900;window.addEventListener("resize",()=>{const d=innerWi
 cardArrange.t=innerWidth>=1280;
 cardApply();
 
+/* =====================================================================
+   Schermi: scelta tra schermo singolo e più schermi
+   Schermo singolo: la Diretta TV grande e centrata, le altre sezioni
+   attorno (sopra, sinistra, destra, sotto). Preset pronti o disposizione
+   manuale con trascinamento. La disposizione resta salvata sul dispositivo.
+   ===================================================================== */
+const SGL_ZONES=["T","L","R","B"];
+const SGL_ZNAME={T:"Sopra",L:"Sinistra",R:"Destra",B:"Sotto"};
+const SGL_WN=["","S","M","L"];
+const SGL_PRESETS=[
+  {id:"regia",n:"Regia",d:"Equilibrato: meteo e comandi sopra, classifica, mappa, radio e telemetria attorno.",tv:.62,Z:{T:["tiles"],L:["table"],R:["map","feed"],B:["tele"]}},
+  {id:"cinema",n:"Cinema",d:"La TV più grande possibile: solo classifica a sinistra, mappa e radio a destra.",tv:.8,Z:{T:[],L:["table"],R:["map","feed"],B:[]}},
+  {id:"strategia",n:"Strategia",d:"Gomme, soste e pit window della console sempre in vista.",tv:.54,Z:{T:["tiles"],L:["table"],R:["console","map"],B:["feed"]},w:{console:3}},
+  {id:"ingegnere",n:"Ingegnere",d:"Più dati possibile, con la telemetria completa sotto la TV.",tv:.5,Z:{T:["tiles"],L:["table","feed"],R:["map","console"],B:["tele"]}},
+  {id:"party",n:"Watch party",d:"Per la gara con gli amici: pronostici a sinistra, classifica e mappa a destra.",tv:.58,Z:{T:["tiles"],L:["console"],R:["table","map"],B:["feed"]}}
+];
+function sglNorm(c){
+  c=c&&typeof c==="object"?c:{};const used={tv:1},Z={};
+  SGL_ZONES.forEach(z=>{Z[z]=(Array.isArray(c.Z&&c.Z[z])?c.Z[z]:[]).filter(k=>typeof k==="string"&&UK[k]&&!used[k]&&(used[k]=1));});
+  const w={},cw=c.w&&typeof c.w==="object"?c.w:{};Object.keys(cw).forEach(k=>{if(UK[k]&&(cw[k]===1||cw[k]===3))w[k]=cw[k];});
+  const tv=+c.tv,base=SGL_PRESETS.some(p=>p.id===c.base)?c.base:"";
+  return{base,mod:!!(base&&c.mod),tv:tv>=.4&&tv<=.8?tv:.62,Z,w,hd:c.hd!==false};
+}
+function sglFromPreset(p,hd){return sglNorm({base:p.id,mod:false,tv:p.tv,Z:p.Z,w:p.w||{},hd:hd!==false});}
+function sglName(c){const p=SGL_PRESETS.find(x=>x.id===c.base);return p?p.n+(c.mod?" (modificato)":""):"Personalizzata";}
+function sglClone(c){return sglNorm(JSON.parse(JSON.stringify(c)));}
+const SGL={cfg:null,on:false,draft:null,ph:{},zones:{},chrome:66,padW:22,armed:null,drag:null,it:0,itT:0};
+SGL.cfg=sglNorm(store.get("sgl",null)||sglFromPreset(SGL_PRESETS[0]));
+if(!SGL.cfg.Z.L.length&&!SGL.cfg.Z.R.length&&!SGL.cfg.Z.T.length&&!SGL.cfg.Z.B.length)SGL.cfg=sglFromPreset(SGL_PRESETS[0]);
+window.sglOn=false;
+function sglEl(k){return document.querySelector(UK[k].sel);}
+/* segnaposto per riportare le sezioni al loro posto; le schede del pit wall usano quelli del menu ⋯ */
+["tiles","tele","show"].forEach(k=>{const el=sglEl(k),ph=document.createComment("schermo singolo "+k);el.parentNode.insertBefore(ph,el);SGL.ph[k]=ph;});
+SGL_ZONES.forEach(z=>{const d=document.createElement("div");d.className="sglz "+(z==="L"||z==="R"?"zcol":"zrow");d.dataset.z=z;d.hidden=true;$("app").appendChild(d);SGL.zones[z]=d;});
+function sglRestoreEl(k){const el=sglEl(k);if(SGL.ph[k]){SGL.ph[k].parentNode.insertBefore(el,SGL.ph[k].nextSibling);return;}const c=CARD.list.find(x=>x.unit===k);if(c)cardRestore(c);}
+
+/* ---------- geometria: la TV resta 16:9, centrata, la più grande possibile ---------- */
+function sglGeom(W,H,c,chrome,padW){
+  const g=10,Z=c.Z,lr=Z.L.length+Z.R.length>0,tb=Z.T.length+Z.B.length>0;
+  const sideMin=lr?Math.round(clamp(W*.17,250,340)):0,stripMin=tb?(Z.T.concat(Z.B).indexOf("tiles")>=0?128:104):0;
+  let w=Math.min(c.tv*W,W-(lr?2*(sideMin+g):0)),ch=(w-padW)*9/16+chrome;
+  const maxH=H-(tb?2*(stripMin+g):0);
+  if(ch>maxH){ch=maxH;w=(ch-chrome)*16/9+padW;}
+  w=Math.max(240,Math.round(w));ch=Math.max(160,Math.round(ch));
+  return{w,h:ch,vw:Math.max(0,Math.round(w-padW)),vh:Math.max(0,Math.round(ch-chrome)),side:Math.max(0,(W-w)/2-g),strip:Math.max(0,(H-ch)/2-g)};
+}
+function sglArea(hd,preview){
+  const top=document.querySelector(".top"),sb=$("soloBar"),live=SGL.on&&top&&top.offsetHeight;
+  if(live&&live!==SGL.hdPx){SGL.hdPx=live;store.set("sglHdH",live);}
+  const hdH=hd?(live||SGL.hdPx||store.get("sglHdH",80))+10:0,sbH=((SGL.on&&sb&&!sb.hidden&&sb.offsetHeight)||37)+10;
+  const W=(preview?document.documentElement.clientWidth:$("app").clientWidth)-20;
+  return{W:Math.max(600,W),H:Math.max(320,innerHeight-10-hdH-sbH),hdH,sbH};
+}
+function sglLayout(){
+  if(!SGL.on)return;
+  const c=SGL.cfg,app=$("app"),hd=c.hd!==false;
+  document.body.classList.toggle("sgl-nohd",!hd);
+  const a=sglArea(hd,false),g=sglGeom(a.W,a.H,c,SGL.chrome,SGL.padW);SGL.geom=g;
+  app.style.gridTemplateAreas=(hd?'"hd hd hd" ':'')+'"sb sb sb" "L T R" "L V R" "L B R"';
+  app.style.gridTemplateRows=(hd?"auto ":"")+"auto minmax(0,1fr) "+g.h+"px minmax(0,1fr)";
+  app.style.gridTemplateColumns="minmax(0,1fr) "+g.w+"px minmax(0,1fr)";
+  /* misura i bordi reali del riquadro TV (barra, messaggi) e ricalcola se servono */
+  requestAnimationFrame(()=>{
+    if(!SGL.on)return;const tp=sglEl("tv").getBoundingClientRect(),st=$("tvStage").getBoundingClientRect();
+    if(tp.height&&st.height){const ch=Math.round(tp.height-st.height),pw=Math.round(tp.width-st.width);
+      if(Date.now()-SGL.itT>1500)SGL.it=0;
+      if((Math.abs(ch-SGL.chrome)>2||Math.abs(pw-SGL.padW)>2)&&SGL.it<4){SGL.it++;SGL.itT=Date.now();SGL.chrome=ch;SGL.padW=pw;sglLayout();return;}}
+    sizeMap();if(window.sizeViews)window.sizeViews();if(window.holo3d&&window.holo3d.size)window.holo3d.size();lastSlow=0;dirty=true;
+  });
+}
+function sglTeardown(){
+  if(!SGL.on)return;SGL.on=false;window.sglOn=false;
+  document.body.classList.remove("sgl","sgl-nohd");
+  Object.keys(UK).forEach(k=>{const el=sglEl(k);if(!el)return;if(el.parentNode&&el.parentNode.classList&&el.parentNode.classList.contains("sglz"))sglRestoreEl(k);el.style.removeProperty("--fw");});
+  SGL_ZONES.forEach(z=>{SGL.zones[z].hidden=true;});
+  store.set("sglOn",false);
+  $("soloLay").hidden=true;$("soloHd").hidden=true;setT($("soloExit"),"LAYOUT COMPLETO");
+}
+{const _a=applySolo;applySolo=function(list,lead,keep){if(SGL.on&&!keep)sglTeardown();return _a(list,lead);};}
+function sglEnter(cfg){
+  cfg=sglNorm(cfg);if(SGL.on)sglTeardown();
+  SGL.cfg=cfg;store.set("sgl",cfg);store.set("sglOn",true);
+  SZ={};homeOn=false;
+  const list=["tv"].concat(...SGL_ZONES.map(z=>cfg.Z[z]));
+  SGL.on=true;window.sglOn=true;document.body.classList.add("sgl");
+  applySolo(list,true,true);
+  $$("[data-unit]").forEach(el=>{el.classList.toggle("on",list.indexOf(el.dataset.unit)>=0);el.style.gridArea="";});
+  SGL_ZONES.forEach(z=>{const d=SGL.zones[z];cfg.Z[z].forEach(k=>{const el=sglEl(k);el.style.setProperty("--fw",cfg.w[k]||2);d.appendChild(el);});d.hidden=!cfg.Z[z].length;d.style.gridArea=z;});
+  sglEl("tv").style.gridArea="V";
+  $("soloLay").hidden=false;$("soloHd").hidden=false;setT($("soloExit"),"ESCI");sglBarTxt();
+  SGL.it=0;sglLayout();cardApply();
+}
+function sglBarTxt(){const c=SGL.cfg;$("soloHd").setAttribute("aria-pressed",String(c.hd!==false));$("soloTxt")._base="Schermo singolo · "+sglName(c);setT($("soloTxt"),$("soloTxt")._base);}
+/* misura dal menu ⋯ in schermo singolo: peso della sezione nella sua zona, o grandezza della TV */
+const SGL_TVSZ=[0,.46,.6,.8];
+window.sglCardCur=k=>k==="tv"?(SGL.cfg.tv<.53?1:SGL.cfg.tv<.7?2:3):(SGL.cfg.w[k]||2);
+window.sglCardSet=(k,v)=>{
+  const c=SGL.cfg;if(k==="tv")c.tv=SGL_TVSZ[v];else{if(v===2)delete c.w[k];else c.w[k]=v;sglEl(k).style.setProperty("--fw",v);}
+  c.mod=!!c.base;store.set("sgl",c);sglBarTxt();SGL.it=0;sglLayout();cardApply();
+  toast(k==="tv"?"Diretta TV: misura "+SGL_WN[v]+" · la TV resta centrata e la più grande possibile.":UK[k].n.replace(/\s*\(.*\)/,"")+": misura "+SGL_WN[v]+" nella zona "+SGL_ZNAME[SGL_ZONES.find(z=>c.Z[z].indexOf(k)>=0)||"L"].toLowerCase()+".");
+};
+
+/* ---------- finestra Schermi: scelta ---------- */
+function msOpenMultiFromChooser(){$("scrModal").hidden=true;msOpenMulti();lastFocus=$("msBtn");}
+function scrOpen(step){
+  $("scrOn").hidden=!SGL.on;if(SGL.on)setT($("scrOn"),"✓ Schermo singolo attivo · "+sglName(SGL.cfg));
+  const narrow=innerWidth<900;$("scrOptSingle").disabled=narrow;$("scrNarrow").hidden=!narrow;
+  setT($("scrSingleTag"),SGL.on?"ATTIVO · MODIFICA":"UN SOLO MONITOR");
+  SGL.draft=sglClone(SGL.cfg);SGL.armed=null;
+  $$(".modal").forEach(m=>{if(m.id!=="scrModal")m.hidden=true;});
+  openModal("scrModal");lastFocus=$("msBtn").offsetParent?$("msBtn"):$("soloLay");
+  scrStep(step==="single"&&!narrow?"single":"choose");
+}
+function scrStep(s){
+  $("scrChoose").hidden=s!=="choose";$("scrSingle").hidden=s!=="single";
+  setT($("scrH"),s==="single"?"Schermo singolo":"Schermi");
+  setT($("scrSub"),s==="single"?"La diretta TV resta al centro e la più grande possibile: scegli un preset o sposta tu le sezioni attorno.":"Come vuoi usare il pit wall?");
+  if(s==="single"){sglRender();$("sglOff").hidden=!SGL.on;setT($("sglGo"),SGL.on?"APPLICA LE MODIFICHE":"APPLICA A QUESTO SCHERMO");
+    const f=$("sglPresets").querySelector('[aria-checked="true"]')||$("sglPresets").querySelector("button");if(f)f.focus();}
+  else{const f=$("scrOptSingle").disabled?$("scrOptMulti"):$("scrOptSingle");f.focus();}
+}
+$("msBtn").addEventListener("click",()=>scrOpen("choose"));
+$("soloLay").addEventListener("click",()=>scrOpen("single"));
+$("scrOptSingle").addEventListener("click",()=>scrStep("single"));
+$("scrOptMulti").addEventListener("click",msOpenMultiFromChooser);
+$("msBack").addEventListener("click",()=>{$("msModal").hidden=true;scrOpen("choose");});
+$("sglBack").addEventListener("click",()=>scrStep("choose"));
+$("soloHd").addEventListener("click",()=>{if(!SGL.on)return;SGL.cfg.hd=SGL.cfg.hd===false;store.set("sgl",SGL.cfg);sglBarTxt();SGL.it=0;sglLayout();
+  toast(SGL.cfg.hd?"Barra comandi visibile.":"Barra comandi nascosta: più spazio per la TV. Ripremi ☰ COMANDI per riaverla.");});
+
+/* ---------- editor dello schermo singolo ---------- */
+function sglPreviewDims(c){
+  const hd=c.hd!==false,a=sglArea(hd,true),ar=Math.max(1.2,Math.min(2.6,(a.W+20)/innerHeight));
+  return{a,ar,g:sglGeom(a.W,a.H,c,SGL.chrome,SGL.padW)};
+}
+function sglGridHTML(c,mini){
+  const{g,ar}=sglPreviewDims(c),sd=Math.max(.01,g.side),sp=Math.max(.01,g.strip);
+  let h='<div class="sgl-grid" style="--ar:'+ar.toFixed(3)+';grid-template-columns:minmax(0,'+sd.toFixed(1)+'fr) minmax(0,'+g.w+'fr) minmax(0,'+sd.toFixed(1)+'fr);grid-template-rows:minmax(0,'+sp.toFixed(1)+'fr) minmax(0,'+g.h+'fr) minmax(0,'+sp.toFixed(1)+'fr)">';
+  SGL_ZONES.forEach(z=>{const L=c.Z[z];
+    h+='<div class="sgl-z z'+z+(L.length?'':' empty')+'" data-z="'+z+'"'+(mini?'':' tabindex="0" role="button" aria-label="Zona '+SGL_ZNAME[z].toLowerCase()+': '+(L.length?L.map(k=>USHORT[k]).join(", "):"vuota")+'"')+'>';
+    if(!L.length&&!mini)h+='<span class="sgl-zl">'+SGL_ZNAME[z]+'</span>';
+    L.forEach(k=>{const w=c.w[k]||2;
+      h+=mini?'<i style="--uc:'+UCOL[k]+';flex:'+w+' 1 0"></i>':
+      '<div class="sgl-cell'+(SGL.armed===k?' armed':'')+'" draggable="true" data-u="'+k+'" tabindex="0" role="button" aria-pressed="'+(SGL.armed===k)+'" aria-label="'+USHORT[k]+', zona '+SGL_ZNAME[z].toLowerCase()+', misura '+SGL_WN[w]+'" style="--uc:'+UCOL[k]+';flex:'+w+' 1 0" title="Trascina in un\'altra zona, oppure tocca e poi tocca la zona">'+
+      '<span class="sgl-cn"><em>'+UICON[k]+'</em>'+USHORT[k]+'</span><span class="sgl-cb"><button type="button" class="sgl-w" data-w="'+k+'" title="Misura nella zona: S, M o L" aria-label="Cambia misura di '+USHORT[k]+' (ora '+SGL_WN[w]+')">'+SGL_WN[w]+'</button><button type="button" class="sgl-x" data-rm="'+k+'" title="Togli" aria-label="Togli '+USHORT[k]+'">×</button></span></div>';});
+    h+='</div>';});
+  return h+'<div class="sgl-tvc">'+(mini?'':'<b>▶ DIRETTA TV</b><small>'+g.vw+' × '+g.vh+' px</small>')+'</div></div>';
+}
+function sglRender(){
+  const d=SGL.draft;if(!d)return;
+  $("sglPresets").innerHTML=SGL_PRESETS.map(p=>{const on=d.base===p.id,pc=sglFromPreset(p,d.hd),pg=sglPreviewDims(pc).g;
+    return'<button type="button" class="sgl-pre'+(on?" on":"")+'" role="radio" aria-checked="'+on+'" data-p="'+p.id+'"><span class="sgl-mini" style="--ar:'+sglPreviewDims(pc).ar.toFixed(3)+'">'+sglGridHTML(pc,true)+'</span><b>'+p.n+(on&&d.mod?'<i>modificato</i>':'')+'</b><small class="sgl-pre-tv">TV '+pg.vw+' × '+pg.vh+'</small><span>'+p.d+'</span></button>';}).join("");
+  const{a,ar,g}=sglPreviewDims(d),scr=$("sglScreen"),hd=d.hd!==false;
+  scr.style.setProperty("--ar",ar.toFixed(3));scr.style.setProperty("--hdp",(hd?a.hdH/innerHeight:0).toFixed(3));scr.style.setProperty("--sbp",(a.sbH/innerHeight).toFixed(3));
+  scr.innerHTML=(hd?'<div class="sgl-hd">BARRA COMANDI</div>':'')+'<div class="sgl-sb">SCHERMO SINGOLO · '+escapeHtml(sglName(d).toUpperCase())+'</div>'+sglGridHTML(d,false);
+  setT($("sglName"),sglName(d));
+  $("sglTv").value=String(Math.round(d.tv*100));
+  const asked=Math.round(d.tv*a.W),capped=g.w<asked-4;
+  setT($("sglTvOut"),"TV "+g.vw+" × "+g.vh+(capped?" · massimo per questo schermo":""));
+  const tb=d.Z.T.length+d.Z.B.length>0,lim=capped&&(g.h>=a.H-(tb?2*(128+10):0)-2);
+  $("sglTvOut").title=lim?"Per ingrandirla ancora: togli la barra comandi o lascia vuote le zone sopra e sotto.":"";
+  $("sglHd").checked=hd;
+  const used=SGL_ZONES.reduce((n,z)=>n.concat(d.Z[z]),[]),free=UNITS.filter(u=>u.k!=="tv"&&used.indexOf(u.k)<0);
+  $("sglPal").innerHTML=free.length?free.map(u=>'<button type="button" class="ms-chip'+(SGL.armed===u.k?" on":"")+'" draggable="true" data-u="'+u.k+'" style="--uc:'+UCOL[u.k]+'" aria-pressed="'+(SGL.armed===u.k)+'"><i>'+UICON[u.k]+'</i><span>'+u.n+'</span><small>non mostrata</small></button>').join(""):'<p class="note sgl-allin">Tutte le sezioni sono sullo schermo.</p>';
+  setT($("sglPalH"),free.length?"SEZIONI NON MOSTRATE · trascinale in una zona":"SEZIONI NON MOSTRATE");
+  const tip=capped&&(hd||tb)?" Per una TV ancora più grande: "+(hd?"togli la barra comandi":"")+(hd&&tb?" o ":"")+(tb?"lascia vuote le zone sopra e sotto":"")+".":"";
+  $("sglHint").textContent=SGL.armed?"Ora tocca la zona dove mettere "+USHORT[SGL.armed]+" (o una sezione per metterla prima di quella).":"Trascina le sezioni tra le zone attorno alla TV. S/M/L cambia lo spazio nella zona, × la toglie."+tip;
+}
+function sglEdited(){const d=SGL.draft;d.mod=!!d.base;}
+function sglMove(k,z,idx){
+  const d=SGL.draft;
+  SGL_ZONES.forEach(q=>{const i=d.Z[q].indexOf(k);if(i>=0){d.Z[q].splice(i,1);if(q===z&&idx!=null&&idx>i)idx--;}});
+  if(z){const L=d.Z[z];L.splice(idx==null||idx<0||idx>L.length?L.length:idx,0,k);}else delete d.w[k];
+  sglEdited();SGL.armed=null;sglRender();
+}
+function sglArm(k){SGL.armed=SGL.armed===k?null:k;sglRender();const el=$("scrModal").querySelector('[data-u="'+k+'"]');if(el)el.focus();}
+$("sglPresets").addEventListener("click",e=>{const b=e.target.closest(".sgl-pre");if(!b)return;const p=SGL_PRESETS.find(x=>x.id===b.dataset.p);if(!p)return;
+  SGL.draft=sglFromPreset(p,SGL.draft.hd);SGL.armed=null;sglRender();const f=$("sglPresets").querySelector('[data-p="'+p.id+'"]');if(f)f.focus();});
+$("sglPresets").addEventListener("keydown",e=>{if(e.key!=="ArrowRight"&&e.key!=="ArrowLeft")return;const it=Array.from($("sglPresets").querySelectorAll(".sgl-pre")),i=it.indexOf(document.activeElement);if(i<0)return;e.preventDefault();it[(i+(e.key==="ArrowRight"?1:-1)+it.length)%it.length].click();});
+const sglScr=$("sglScreen");
+sglScr.addEventListener("click",e=>{
+  const wb=e.target.closest(".sgl-w");if(wb){e.stopPropagation();const k=wb.dataset.w,d=SGL.draft,v=((d.w[k]||2)%3)+1;if(v===2)delete d.w[k];else d.w[k]=v;sglEdited();sglRender();const f=sglScr.querySelector('.sgl-w[data-w="'+k+'"]');if(f)f.focus();return;}
+  const x=e.target.closest(".sgl-x");if(x){e.stopPropagation();sglMove(x.dataset.rm,null);return;}
+  const cell=e.target.closest(".sgl-cell"),zone=e.target.closest(".sgl-z");
+  if(SGL.armed&&zone){if(cell&&cell.dataset.u===SGL.armed){sglArm(SGL.armed);return;}
+    const z=zone.dataset.z,idx=cell?SGL.draft.Z[z].indexOf(cell.dataset.u):null;sglMove(SGL.armed,z,idx);return;}
+  if(cell)sglArm(cell.dataset.u);
+});
+sglScr.addEventListener("keydown",e=>{
+  if(e.target.closest(".sgl-cb"))return;
+  const cell=e.target.closest(".sgl-cell"),zone=e.target.closest(".sgl-z");
+  if(e.key==="Enter"||e.key===" "){
+    if(cell&&!SGL.armed){e.preventDefault();sglArm(cell.dataset.u);}
+    else if(zone&&SGL.armed){e.preventDefault();const z=zone.dataset.z,idx=cell&&cell.dataset.u!==SGL.armed?SGL.draft.Z[z].indexOf(cell.dataset.u):null;
+      if(cell&&cell.dataset.u===SGL.armed){sglArm(SGL.armed);return;}sglMove(SGL.armed,z,idx);const f=sglScr.querySelector('.sgl-z[data-z="'+z+'"]');if(f)f.focus();}
+  }else if((e.key==="Delete"||e.key==="Backspace")&&cell){e.preventDefault();sglMove(cell.dataset.u,null);}
+});
+$("sglPal").addEventListener("click",e=>{const b=e.target.closest(".ms-chip");if(b)sglArm(b.dataset.u);});
+/* trascinamento */
+function sglInsIdx(zone,e){
+  const z=zone.dataset.z,col=z==="L"||z==="R",cells=Array.from(zone.querySelectorAll(".sgl-cell"));
+  let i=0;for(const c of cells){const r=c.getBoundingClientRect();if((col?e.clientY>r.top+r.height/2:e.clientX>r.left+r.width/2))i++;}
+  return{i,cells};
+}
+document.addEventListener("dragstart",e=>{const el=e.target.closest&&e.target.closest("#scrModal [draggable][data-u]");if(!el)return;SGL.drag=el.dataset.u;
+  try{e.dataTransfer.setData("text/plain",SGL.drag);e.dataTransfer.effectAllowed="move";}catch(x){}el.classList.add("dragging");$("scrModal").classList.add("is-drag");});
+document.addEventListener("dragend",()=>{if(!SGL.drag)return;SGL.drag=null;$$("#scrModal .over,#scrModal .dragging,#scrModal .ins").forEach(o=>o.classList.remove("over","dragging","ins","ins-end"));$("scrModal").classList.remove("is-drag");});
+sglScr.addEventListener("dragover",e=>{const z=e.target.closest(".sgl-z");if(!z||!SGL.drag)return;e.preventDefault();
+  $$("#sglScreen .sgl-z.over").forEach(o=>o!==z&&o.classList.remove("over"));z.classList.add("over");
+  const{i,cells}=sglInsIdx(z,e);cells.forEach((c,j)=>c.classList.toggle("ins",j===i));z.classList.toggle("ins-end",i>=cells.length&&cells.length>0);});
+sglScr.addEventListener("dragleave",e=>{const z=e.target.closest(".sgl-z");if(z&&!z.contains(e.relatedTarget)){z.classList.remove("over","ins-end");z.querySelectorAll(".ins").forEach(c=>c.classList.remove("ins"));}});
+sglScr.addEventListener("drop",e=>{const z=e.target.closest(".sgl-z");if(!z)return;e.preventDefault();const k=SGL.drag||e.dataTransfer.getData("text/plain");if(!UK[k]||k==="tv")return;
+  const{i}=sglInsIdx(z,e);SGL.drag=null;$("scrModal").classList.remove("is-drag");sglMove(k,z.dataset.z,i);});
+[$("sglPal"),$("sglTrash")].forEach(t=>{
+  t.addEventListener("dragover",e=>{if(SGL.drag){e.preventDefault();$("sglTrash").classList.add("over");}});
+  t.addEventListener("dragleave",e=>{if(!t.contains(e.relatedTarget))$("sglTrash").classList.remove("over");});
+  t.addEventListener("drop",e=>{e.preventDefault();const k=SGL.drag||e.dataTransfer.getData("text/plain");SGL.drag=null;$("scrModal").classList.remove("is-drag");$("sglTrash").classList.remove("over");if(UK[k])sglMove(k,null);});
+});
+$("sglTv").addEventListener("input",()=>{SGL.draft.tv=clamp(+$("sglTv").value/100,.4,.8);sglEdited();sglRender();});
+$("sglHd").addEventListener("change",()=>{SGL.draft.hd=$("sglHd").checked;sglRender();});
+$("sglGo").addEventListener("click",()=>{
+  const d=sglClone(SGL.draft),n=SGL_ZONES.reduce((s,z)=>s+d.Z[z].length,0),was=SGL.on;
+  closeModals();sglEnter(d);
+  if(d.base==="party"&&!d.mod){const b=document.querySelector('#ctabs button[data-c="party"]');if(b)b.click();}
+  setTimeout(()=>{const st=$("tvStage").getBoundingClientRect();toast((was?"Disposizione aggiornata":"Schermo singolo attivo")+": "+sglName(d)+" · TV "+Math.round(st.width)+"×"+Math.round(st.height)+(n?"":" · nessuna sezione attorno")+". ⚙ DISPOSIZIONE per cambiarla.");},350);
+});
+$("sglOff").addEventListener("click",()=>{closeModals();applySolo(null);toast("Schermo singolo disattivato: layout completo ripristinato.");});
+addEventListener("resize",()=>{if(SGL.on){SGL.it=0;requestAnimationFrame(sglLayout);}if(!$("scrModal").hidden&&!$("scrSingle").hidden)sglRender();});
+if(window.ResizeObserver){const ro=new ResizeObserver(()=>{if(SGL.on)sglLayout();});
+  [sglEl("tv").querySelector(".panel-h"),sglEl("tv").querySelector(".tvbar"),$("tvMsg"),$("tvExtBox")].forEach(el=>{if(el)ro.observe(el);});}
+$("tvExtMore").addEventListener("click",()=>{const o=$("tvExtBox").classList.toggle("open");$("tvExtMore").setAttribute("aria-expanded",String(o));setT($("tvExtMore"),o?"CHIUDI ISTRUZIONI":"ISTRUZIONI");});
+$("tvExtHide").addEventListener("click",()=>{TV.guideOff=true;$("tvExtBox").hidden=true;toast("Guida nascosta fino al prossimo caricamento della pagina.");});
+/* all'avvio: se l'ultima volta era attivo, riapre lo schermo singolo */
+window.sglBoot=()=>{if(store.get("sglOn",false)&&innerWidth>=900&&!SOLO)sglEnter(SGL.cfg);};
+
 /* ---------- avvio ---------- */
 function start(saved){
   if(saved&&saved.ctl){const v=validCtl(saved.ctl);if(v)ctl=v;}
@@ -3367,6 +3749,7 @@ function start(saved){
   $("shareUrl").textContent=curLink()||"Carica il file su un hosting per avere un link";
   const fol=bootFollower();
   if(fol&&window.tvAutoInline)setTimeout(window.tvAutoInline,400);
+  if(!fol&&window.sglBoot)window.sglBoot();
   requestAnimationFrame(frame);if(!fol||MSC.role!=="follow")initShared();
 }
 const hot=window.claude&&window.claude.hot;
