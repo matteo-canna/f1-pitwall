@@ -429,6 +429,66 @@ body.replay #flagSeg button,body.replay #wxSeg button{pointer-events:none;opacit
 .rp-status{margin:6px 20px 0;border:1px solid rgba(6,182,212,.45);border-radius:10px;padding:10px 12px;display:grid;gap:6px;font-size:12.5px}
 .rp-status i{display:block;height:5px;border-radius:3px;background:#1a2132;overflow:hidden}.rp-status em{display:block;height:100%;background:var(--cyan)}
 #rpYear{background:#0e1422;border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+
+/* ---- misura schede: menu ⋯ (S / M / L) ---- */
+.view .panel{position:relative}
+.cardbtn{position:absolute;top:10px;right:10px;z-index:4;width:30px;height:30px;padding:0;border-radius:8px;border:1px solid var(--line);background:#0b101a;color:var(--muted);font:800 17px/1 var(--f-mono);letter-spacing:0;display:grid;place-items:center;cursor:pointer;transition:color .15s,border-color .15s,background .15s}
+.cardbtn:hover,.cardbtn[aria-expanded="true"]{color:var(--text);border-color:#3b4864;background:#131b2b}
+.cardbtn:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.cardbtn[data-cur]:not([data-cur=""])::after{content:attr(data-cur);position:absolute;right:-5px;bottom:-5px;min-width:15px;height:15px;padding:0 3px;border-radius:5px;background:var(--cyan);color:#04121a;font:800 9.5px/15px var(--f-mono);text-align:center}
+.panel.szable>.panel-h,.panel.szable>.ctabs{padding-right:50px}
+.cardmenu{position:fixed;z-index:95;min-width:214px;max-width:calc(100vw - 16px);background:#0d1320;border:1px solid #2c3652;border-radius:12px;box-shadow:0 18px 44px rgba(0,0,0,.6);padding:6px;display:grid;gap:2px}
+.cardmenu .cm-h{font-size:10.5px;letter-spacing:.07em;color:var(--muted);padding:6px 10px 5px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cardmenu button{display:flex;align-items:center;gap:10px;width:100%;min-height:38px;text-align:left;background:none;border:0;color:#cfd7e6;padding:6px 10px;border-radius:8px;font:600 13px/1.2 inherit;cursor:pointer}
+.cardmenu button b{flex:none;width:28px;height:24px;display:grid;place-items:center;border-radius:6px;border:1px solid var(--line);font:800 12px var(--f-mono);color:var(--muted)}
+.cardmenu button:hover,.cardmenu button:focus-visible{background:#161f31;outline:none;color:#fff}
+.cardmenu button[aria-checked="true"]{background:rgba(69,200,236,.12);color:#fff}
+.cardmenu button[aria-checked="true"] b{border-color:var(--cyan);color:var(--cyan)}
+.cardmenu button[aria-checked="true"]::after{content:"✓";margin-left:auto;color:var(--cyan);font-weight:800}
+.cardmenu hr{border:0;border-top:1px solid var(--line);margin:4px 4px}
+.cardmenu .cm-reset{color:var(--muted);font-weight:500;font-size:12px;min-height:34px}
+/* riga delle schede grandi (L): a tutta larghezza sopra le colonne */
+.cardwide{grid-column:1/-1;display:grid;gap:14px;min-width:0}
+body.solo .cardwide{display:contents}
+/* pit wall */
+body:not(.solo) .p-map[data-sz="s"] .mapbox{aspect-ratio:4/3;max-height:400px}
+body:not(.solo) .p-map[data-sz="l"] .mapbox{aspect-ratio:16/9;max-height:min(84vh,1000px)}
+body:not(.solo) .p-tv[data-sz="s"] .tvstage{width:62%;margin:12px auto 0}
+body:not(.solo) .p-tv[data-sz="l"] .tvstage{width:min(calc(100% - 32px),calc(80vh * 16 / 9));margin:12px auto 0}
+body:not(.solo) .p-feed[data-sz="s"] .feed{max-height:190px}
+body:not(.solo) .p-feed[data-sz="l"] .feed{max-height:620px}
+.cardwide .p-feed .feed{grid-template-columns:repeat(auto-fill,minmax(340px,1fr));max-height:480px}
+body:not(.solo) .p-table[data-sz="s"] .tbl{font-size:12px}
+body:not(.solo) .p-table[data-sz="s"] .tbl td{height:36px;padding-top:3px;padding-bottom:3px}
+body:not(.solo) .p-table[data-sz="l"] .tbl{font-size:14px}
+/* ultra telemetria */
+#vTele>.panel[data-sz="s"]{--hs:.72;grid-column:span 4}
+#vTele>.panel.s3[data-sz="s"],#vTele>.panel.s4[data-sz="s"]{grid-column:span 3}
+#vTele>.panel.wide[data-sz="s"]{grid-column:span 6}
+#vTele>.panel[data-sz="l"]{--hs:1.45;grid-column:1/-1}
+#vTele .panel[data-sz="l"] svg.chart{max-height:540px}
+#vTele .panel[data-sz="s"] svg.chart{max-height:220px}
+/* 3D showroom */
+#vShow .panel[data-sz="s"] .holobox{height:380px}
+#vShow .panel[data-sz="l"] .holobox{height:min(80vh,860px)}
+#vShow .panel[data-sz="s"] .neonbox{height:180px}
+#vShow .panel[data-sz="l"] .neonbox{height:440px}
+#vShow .panel[data-sz="s"] .cfdbox{height:140px}
+#vShow .panel[data-sz="l"] .cfdbox{height:320px}
+#vShow .panel[data-sz="l"] svg.chart{max-height:460px}
+#vShow .panel[data-sz="s"] svg.chart{max-height:220px}
+@media (max-width:1279px){#vTele>.panel[data-sz="s"],#vTele>.panel.s3[data-sz="s"],#vTele>.panel.s4[data-sz="s"],#vTele>.panel.wide[data-sz="s"]{grid-column:span 6}}
+@media (max-width:899px){
+  .cardwide{display:contents}
+  body:not(.solo) .p-map[data-sz="s"] .mapbox{aspect-ratio:4/3;max-height:none}
+  body:not(.solo) .p-map[data-sz="l"] .mapbox{aspect-ratio:3/4;max-height:78vh}
+  body:not(.solo) .p-tv[data-sz="s"] .tvstage{width:70%}
+  body:not(.solo) .p-tv[data-sz="l"] .tvstage{width:auto;margin:12px 0 0}
+  #vShow .panel[data-sz="s"] .holobox{height:300px}
+  #vShow .panel[data-sz="l"] .holobox{height:min(75vh,600px)}
+  .cardbtn{top:8px;right:8px;width:34px;height:34px}
+  .panel.szable>.panel-h,.panel.szable>.ctabs{padding-right:52px}
+}
 </style>
 </head>
 <body data-view="pista" data-mode="pit">
@@ -659,16 +719,16 @@ body.replay #flagSeg button,body.replay #wxSeg button{pointer-events:none;opacit
   <section class="panel s8">
     <div class="panel-h"><h2>Oscilloscopio multi-canale</h2>
       <p class="legend2"><i style="background:#06B6D4"></i>Velocità <i style="background:#10B981"></i>Gas <i style="background:#E10600"></i>Freno <i style="background:#F59E0B"></i>ERS kW <i style="background:#A855F7"></i>RPM <i style="background:#e9eef8"></i>Marcia</p></div>
-    <div class="cbox" style="height:250px"><canvas id="osc"></canvas></div>
+    <div class="cbox" style="height:calc(250px * var(--hs,1))"><canvas id="osc"></canvas></div>
   </section>
   <section class="panel s4">
     <div class="panel-h"><h2>Speed map</h2><p>velocità di riferimento · ▲ staccate</p></div>
-    <div class="cbox" style="height:250px"><canvas id="tHeat"></canvas></div>
+    <div class="cbox" style="height:calc(250px * var(--hs,1))"><canvas id="tHeat"></canvas></div>
   </section>
   <section class="panel s8">
     <div class="panel-h"><h2>Giro attuale vs miglior giro</h2><p id="tOvlSub">velocità per distanza</p></div>
-    <div class="cbox" style="height:200px"><canvas id="tOvl"></canvas></div>
-    <div class="cbox" style="height:96px;border-top:1px solid var(--line)"><canvas id="tDlt"></canvas></div>
+    <div class="cbox" style="height:calc(200px * var(--hs,1))"><canvas id="tOvl"></canvas></div>
+    <div class="cbox" style="height:calc(96px * var(--hs,1));border-top:1px solid var(--line)"><canvas id="tDlt"></canvas></div>
   </section>
   <section class="panel s4">
     <div class="panel-h"><h2>Stile di guida</h2><p>quota di tempo sul giro</p></div>
@@ -685,16 +745,16 @@ body.replay #flagSeg button,body.replay #wxSeg button{pointer-events:none;opacit
   </section>
   <section class="panel s3">
     <div class="panel-h"><h2>Energia ERS</h2><p>carica nel giro</p></div>
-    <div class="cbox" style="height:170px"><canvas id="tEnergy"></canvas></div>
+    <div class="cbox" style="height:calc(170px * var(--hs,1))"><canvas id="tEnergy"></canvas></div>
     <div class="pad trio" id="tEnStats" style="margin-top:0"></div>
   </section>
   <section class="panel s6">
     <div class="panel-h"><h2>Passo gara · <span id="tLapsWho">—</span></h2><p id="tDeg">—</p></div>
-    <div class="cbox" style="height:230px"><canvas id="tLaps"></canvas></div>
+    <div class="cbox" style="height:calc(230px * var(--hs,1))"><canvas id="tLaps"></canvas></div>
   </section>
   <section class="panel s6">
     <div class="panel-h"><h2>Distacco dal leader · top 10</h2><p>secondi per giro</p></div>
-    <div class="cbox" style="height:230px"><canvas id="tGaps"></canvas></div>
+    <div class="cbox" style="height:calc(230px * var(--hs,1))"><canvas id="tGaps"></canvas></div>
   </section>
   <section class="panel s6">
     <div class="panel-h"><h2>Strategia gomme · 22 piloti</h2><p class="legend2"><i style="background:#e5383b"></i>S <i style="background:#f2c230"></i>M <i style="background:#e9eef8"></i>H <i style="background:#3fbf7f"></i>I <i style="background:#4f8ef7"></i>W</p></div>
@@ -702,7 +762,7 @@ body.replay #flagSeg button,body.replay #wxSeg button{pointer-events:none;opacit
   </section>
   <section class="panel s6">
     <div class="panel-h"><h2>Lap chart · posizioni</h2><p>pilota selezionato in evidenza</p></div>
-    <div class="cbox" style="height:356px"><canvas id="tPos"></canvas></div>
+    <div class="cbox" style="height:calc(356px * var(--hs,1))"><canvas id="tPos"></canvas></div>
   </section>
   <section class="panel s6">
     <div class="panel-h"><h2>Settori · miglior tempo per pilota</h2><p>giro ideale = S1+S2+S3 migliori</p></div>
@@ -3175,6 +3235,126 @@ window.rpOnMessage=m=>{
   if(m.type==="rpneed"&&!following&&RP.data[m.key]){try{chan.postMessage({type:"rpdata",key:m.key,D:RP.data[m.key]});}catch(e){}}
   else if(m.type==="rpdata"&&following&&m.D&&!RP.data[m.key]){RP.data[m.key]=m.D;dirty=true;}
 };
+
+/* =====================================================================
+   Misura delle schede: pulsante ⋯ su ogni sezione → S / M / L
+   - pagina principale: misura salvata su questo dispositivo (L = a tutta larghezza)
+   - finestre multi-schermo: per le sezioni del pit wall cambia la misura nella griglia
+     della finestra (anche schermo intero) e la comunica alla finestra principale
+   ===================================================================== */
+const CARD={sz:store.get("cardsz",{}),list:[],menu:null,open:null,wide:{}};
+if(typeof CARD.sz!=="object"||!CARD.sz||Array.isArray(CARD.sz))CARD.sz={};
+const CARD_NAME={1:["S","Piccola"],2:["M","Media"],3:["L","Grande"],4:["⛶","Schermo intero"]};
+function cardSz(k){const v=CARD.sz[k];return v===1||v===3?v:2;}
+function cardIsUnit(c){return c.view==="vPit"&&!!SOLO&&!!c.unit;}
+function cardCur(c){return cardIsUnit(c)?szOf(c.unit,SZ):cardSz(c.k);}
+(function cardInit(){
+  ["vPit","vTele","vShow"].forEach(V=>{
+    const view=$(V);let i=0;
+    view.querySelectorAll(".panel").forEach(el=>{
+      const unit=el.dataset.unit||"",k=unit||V.slice(1).toLowerCase()+(i++);
+      const h=el.querySelector(".panel-h h2"),name=unit?UK[unit].n.replace(/\s*\(.*\)/,""):(h&&h.textContent.replace(/\s*·.*$/,"").trim())||el.getAttribute("aria-label")||"Sezione";
+      const b=document.createElement("button");b.type="button";b.className="cardbtn";b.textContent="⋯";
+      b.setAttribute("aria-haspopup","menu");b.setAttribute("aria-expanded","false");b.setAttribute("aria-label","Misura della scheda "+name);b.title="Misura scheda";
+      el.classList.add("szable");el.appendChild(b);
+      const ph=document.createComment("scheda "+k);el.parentNode.insertBefore(ph,el);
+      const c={k,unit,view:V,el,btn:b,name,ph};CARD.list.push(c);
+      b.addEventListener("click",e=>{e.stopPropagation();CARD.open===c?cardMenuClose(false):cardMenuOpen(c);});
+    });
+    if(V!=="vTele"){const w=document.createElement("div");w.className="cardwide";w.hidden=true;w.setAttribute("aria-label","Schede grandi");
+      if(V==="vShow")$("carousel").after(w);else view.prepend(w);CARD.wide[V]=w;}
+  });
+  const m=document.createElement("div");m.className="cardmenu";m.setAttribute("role","menu");m.hidden=true;
+  m.innerHTML='<div class="cm-h" id="cmH">Misura scheda</div>'+[1,2,3,4].map(v=>'<button type="button" role="menuitemradio" aria-checked="false" data-v="'+v+'"><b>'+CARD_NAME[v][0]+'</b>'+CARD_NAME[v][1]+'</button>').join("")+
+    '<hr><button type="button" role="menuitem" data-v="reset" class="cm-reset">Tutte le schede su M</button>';
+  m.setAttribute("aria-labelledby","cmH");document.body.appendChild(m);CARD.menu=m;
+  m.addEventListener("click",e=>{const b=e.target.closest("button");if(!b||!CARD.open)return;
+    const c=CARD.open;if(b.dataset.v==="reset"){cardMenuClose(true);cardResetAll();return;}
+    cardMenuClose(true);cardSet(c,+b.dataset.v);});
+  m.addEventListener("keydown",e=>{
+    const it=Array.from(m.querySelectorAll("button:not([hidden])")),i=it.indexOf(document.activeElement);
+    if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();it[(i+(e.key==="ArrowDown"?1:-1)+it.length)%it.length].focus();}
+    else if(e.key==="Home"){e.preventDefault();it[0].focus();}else if(e.key==="End"){e.preventDefault();it[it.length-1].focus();}
+    else if(e.key==="Escape"||e.key==="Tab"){e.preventDefault();cardMenuClose(true);}
+  });
+  document.addEventListener("pointerdown",e=>{if(CARD.open&&!m.contains(e.target)&&!CARD.open.btn.contains(e.target))cardMenuClose(false);},true);
+  window.addEventListener("resize",()=>{if(CARD.open)cardMenuClose(false);});
+  document.addEventListener("scroll",()=>{if(CARD.open)cardMenuPlace(CARD.open);},{capture:true,passive:true});
+})();
+function cardMenuOpen(c){
+  if(CARD.open)cardMenuClose(false);
+  const m=CARD.menu,unit=cardIsUnit(c),cur=cardCur(c);CARD.open=c;
+  $("cmH").textContent=c.name+" · misura";
+  m.querySelectorAll("button[data-v]").forEach(b=>{const v=b.dataset.v;
+    if(v==="4")b.hidden=!unit;if(v==="reset")b.hidden=unit;
+    if(v!=="reset")b.setAttribute("aria-checked",String(+v===cur));});
+  m.querySelector("hr").hidden=unit;
+  m.hidden=false;c.btn.setAttribute("aria-expanded","true");cardMenuPlace(c);
+  (m.querySelector('button[aria-checked="true"]')||m.querySelector("button")).focus();
+}
+/* il menu resta agganciato al pulsante anche se la pagina scorre; si chiude se il pulsante esce dallo schermo */
+function cardMenuPlace(c){
+  const m=CARD.menu,r=c.btn.getBoundingClientRect(),mw=m.offsetWidth,mh=m.offsetHeight;
+  if(!r.width||r.bottom<0||r.top>innerHeight){cardMenuClose(false);return;}
+  let x=r.right-mw,y=r.bottom+6;if(y+mh>innerHeight-8)y=Math.max(8,r.top-mh-6);
+  m.style.left=clamp(x,8,innerWidth-mw-8)+"px";m.style.top=y+"px";
+}
+function cardMenuClose(focusBtn){const c=CARD.open;if(!c)return;CARD.menu.hidden=true;c.btn.setAttribute("aria-expanded","false");CARD.open=null;if(focusBtn)c.btn.focus();}
+function cardSet(c,v){
+  if(cardIsUnit(c)){
+    /* finestra multi-schermo: misura della sezione nella griglia di questa finestra */
+    if(v===szOf(c.unit,SZ))return;SZ[c.unit]=v;
+    if(MSC.role==="lead"&&MSC.sz)MSC.sz[c.unit]=v;
+    try{const sz="sz="+SOLO.map(k=>k+":"+szOf(k,SZ)).join(","),qs=location.search.replace(/^\?/,""),nq=/(^|&)sz=[^&]*/.test(qs)?qs.replace(/(^|&)sz=[^&]*/,"$1"+sz):(qs?qs+"&":"")+sz;history.replaceState(null,"","?"+nq+location.hash);}catch(e){}
+    if(chan)try{chan.postMessage({type:"szset",k:c.unit,v});}catch(e){}
+    applySolo(SOLO,document.body.classList.contains("lead"));
+    toast(c.name+": misura "+CARD_NAME[v][0]+" in questa finestra.");return;
+  }
+  if(v===cardSz(c.k))return;
+  if(v===2)delete CARD.sz[c.k];else CARD.sz[c.k]=v;store.set("cardsz",CARD.sz);
+  cardApply();
+  const wideNote=v===3&&c.view!=="vTele"&&innerWidth>=900&&!SOLO?" · a tutta larghezza in alto":"";
+  toast(c.name+": misura "+CARD_NAME[v][0]+wideNote+".");
+  if(v===3&&wideNote)requestAnimationFrame(()=>{try{c.el.scrollIntoView({block:"nearest",behavior:"smooth"});}catch(e){}});
+}
+function cardResetAll(){
+  if(!Object.keys(CARD.sz).length){toast("Tutte le schede sono già su M.");return;}
+  CARD.sz={};store.set("cardsz",CARD.sz);cardApply();toast("Tutte le schede riportate alla misura M.");
+}
+function cardRestore(c){if(c.el.parentNode!==c.ph.parentNode||c.el.previousSibling!==c.ph)c.ph.parentNode.insertBefore(c.el,c.ph.nextSibling);}
+function cardArrange(){
+  const desk=innerWidth>=900&&!SOLO;
+  ["vPit","vShow"].forEach(V=>{
+    const w=CARD.wide[V],cs=CARD.list.filter(c=>c.view===V);
+    cs.forEach(c=>{if(desk&&cardSz(c.k)===3)w.appendChild(c.el);else cardRestore(c);});
+    w.hidden=!w.children.length;
+    const cols=Array.from($(V).children).filter(el=>el.classList.contains("col"));
+    if(!desk){cols.forEach(col=>{col.hidden=false;});$(V).style.gridTemplateColumns="";return;}
+    const info=cols.map(col=>{const own=cs.filter(c=>c.el.parentNode===col);return{col,n:own.length,small:own.length>0&&own.every(c=>cardSz(c.k)===1)};});
+    info.forEach(x=>{x.col.hidden=x.n===0;});
+    const f=x=>x.small?.66:1,fr=v=>"minmax(0,"+v.toFixed(2)+"fr)";
+    let tpl="";
+    if(V==="vPit"){
+      if(innerWidth>=1280){const W=[1.28,1.25,.82],vis=info.map((x,i)=>x.n?fr(W[i]*f(x)):null).filter(Boolean);tpl=vis.length?vis.join(" "):"minmax(0,1fr)";}
+      else{const b=info[1],c=info[2];tpl=b.n&&c.n?fr(1.45*f(b))+" "+fr(1*f(c)):"minmax(0,1fr)";}
+    }else{const W=[1.05,1],vis=info.map((x,i)=>x.n?fr(W[i]*f(x)):null).filter(Boolean);tpl=vis.length>1?vis.join(" "):"minmax(0,1fr)";}
+    $(V).style.gridTemplateColumns=tpl;
+  });
+}
+function cardApply(){
+  CARD.list.forEach(c=>{const v=cardSz(c.k);if(v===2)delete c.el.dataset.sz;else c.el.dataset.sz=v===1?"s":"l";
+    const u=cardIsUnit(c)?szOf(c.unit,SZ):v;c.btn.dataset.cur=u===2?"":CARD_NAME[u][0];});
+  cardArrange();
+  lastSlow=0;dirty=true;
+  requestAnimationFrame(()=>{sizeMap();if(window.sizeViews)window.sizeViews();if(window.holo3d&&window.holo3d.size)window.holo3d.size();dirty=true;});
+}
+/* le finestre multi-schermo riportano le misure scelte dal menu ⋯ alla finestra principale */
+if(chan)chan.addEventListener("message",e=>{const m=e.data;
+  if(m&&m.type==="szset"&&MSC.role==="lead"&&UK[m.k]&&m.v>=1&&m.v<=4){MSC.sz=MSC.sz||{};MSC.sz[m.k]=m.v;if(!$("msModal").hidden&&typeof renderMs==="function")renderMs();}});
+{const _applySolo=applySolo;applySolo=function(list,lead){if(list&&list.length)CARD.list.forEach(cardRestore);_applySolo(list,lead);cardApply();};}
+let cardBp=innerWidth>=900;window.addEventListener("resize",()=>{const d=innerWidth>=900,t=innerWidth>=1280;if(d!==cardBp||t!==cardArrange.t){cardBp=d;cardArrange.t=t;cardArrange();}});
+cardArrange.t=innerWidth>=1280;
+cardApply();
 
 /* ---------- avvio ---------- */
 function start(saved){
