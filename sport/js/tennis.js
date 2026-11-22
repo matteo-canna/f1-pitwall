@@ -43,7 +43,7 @@ M.homeFeed=async function(day,ttl){
   return matches.filter(m=>(m.type==="S"||m.ita)&&(SL.dayKey(m.date)===tgt||(day===0&&m.live))).map(item);};
 M.onChange=function(p,it){const a=p.m,b=it.m;const nm=b.p.map(x=>x.name).join(" – ");
   const score=b.p[0].sets.map((s,i)=>s.v+"-"+((b.p[1].sets[i]||{}).v||0)).join(" ");
-  if(a.state!=="post"&&b.state==="post"){const w=b.p.find(x=>x.winner);return{id:"w:"+b.id,big:w&&w.ita?"🇮🇹 VINCE":"FINE",title:w?w.name+" vince":nm,text:score+" · "+b.tourn+" "+b.round,color:w&&w.ita?"var(--ita)":"var(--yellow)"};}
+  if(a.state!=="post"&&b.state==="post"){const w=b.p.find(x=>x.winner);return{id:"w:"+b.id,big:w&&w.ita?"VINCE":"FINE",icon:w&&w.ita?"ita":"tennis",title:w?w.name+" vince":nm,text:score+" · "+b.tourn+" "+b.round,color:w&&w.ita?"var(--ita)":"var(--yellow)"};}
   const na=a.p[0].sets.length,nb=b.p[0].sets.length;
   if(nb>na&&na>0){const i=na-1,w=(b.p[0].sets[i]||{}).v>(b.p[1].sets[i]||{}).v?b.p[0]:b.p[1];return{id:"s:"+b.id+":"+na,big:"SET",title:w.name+" vince il "+na+"° set",text:score+" · "+b.tourn,color:"var(--yellow)"};}
   if(a.state==="pre"&&b.state==="in")return{id:"k:"+b.id,big:"VIA",title:nm,text:b.tourn+" · "+b.round+(b.court?" · "+b.court:""),color:"var(--cyan)"};
@@ -93,7 +93,7 @@ M.mount=function(ctx){
     let s='<div class="row" style="justify-content:space-between;margin-bottom:10px"><span class="tag'+(m.big?" big":"")+'">'+h(m.cat.n)+'</span><span class="muted">'+h([m.tourn,m.round,m.court].filter(Boolean).join(" · "))+'</span>'+(m.live?'<span class="tag live">LIVE</span>':'<span class="tag">'+h(m.status)+'</span>')+'</div>';
     s+='<table class="tbl" style="font-size:1.2em"><thead><tr><th class="l">Giocatore</th>'+Array.from({length:n},(_,i)=>'<th>SET '+(i+1)+'</th>').join("")+'</tr></thead><tbody>'+
       m.p.map(p=>'<tr class="'+(p.ita?"ita":"")+'"><td class="l"><span class="tn" style="max-width:none">'+(p.flag?'<img class="flag" src="'+h(p.flag)+'" alt="">':"")+'<b>'+h(p.name)+'</b>'+(p.seed?' <span class="dim">('+p.seed+')</span>':"")+(p.winner?' <span class="tag ok">VINCE</span>':"")+' <span class="dim">'+h(rk(p.id))+'</span>'+SL.star("tennis","player",p.id,p.name)+'</span></td>'+
-        Array.from({length:n},(_,i)=>{const s2=p.sets[i]||{};return'<td style="font:900 1.6em/1 var(--f-display);'+(s2.w?"":"color:var(--muted)")+'">'+h(s2.v==null?"":s2.v)+(s2.tb!=null?'<sup style="font-size:.5em">'+h(s2.tb)+'</sup>':"")+'</td>';}).join("")+'</tr>').join("")+'</tbody></table>';
+        Array.from({length:n},(_,i)=>{const s2=p.sets[i]||{};return'<td class="setnum" style="font-size:1.6em;line-height:1;'+(s2.w?"":"color:var(--muted)")+'">'+h(s2.v==null?"":s2.v)+(s2.tb!=null?'<sup style="font-size:.5em">'+h(s2.tb)+'</sup>':"")+'</td>';}).join("")+'</tr>').join("")+'</tbody></table>';
     if(m.note)s+='<p class="note">'+h(m.note.replace(/\bbt\b/g,"batte").replace(/\bret\.?/gi,"ritiro"))+'</p>';
     if(m.state==="pre")s+='<p class="note">'+(m.timeValid?'Inizio previsto '+h(SL.when(m.date))+' · tra <b class="cdown">'+h(SL.countdown(new Date(m.date)-Date.now()))+'</b>':"Orario da definire: dipende dagli incontri precedenti sullo stesso campo.")+'</p>';
     s+='<p class="note">I dati gratuiti danno i giochi per set, non il punto per punto.</p>';

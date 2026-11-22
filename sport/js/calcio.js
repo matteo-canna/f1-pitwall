@@ -16,7 +16,7 @@ function item(ev){
   return{id:"calcio:"+ev.id,sport:"calcio",comp:ev.comp,date:ev.date,state:ev.state,live:ev.live,done:ev.done,status:ev.status,important:ev.important,ev,
     sig:E.score(ev)+"|"+ev.state+"|"+ev.home.red+ev.away.red,
     lines:[{n:ev.home.name,img:ev.home.logo,v:sc?ev.home.score:"",lose:ev.done&&ev.away.winner},{n:ev.away.name,img:ev.away.logo,v:sc?ev.away.score:"",lose:ev.done&&ev.home.winner}],
-    foot:ev.live||ev.done?ev.last:(ev.broadcast||ev.venue),
+    foot:ev.live||ev.done?ev.last:(ev.broadcast||ev.venue),footIco:(ev.live||ev.done)&&ev.last?"calcio":"",
     go:{sport:"calcio",c:ev.compK,e:ev.id,d:SL.dayOff(ev.date)||""}};
 }
 M.homeFeed=async function(day,ttl){
@@ -108,7 +108,7 @@ M.mount=function(ctx){
         s+='<button type="button" class="mrow'+(ev.id===S.sel?" sel":"")+'" data-ev="'+ev.id+'"><span class="min'+(ev.live?" live":"")+'">'+h(ev.live?ev.clock:ev.done?"FIN":SL.fmtTime(ev.date))+'</span>'+
           '<span class="tt"><img class="logo-t" src="'+h(ev.home.logo)+'" alt="" loading="lazy"><span>'+h(ev.home.name)+'</span>'+(ev.home.red?'<i class="rc"></i>'.repeat(ev.home.red):"")+'</span><span class="s">'+(sc?h(ev.home.score):"")+'</span>'+
           '<span class="min" style="grid-row:auto;display:none"></span><span class="tt"><img class="logo-t" src="'+h(ev.away.logo)+'" alt="" loading="lazy"><span>'+h(ev.away.name)+'</span>'+(ev.away.red?'<i class="rc"></i>'.repeat(ev.away.red):"")+'</span><span class="s">'+(sc?h(ev.away.score):"")+'</span>'+
-          (ev.last||ev.broadcast?'<span class="last">'+h(ev.live||ev.done?ev.last:ev.broadcast)+'</span>':"")+'</button>';});});
+          (ev.last&&(ev.live||ev.done)?'<span class="last">'+SL.ico("calcio")+" "+h(ev.last)+'</span>':"")+'</button>';});});
     c.body.innerHTML=s+"</div>";
   }
 
@@ -223,7 +223,7 @@ M.mount=function(ctx){
     const curMin=T.ev.live?Math.min(last,Math.floor(Math.max(...plays.map(p=>+p.clock.value||0))/60)):last;
     let bars="";sm.forEach((v,i)=>{if(i>curMin)return;const hh=Math.abs(v)/mx*(mid-14);if(hh<.5)return;bars+='<rect x="'+(i*bw).toFixed(1)+'" y="'+(v>0?mid-hh:mid).toFixed(1)+'" width="'+Math.max(1,bw-1).toFixed(1)+'" height="'+hh.toFixed(1)+'" fill="'+(v>0?T.ch:T.ca)+'" opacity=".9"/>';});
     let marks='<line x1="0" x2="'+Wd+'" y1="'+mid+'" y2="'+mid+'" stroke="var(--line)"/><line x1="'+(45*bw)+'" x2="'+(45*bw)+'" y1="6" y2="'+(Hd-6)+'" stroke="var(--dim)" stroke-dasharray="3 4"/><text x="'+(45*bw+4)+'" y="'+(Hd-6)+'" fill="var(--dim)" font-size="10" class="svgtxt">INT</text>';
-    goals.forEach(g=>{const x=(g.m+.5)*bw,y=g.side==="h"?12:Hd-6;marks+='<line x1="'+x+'" x2="'+x+'" y1="'+(g.side==="h"?16:mid)+'" y2="'+(g.side==="h"?mid:Hd-16)+'" stroke="#fff" stroke-width="1" opacity=".6"/><text x="'+x+'" y="'+y+'" fill="#fff" font-size="11" text-anchor="middle">⚽</text>';});
+    goals.forEach(g=>{const x=(g.m+.5)*bw,y=g.side==="h"?12:Hd-6;marks+='<line x1="'+x+'" x2="'+x+'" y1="'+(g.side==="h"?16:mid)+'" y2="'+(g.side==="h"?mid:Hd-16)+'" stroke="#fff" stroke-width="1" opacity=".6"/><use href="#i-calcio" x="'+(x-6.5)+'" y="'+(y-10)+'" width="13" height="13" color="#fff"/>';});
     [15,30,60,75,90].forEach(m=>{marks+='<text x="'+(m*bw)+'" y="'+(mid+12)+'" fill="var(--dim)" font-size="9" text-anchor="middle" class="svgtxt" opacity=".7">'+m+"'</text>";});
     c.body.innerHTML='<svg viewBox="0 0 '+Wd+' '+Hd+'" width="100%" role="img" aria-label="Momentum della partita" style="height:auto">'+bars+marks+'</svg>'+
       '<div class="legend"><span><i style="background:'+T.ch+'"></i>'+h(T.hn)+' (sopra)</span><span><i style="background:'+T.ca+'"></i>'+h(T.an)+' (sotto)</span></div>'+
@@ -277,10 +277,10 @@ M.mount=function(ctx){
       const last=(a.lastName||n.split(" ").pop()||"").slice(0,11);
       s+='<g transform="translate('+o.x.toFixed(1)+' '+o.y.toFixed(1)+')"'+(m.out?' opacity=".7"':"")+'><circle r="2.7" fill="'+col+'" stroke="#0b0f19" stroke-width=".35"/><text y=".95" font-size="2.5" text-anchor="middle" fill="'+(contrast(col))+'" class="svgtxt">'+h(o.p.jersey||"")+'</text>'+
         '<text y="'+(o.up?-3.6:5.3)+'" font-size="1.95" text-anchor="middle" fill="#fff" class="svgtxt" style="paint-order:stroke;stroke:#000a;stroke-width:.6">'+h(last)+'</text>'+
-        (m.g?'<text x="2.6" y="-2" font-size="2.4">'+"⚽".repeat(Math.min(m.g,3))+'</text>':"")+
+        (m.g?Array.from({length:Math.min(m.g,3)},(_,i)=>'<use href="#i-calcio" x="'+(2.2+i*2.4)+'" y="-4.6" width="2.4" height="2.4" color="#fff"/>').join(""):"")+
         (m.r?'<rect x="-3.9" y="-3.6" width="1.5" height="2.1" fill="#ef4444" rx=".2"/>':m.y?'<rect x="-3.9" y="-3.6" width="1.5" height="2.1" fill="#f2c230" rx=".2"/>':"")+
         (m.out?'<text x="2.5" y="3.4" font-size="2" fill="#ef4444" class="svgtxt">▼'+h(m.out)+'</text>':"")+'</g>';});
-    const bench=(L,mkr)=>L?L.bench.map(p=>{const a=p.athlete||{},m=mkr[a.displayName]||{};return'<div'+(m.inn?' class="in"':"")+'>'+h((p.jersey||"")+" "+(a.displayName||""))+(m.inn?" ▲"+h(m.inn):"")+(m.g?" ⚽":"")+'</div>';}).join(""):"";
+    const bench=(L,mkr)=>L?L.bench.map(p=>{const a=p.athlete||{},m=mkr[a.displayName]||{};return'<div'+(m.inn?' class="in"':"")+'>'+h((p.jersey||"")+" "+(a.displayName||""))+(m.inn?" ▲"+h(m.inn):"")+(m.g?" "+SL.ico("calcio"):"")+'</div>';}).join(""):"";
     c.body.innerHTML=V.pitch(s,{label:"Formazioni"})+'<div class="bench"><div><h4>PANCHINA '+h(T.hn.toUpperCase())+'</h4>'+bench(LH,mk)+'</div><div><h4>PANCHINA '+h(T.an.toUpperCase())+'</h4>'+bench(LA,mk)+'</div></div>';
   }
   function contrast(hex){const n=parseInt(String(hex).slice(1),16);const l=.299*(n>>16)+.587*(n>>8&255)+.114*(n&255);return l>150?"#0b0f19":"#ffffff";}
@@ -318,14 +318,18 @@ M.mount=function(ctx){
   }
 
   /* eventi principali */
-  const ICON=t=>/^goal/.test(t)?"⚽":/yellow/.test(t)?"🟨":/red/.test(t)?"🟥":/substitution/.test(t)?"🔁":/var/i.test(t)?"📺":/penalty/.test(t)?"🎯":/kickoff|half|end|start/.test(t)?"⏱":"•";
+  /* icone degli eventi: per le liste (HTML) e dentro i grafici (SVG) */
+  const ICN=t=>/^goal/.test(t)?["calcio","ico-g"]:/yellow/.test(t)?["card","ico-y"]:/red/.test(t)?["card","ico-r"]:/substitution/.test(t)?["sub","ico-sub"]:/var/i.test(t)?["var",""]:/penalty/.test(t)?["target",""]:/^shot/.test(t)?["goal",""]:/kickoff|half|end|start/.test(t)?["whistle",""]:null;
+  const ICON=t=>{const n=ICN(t);return n?SL.ico(n[0],n[1]):'<span class="dim">•</span>';};
+  const ICOCOL={"ico-g":"#3fbf7f","ico-y":"#f2c230","ico-r":"#ef4444","ico-sub":"#45c8ec","":"#e9eef8"};
+  const ICOSVG=(t,x,y,s)=>{const n=ICN(t);return n?'<use href="#i-'+n[0]+'" x="'+(x-s/2).toFixed(1)+'" y="'+(y-s/2).toFixed(1)+'" width="'+s+'" height="'+s+'" color="'+ICOCOL[n[1]]+'"/>':"";};
   function drawEvents(){
     const c=cards.events,T=teamsOf(),ke=((S.sum||{}).keyEvents||[]).filter(k=>!/delay/.test(k.type&&k.type.type||""));
     if(!ke.length){c.body.innerHTML=UI.empty(T.ev.state==="pre"?"Gli eventi compaiono qui durante la partita.":"Nessun evento.");return;}
     /* linea del tempo */
     let tl='<svg viewBox="0 0 300 54" width="100%" style="height:auto;margin-bottom:8px" role="img" aria-label="Linea del tempo"><line x1="6" x2="294" y1="27" y2="27" stroke="var(--line)" stroke-width="2"/><line x1="150" x2="150" y1="20" y2="34" stroke="var(--dim)"/>';
     ke.forEach(k=>{const t=(k.type&&k.type.type)||"",m=(+(k.clock&&k.clock.value)||0)/60;if(!(/^goal|yellow|red|substitution/.test(t)))return;
-      const x=6+Math.min(1,m/95)*288,w=sideOf(T,k.team);const y=w==="a"?42:12;tl+='<text x="'+x.toFixed(1)+'" y="'+(y+4)+'" font-size="10" text-anchor="middle">'+ICON(t)+'</text>';});
+      const x=6+Math.min(1,m/95)*288,w=sideOf(T,k.team);const y=w==="a"?42:12;tl+=ICOSVG(t,x,y,11);});
     tl+='<text x="2" y="9" font-size="8" fill="var(--muted)" class="svgtxt">'+h(T.hn)+'</text><text x="2" y="53" font-size="8" fill="var(--muted)" class="svgtxt">'+h(T.an)+'</text></svg>';
     const li=ke.slice().reverse().map(k=>{const t=(k.type&&k.type.type)||"",w=sideOf(T,k.team);const goal=/^goal/.test(t)||k.scoringPlay;
       return'<li class="'+(goal?"goal":"")+(/^goal|red|yellow|substitution/.test(t)?" key":"")+'"><span class="t">'+h(k.clock&&k.clock.displayValue||"")+'</span><span>'+ICON(t)+'</span><span class="x">'+h(SL.tr.soccer(k.text||k.type.text||""))+(w?'<small>'+h(w==="h"?T.hn:T.an)+'</small>':"")+'</span></li>';}).join("");

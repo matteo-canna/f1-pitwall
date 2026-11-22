@@ -44,7 +44,7 @@ E.norm=function(e,sport,league,compName){
   const home=side("home"),away=side("away");
   let red={home:0,away:0},last="";
   (c.details||[]).forEach(d=>{const t=d.team&&String(d.team.id);const w=t===home.id?"home":t===away.id?"away":null;if(d.redCard&&w)red[w]++;
-    if(d.scoringPlay){const who=(d.athletesInvolved||[])[0];last="⚽ "+(who?who.shortName||who.displayName:"")+" "+(d.clock&&d.clock.displayValue||"");}});
+    if(d.scoringPlay){const who=(d.athletesInvolved||[])[0];last=(who?who.shortName||who.displayName:"")+" "+(d.clock&&d.clock.displayValue||"");}});
   home.red=red.home;away.red=red.away;
   const state=ty.state||"pre";
   let clock="";

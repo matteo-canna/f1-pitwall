@@ -37,12 +37,12 @@ M.homeFeed=async function(day,ttl){
         foot:hd.session_name+" · "+hd.circuit_name,go:{sport:"moto",s:"gp"}});}}
     const evs=await events(),ev=currentEvent(evs);if(ev){const cat=await gpCat(ev.id),S=await gpSessions(ev.id,cat.id);
       S.filter(s=>SL.dayKey(s.date)===tgt&&new Date(s.date)>Date.now()&&/SPR|RAC|Q/.test(s.type)).forEach(s=>out.push({id:"moto:gps:"+s.id,sport:"moto",comp:"MotoGP · "+(ev.sponsored_name||ev.name),date:s.date,state:"pre",live:false,done:false,status:SL.when(s.date),important:s.type==="RAC",
-        sig:"pre",lines:[{n:sesName(s),ico:"🏁",v:SL.fmtTime(s.date)}],foot:(ev.circuit&&ev.circuit.name)||"",go:{sport:"moto",s:"gp"}}));}
+        sig:"pre",lines:[{n:sesName(s),ico:s.type==="RAC"||s.type==="SPR"?"flag":"stopwatch",v:SL.fmtTime(s.date)}],foot:(ev.circuit&&ev.circuit.name)||"",go:{sport:"moto",s:"gp"}}));}
   }catch(e){}
   return out;};
 M.onChange=function(p,it){if(!it.R)return null;const a=p.R&&p.R[0],b=it.R[0];if(!b)return null;const nm=b.rider_name+" "+b.rider_surname;
   const imp=ITA(b.rider_nation)||favR(nm);
-  if(p.state!=="post"&&it.state==="post")return{id:"w:"+it.id,big:ITA(b.rider_nation)?"🇮🇹 VINCE":"VINCE",title:nm,text:"MotoGP · "+it.head.session_name+" · "+it.head.event_tv_name,color:"var(--red)",important:imp};
+  if(p.state!=="post"&&it.state==="post")return{id:"w:"+it.id,big:"VINCE",icon:ITA(b.rider_nation)?"ita":"flag",title:nm,text:"MotoGP · "+it.head.session_name+" · "+it.head.event_tv_name,color:"var(--red)",important:imp};
   if(a&&a.rider_number!==b.rider_number&&it.state==="in")return{id:"l:"+it.id+":"+b.rider_number+":"+b.num_lap,big:"IN TESTA",title:nm,text:"Giro "+b.num_lap+" · MotoGP "+it.head.session_name,color:"var(--yellow)",important:imp};
   return null;};
 
@@ -111,7 +111,7 @@ function mountGP(ctx){
     const c=cards.weekend,now=Date.now(),next=S.ses.find(s=>new Date(s.date)>now);
     c.sub(S.ev.sponsored_name||S.ev.name);
     c.body.innerHTML=(next?'<p class="muted">Prossima: <b>'+h(sesName(next))+'</b> '+h(SL.when(next.date))+'</p><div class="cd" data-cd="'+h(next.date)+'">'+h(SL.countdown(new Date(next.date)-now))+'</div>':"")+
-      '<ul class="feed" style="margin-top:8px">'+S.ses.map(s=>'<li class="'+(next&&s.id===next.id?"goal":"")+'"><span class="t">'+h(SL.fmtDay(s.date).split(" ")[0])+'</span><span>'+(/RAC|SPR/.test(s.type)?"🏁":"⏱")+'</span><span class="x"><b>'+h(sesName(s))+'</b> '+h(SL.fmtTime(s.date))+'<small>'+h(s.status==="FINISHED"?"conclusa":new Date(s.date)<now?"":"")+'</small></span></li>').join("")+'</ul>'+
+      '<ul class="feed" style="margin-top:8px">'+S.ses.map(s=>'<li class="'+(next&&s.id===next.id?"goal":"")+'"><span class="t">'+h(SL.fmtDay(s.date).split(" ")[0])+'</span><span>'+SL.ico(/RAC|SPR/.test(s.type)?"flag":"stopwatch")+'</span><span class="x"><b>'+h(sesName(s))+'</b> '+h(SL.fmtTime(s.date))+'<small>'+h(s.status==="FINISHED"?"conclusa":new Date(s.date)<now?"":"")+'</small></span></li>').join("")+'</ul>'+
       '<p class="note">'+h([(S.ev.circuit&&S.ev.circuit.name),(S.ev.country&&SL.tr.country(S.ev.country.iso))].filter(Boolean).join(" · "))+' · orari italiani</p>';
     drawResultsPicker();drawCal();}
   async function drawResultsPicker(){const c=cards.results;

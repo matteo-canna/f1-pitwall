@@ -19,7 +19,7 @@ M.homeFeed=async function(day,ttl){const key=SL.dayKey(SL.addDays(Date.now(),day
 const KIND=d=>d===5?"META":d===2?"TRASFORMAZIONE":d===3?"PIAZZATO":d===7?"META + TRASF.":d===8?"META + PIAZZATO":"+"+d;
 M.onChange=function(p,it){const a=p.ev,b=it.ev,t=b.home.name+" "+E.score(b)+" "+b.away.name;
   const dh=(+b.home.score||0)-(+a.home.score||0),da=(+b.away.score||0)-(+a.away.score||0);
-  if(dh>0||da>0){const d=dh>0?dh:da,who=dh>0?b.home.name:b.away.name;return{id:"p:"+b.id+":"+E.score(b),big:KIND(d),title:t,text:who+" · "+b.comp,color:who==="Italia"?"var(--ita)":"var(--cyan)"};}
+  if(dh>0||da>0){const d=dh>0?dh:da,who=dh>0?b.home.name:b.away.name;return{id:"p:"+b.id+":"+E.score(b),big:KIND(d),title:t,text:who+" · "+b.comp,color:who==="Italia"?"var(--ita)":"var(--cyan)",icon:who==="Italia"?"ita":"rugby"};}
   if(a.state==="pre"&&b.state==="in")return{id:"k:"+b.id,big:"VIA",title:b.home.name+" – "+b.away.name,text:b.comp,color:"var(--cyan)"};
   if(a.state==="in"&&b.state==="post")return{id:"f:"+b.id,big:"FINALE",title:t,text:b.comp,color:"var(--muted)"};
   return null;};
@@ -41,7 +41,7 @@ const DEFS=[
 M.mount=function(ctx){
   const st=ctx.st;let comp=st.c||"ita";if(comp!=="ita"&&!L.find(x=>x.k===comp))comp="ita";
   const r=document.createElement("div");r.className="row";
-  r.appendChild(UI.chips([{k:"ita",n:"🇮🇹 Italia"}].concat(L.map(x=>({k:x.k,n:x.n}))),comp,v=>SL.go({c:v,e:""})));
+  r.appendChild(UI.chips([{k:"ita",n:"Italia",ic:"ita"}].concat(L.map(x=>({k:x.k,n:x.n}))),comp,v=>SL.go({c:v,e:""})));
   ctx.sub.appendChild(r);
   const cards=UI.mount(ctx.main,DEFS);UI.tv(cards.tv,"rugby");
   const S={evs:[],sel:st.e||"",sum:null};
@@ -77,21 +77,22 @@ M.mount=function(ctx){
     const tm=t=>'<div class="tm">'+(t.logo?'<img src="'+h(t.logo)+'" alt="">':"")+'<div class="nm">'+h(t.name)+' '+SL.star("rugby","team",t.id,t.name)+'</div><div class="rec">'+h(t.rec||"")+'</div></div>';
     let s='<div class="bug">'+tm(ev.home)+'<div class="mid"><div class="score">'+(ev.state!=="pre"?h(ev.home.score)+'<i>–</i>'+h(ev.away.score):'<span style="font-size:.55em">'+h(SL.fmtTime(ev.date))+'</span>')+'</div><div class="clk">'+(ev.live?'<span class="tag live">'+h(ev.clock||"LIVE")+'</span>':ev.done?'<span class="tag">FINALE</span>':'<span class="tag">'+h(SL.when(ev.date))+'</span>')+'</div></div>'+tm(ev.away)+'</div>';
     const tl=SL.store.sget("rgtl."+ev.id,null);
-    if(tl&&tl.ev.length){s+='<h4 class="muted" style="margin:12px 0 4px;font-size:11px;letter-spacing:.08em">PUNTI SEGNATI (visti in diretta)</h4><ul class="feed">'+tl.ev.slice().reverse().map(x=>'<li class="'+(x.d>=5?"goal":"")+'"><span class="t">'+h(x.c||"")+'</span><span>🏉</span><span class="x"><b>'+h(KIND(x.d))+'</b> '+h(x.s==="h"?ev.home.name:ev.away.name)+'<small>'+h(x.sc)+'</small></span></li>').join("")+'</ul>';}
+    if(tl&&tl.ev.length){s+='<h4 class="muted" style="margin:12px 0 4px;font-size:11px;letter-spacing:.08em">PUNTI SEGNATI (visti in diretta)</h4><ul class="feed">'+tl.ev.slice().reverse().map(x=>'<li class="'+(x.d>=5?"goal":"")+'"><span class="t">'+h(x.c||"")+'</span><span>'+SL.ico(x.d>=5?"rugby":"posts")+'</span><span class="x"><b>'+h(KIND(x.d))+'</b> '+h(x.s==="h"?ev.home.name:ev.away.name)+'<small>'+h(x.sc)+'</small></span></li>').join("")+'</ul>';}
     else if(ev.live)s+='<p class="note">I punti segnati compaiono qui mentre segui la partita: i dati gratuiti danno solo il punteggio, l\'app ricava mete, trasformazioni e piazzati dai cambi.</p>';
     if(ev.state==="pre")s+='<p class="note" style="text-align:center">Calcio d\'inizio tra <b class="cdown">'+h(SL.countdown(new Date(ev.date)-Date.now()))+'</b></p>';
     const gi=(S.sum&&S.sum.gameInfo)||{};s+='<p class="note" style="text-align:center">'+[ev.comp,(gi.venue&&gi.venue.fullName)||ev.venue,gi.attendance?"Spettatori "+Number(gi.attendance).toLocaleString("it-IT"):""].filter(Boolean).map(h).join(" · ")+'</p>';
     c.body.innerHTML=s;c.sub(ev.comp);
     S.ch=ch;S.ca=ca;}
   /* posizioni standard 1-15 su campo orizzontale (casa attacca verso destra) */
-  const POS={1:[45,24],2:[45,35],3:[45,46],4:[39.5,29.5],5:[39.5,40.5],6:[34,19],8:[34,35],7:[34,51],9:[28,42],10:[23,28],12:[18,40],13:[13,52],11:[12,8],14:[8,63],15:[5,33]};
+  /* posizioni 1-15 (casa attacca verso destra): colonne ben separate, nomi sempre sotto il pallino */
+  const POS={1:[45,20],2:[45,35],3:[45,50],4:[39,27.5],5:[39,42.5],6:[33,13],8:[33,35],7:[33,57],9:[27,45],10:[22,28],12:[17,41],13:[12.5,54],11:[11,7],14:[8,63],15:[4,34]};
   function drawLineup(){const c=cards.lineup,ev=sel(),R=(S.sum&&S.sum.rosters)||[];
     if(!R.length||!R.some(r=>(r.roster||[]).length)){c.body.innerHTML=UI.empty(ev&&ev.state==="pre"?"Le formazioni escono di solito due giorni prima della partita.":"Formazioni non disponibili.");c.sub("");return;}
     const side=r=>r.homeAway==="home"?"h":r.homeAway==="away"?"a":String(r.team&&r.team.id)===ev.home.id?"h":"a";
     const ch=S.ch||"#4f8ef7",ca=S.ca||"#f59b42";let g="";const bench={h:[],a:[]};
     R.forEach(r=>{const w=side(r),col=w==="h"?ch:ca;(r.roster||[]).forEach(p=>{const j=+p.jersey,a=p.athlete||{};
-      if(j>=1&&j<=15&&POS[j]){let [x,y]=POS[j];if(w==="a"){x=100-x;y=70-y;}const last=(a.lastName||a.displayName||"").slice(0,11);
-        g+='<g transform="translate('+x+' '+y+')"><circle r="2.4" fill="'+col+'" stroke="#0b0f19" stroke-width=".3"/><text y=".9" font-size="2.3" text-anchor="middle" fill="#fff" class="svgtxt">'+j+'</text><text y="'+(j%2?-3.2:4.9)+'" font-size="1.9" text-anchor="middle" fill="#fff" class="svgtxt" style="paint-order:stroke;stroke:#000a;stroke-width:.5">'+h(last)+'</text>'+(p.captain?'<text x="2.6" y="-1.6" font-size="2" fill="#f2c230" class="svgtxt">C</text>':"")+'</g>';}
+      if(j>=1&&j<=15&&POS[j]){let [x,y]=POS[j];if(w==="a"){x=100-x;y=70-y;}const last=(a.lastName||a.displayName||"").slice(0,10);
+        g+='<g transform="translate('+x+' '+y+')"><circle r="2.4" fill="'+col+'" stroke="#0b0f19" stroke-width=".3"/><text y=".9" font-size="2.3" text-anchor="middle" fill="#fff" class="svgtxt">'+j+'</text><text y="4.6" font-size="1.75" text-anchor="middle" fill="#fff" class="svgtxt" style="paint-order:stroke;stroke:#000a;stroke-width:.5">'+h(last)+'</text>'+(p.captain?'<text x="2.6" y="-1.6" font-size="2" fill="#f2c230" class="svgtxt">C</text>':"")+'</g>';}
       else bench[w].push(p);});});
     const bl=(w,n)=>'<div><h4>'+h(n.toUpperCase())+' · PANCHINA</h4>'+bench[w].map(p=>'<div>'+h(p.jersey+" "+((p.athlete||{}).displayName||""))+(/replacement/i.test(p.position&&(p.position.displayName||p.position.name)||"")?"":' <span class="dim">'+h(SL.tr.rpos(p.position&&(p.position.displayName||p.position.name)))+'</span>')+'</div>').join("")+'</div>';
     c.body.innerHTML=V.rugby(g)+'<div class="bench">'+bl("h",ev.home.name)+bl("a",ev.away.name)+'</div><p class="note">1-3 prima linea · 4-5 seconde linee · 6-8 terza linea · 9 mediano di mischia · 10 apertura · 12-13 centri · 11-14 ali · 15 estremo.</p>';

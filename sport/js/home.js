@@ -18,7 +18,7 @@ async function tickToday(){
   SPORTS.forEach(s=>{const list=res[s]||[];LIVE.bySport[s]=list;const n=list.filter(x=>x.live).length;LIVE.lastLive[s]=n>0||list.some(x=>x.state==="pre"&&new Date(x.date)-Date.now()<20*60000);SL.setLive(s,n);
     const m=SL.sports[s];
     list.forEach(it=>{const prev=LIVE.items.get(it.id);LIVE.items.set(it.id,it);
-      if(prev&&prev.sig!==it.sig&&m.onChange){const a=m.onChange(prev,it);if(a){a.important=a.important!=null?a.important:it.important;a.go=a.go||it.go;SL.alert(a);SL.emit("flash",it.id);}}});});
+      if(prev&&prev.sig!==it.sig&&m.onChange){const a=m.onChange(prev,it);if(a){a.important=a.important!=null?a.important:it.important;a.go=a.go||it.go;a.sport=s;SL.alert(a);SL.emit("flash",it.id);}}});});
   LIVE.updated=Date.now();
   SL.setLive("home",[...LIVE.items.values()].filter(x=>x.live).length);
   SL.emit("live");
@@ -31,19 +31,19 @@ SL.sports.home={
 
 /* ---------- tessera di un evento ---------- */
 const COL={calcio:"#2fbf71",basket:"#f5803e",tennis:"#c9dc3c",rugby:"#3fa7d6",moto:"#e5383b"};
-const ICO={calcio:"⚽",basket:"🏀",tennis:"🎾",rugby:"🏉",moto:"🏍"};
+const ICO={calcio:1,basket:1,tennis:1,rugby:1,moto:1};
 SL.homeTile=function(it){
   const tag=it.live?'<span class="tag live">'+h(it.status||"LIVE")+'</span>':it.done?'<span class="tag">'+h(it.status||"FINALE")+'</span>':'<span class="tag">'+h(it.status)+'</span>';
-  const lines=(it.lines||[]).map(l=>'<div class="ln'+(l.lose?" l":"")+'">'+(l.img?'<img class="logo-t" src="'+h(l.img)+'" alt="" loading="lazy">':'<span>'+(l.ico||"")+'</span>')+'<span class="n">'+h(l.n)+(l.ita?' <span class="tag ita" style="padding:1px 4px;font-size:9px">ITA</span>':"")+'</span><span class="v">'+h(l.v==null?"":l.v)+'</span></div>').join("");
-  return'<button type="button" class="htile'+(it.important?" fav":"")+'" style="--tc:'+COL[it.sport]+'" data-go="'+h(JSON.stringify(it.go||{sport:it.sport}))+'" data-id="'+h(it.id)+'">'+
-    '<div class="hd"><span class="sportpill" style="--tc:'+COL[it.sport]+'">'+ICO[it.sport]+'</span><span class="cmp">'+h(it.comp||"")+'</span>'+tag+'</div>'+lines+
-    (it.foot?'<div class="ft">'+h(it.foot)+'</div>':"")+'</button>';
+  const lines=(it.lines||[]).map(l=>'<div class="ln'+(l.lose?" l":"")+'">'+(l.img?'<img class="logo-t" src="'+h(l.img)+'" alt="" loading="lazy">':'<span>'+(l.ico?SL.ico(l.ico):"")+'</span>')+'<span class="n">'+h(l.n)+(l.ita?' '+SL.ico("ita"):"")+'</span><span class="v">'+h(l.v==null?"":l.v)+'</span></div>').join("");
+  return'<button type="button" class="htile sp-'+it.sport+(it.important?" fav":"")+'" style="--tc:'+COL[it.sport]+'" data-go="'+h(JSON.stringify(it.go||{sport:it.sport}))+'" data-id="'+h(it.id)+'">'+
+    '<div class="hd"><span class="sportpill" style="--tc:'+COL[it.sport]+'">'+SL.ico(it.sport)+'</span><span class="cmp">'+h(it.comp||"")+'</span>'+tag+'</div>'+lines+
+    (it.foot?'<div class="ft">'+(it.footIco?SL.ico(it.footIco)+" ":"")+h(it.foot)+'</div>':"")+'</button>';
 };
 
 /* ---------- pagina ---------- */
 function mount(ctx){
   const st=ctx.st,f=st.f||"all";
-  const chips=[{k:"all",n:"Tutti"}].concat(SPORTS.map(s=>({k:s,n:ICO[s]+" "+SL.sports[s].name})));
+  const chips=[{k:"all",n:"Tutti",ic:"home"}].concat(SPORTS.map(s=>({k:s,n:SL.sports[s].name,ic:s})));
   const row=document.createElement("div");row.className="row";
   row.appendChild(SL.ui.chips(chips,f,v=>SL.go({sport:"home",f:v==="all"?"":v},true)));
   ctx.sub.appendChild(row);
