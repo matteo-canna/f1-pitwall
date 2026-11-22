@@ -142,7 +142,7 @@ M.mount=function(ctx){
   function drawPbp(){const c=cards.pbp;if(!c.shown)return;const t=T(),P=((S.sum||{}).plays||[]).slice().reverse().slice(0,160);
     if(!P.length){c.body.innerHTML=UI.empty("Le azioni compaiono durante la partita.");return;}
     c.body.innerHTML='<div class="scroll"><ul class="feed">'+P.map(p=>{const w=String(p.team&&p.team.id)===t.hid?t.ev.home.abbr:String(p.team&&p.team.id)===t.aid?t.ev.away.abbr:"";
-      return'<li class="'+(p.scoringPlay?"goal":"")+'"><span class="t">'+h((p.period&&p.period.number?"Q"+p.period.number+" ":"")+(p.clock&&p.clock.displayValue||""))+'</span><span>'+(p.scoringPlay?"🏀":"")+'</span><span class="x">'+h(SL.tr.nba(p.text))+'<small>'+h(w)+(p.scoringPlay?" · "+p.awayScore+"-"+p.homeScore:"")+'</small></span></li>';}).join("")+'</ul></div>';}
+      return'<li class="'+(p.scoringPlay?"goal":"")+'"><span class="t">'+h((p.period&&p.period.number?"Q"+p.period.number+" ":"")+(p.clock&&p.clock.displayValue||""))+'</span><span>'+(p.scoringPlay?SL.ico("basket"):"")+'</span><span class="x">'+h(SL.tr.nba(p.text))+'<small>'+h(w)+(p.scoringPlay?" · "+p.awayScore+"-"+p.homeScore:"")+'</small></span></li>';}).join("")+'</ul></div>';}
   async function loadTable(){const c=cards.table,d=await SL.tryGet(SL.ESPN2+"basketball/nba/standings",{ttl:600000});
     if(!d){c.body.innerHTML=UI.empty("Classifica non disponibile.");return;}
     const G=E.groups(d),ev=sel();

@@ -74,7 +74,7 @@ UI.empty=(t)=>'<div class="empty">'+t+'</div>';
 
 /* ---------- sottobarra: competizioni e giorno ---------- */
 UI.chips=function(items,cur,on,extraCls){const w=document.createElement("div");w.className="chips "+(extraCls||"");
-  w.innerHTML=items.map(it=>'<button type="button" class="chip" data-v="'+h(it.k)+'" aria-pressed="'+(it.k===cur)+'">'+(it.live?'<i class="lv" title="in diretta"></i>':"")+h(it.n)+(it.c!=null?' <span class="n">'+it.c+'</span>':"")+'</button>').join("");
+  w.innerHTML=items.map(it=>'<button type="button" class="chip" data-v="'+h(it.k)+'" aria-pressed="'+(it.k===cur)+'">'+(it.live?'<i class="lv" title="in diretta"></i>':"")+(it.ic?SL.ico(it.ic):"")+h(it.n)+(it.c!=null?' <span class="n">'+it.c+'</span>':"")+'</button>').join("");
   w.addEventListener("click",e=>{const b=e.target.closest("button");if(b)on(b.dataset.v);});return w;};
 UI.daynav=function(off,on){const w=document.createElement("div");w.className="daynav";const d=SL.addDays(Date.now(),off);
   w.innerHTML='<button type="button" data-d="-1" aria-label="Giorno precedente">‹</button><button type="button" class="cur" data-d="0">'+h(off===0?"Oggi · "+SL.fmtDay(d):SL.relDay(d)===SL.fmtDay(d)?SL.fmtDay(d):SL.relDay(d)+" · "+SL.fmtDay(d))+'</button><button type="button" data-d="1" aria-label="Giorno successivo">›</button>';
@@ -98,8 +98,7 @@ UI.openSettings=function(){
 function couchNow(){$("couchNow").textContent=SL.couch()?"Ora è attiva.":"Ora non è attiva.";}
 function bcLook(){try{SL.chan&&SL.chan.postMessage({type:"look",settings:{style:SL.settings.style,couch:SL.settings.couch}});}catch(e){}}
 function favRender(){const L=SL.fav.list;$("favCount").textContent=L.length?"("+L.length+")":"";
-  const names={calcio:"⚽",basket:"🏀",tennis:"🎾",rugby:"🏉",moto:"🏍"};
-  $("favList").innerHTML=L.length?L.map((x,i)=>'<li>'+(names[x.s]||"")+" "+h(x.n)+'<button type="button" data-i="'+i+'" aria-label="Togli '+h(x.n)+'">✕</button></li>').join(""):'<li class="muted">Nessun preferito.</li>';}
+  $("favList").innerHTML=L.length?L.map((x,i)=>'<li class="sp-'+h(x.s)+'">'+(x.s?SL.ico(x.s):"")+" "+h(x.n)+'<button type="button" data-i="'+i+'" aria-label="Togli '+h(x.n)+'">✕</button></li>').join(""):'<li class="muted">Nessun preferito.</li>';}
 $("favList")&&$("favList").addEventListener("click",e=>{const b=e.target.closest("button[data-i]");if(!b)return;const it=SL.fav.list[+b.dataset.i];if(it)SL.fav.toggle(it);favRender();});
 SL.on("fav",()=>{if($("dlgSettings").open)favRender();});
 

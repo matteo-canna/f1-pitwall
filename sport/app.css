@@ -404,3 +404,100 @@ html[data-style="regia"] .logo{transform:skewX(-8deg)}
   .alerts{top:auto;bottom:16px;right:16px;left:16px;max-width:none}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* =====================================================================
+   PERSONALITÀ PER SPORT
+   Ogni sport ha font, sfondo illustrato, striscia, filigrana e caricamento suoi.
+   Le variabili valgono sia per la pagina (body[data-sport]) sia per i singoli elementi (.sp-xxx: tessere, linguette, avvisi).
+   ===================================================================== */
+:root{--h2size:12.5px;--scoresize:46px;--nmsize:15px;--tabsz:12.5px;--hv:20px;--hn:14px;--alb:26px;--mrs:17px;--mtsc:14px;--shsize:30px}
+html[data-style="regia"]{--h2size:16px;--scoresize:64px;--nmsize:19px;--tabsz:13.5px;--hv:26px;--hn:16px;--alb:32px}
+html[data-couch="1"]{--h2size:15px;--scoresize:66px;--nmsize:20px;--tabsz:15px;--hv:26px;--hn:17px;--mrs:22px;--mtsc:18px;--shsize:38px}
+html[data-couch="1"][data-style="regia"]{--h2size:18px;--scoresize:76px;--nmsize:22px}
+@media (max-width:760px){:root,html[data-style="regia"]{--scoresize:38px;--nmsize:15px;--shsize:24px}}
+
+/* --- identità: font, scala, accenti, striscia, icona --- */
+.sp-home,body[data-sport="home"]{--f-sport:var(--f-display);--f-score:var(--f-display);--fw:900;--fw2:900;--fst:normal;--fs:1;--fs2:1;--ls:.04em;--stretch:118%;--sa:#e5383b;--ic:var(--ic-home);--icload:var(--ic-home);--load:pulse2 1s ease-in-out infinite;
+  --stripe:linear-gradient(90deg,#2fbf71 0 20%,#f5803e 20% 40%,#c9dc3c 40% 60%,#3fa7d6 60% 80%,#e5383b 80%)}
+.sp-calcio,body[data-sport="calcio"]{--f-sport:"Teko","Archivo Narrow",sans-serif;--f-score:"Teko","Archivo Narrow",sans-serif;--fw:600;--fw2:600;--fst:normal;--fs:1.4;--fs2:1.28;--ls:.06em;--stretch:100%;--sa:#2fbf71;--ic:var(--ic-calcio);--icload:var(--ic-calcio);--load:roll .9s ease-in-out infinite alternate;
+  --stripe:repeating-linear-gradient(90deg,#2fbf71 0 22px,#23a35c 22px 44px)}
+.sp-basket,body[data-sport="basket"]{--f-sport:"Bungee",system-ui,sans-serif;--f-score:"Bungee",system-ui,sans-serif;--fw:400;--fw2:400;--fst:normal;--fs:.97;--fs2:.82;--ls:.02em;--stretch:100%;--sa:#f5803e;--ic:var(--ic-basket);--icload:var(--ic-basket);--load:dribble .55s cubic-bezier(.5,0,.5,1) infinite alternate;
+  --stripe:linear-gradient(90deg,#f5803e,#ffc08a 50%,#f5803e)}
+.sp-tennis,body[data-sport="tennis"]{--f-sport:"Fraunces",Georgia,serif;--f-score:"Fraunces",Georgia,serif;--fw:900;--fw2:800;--fst:italic;--fs:1.12;--fs2:1;--ls:0;--stretch:100%;--sa:#c9dc3c;--ic:var(--ic-tennis);--icload:var(--ic-tennis);--load:bounce .45s cubic-bezier(.4,0,.6,1) infinite alternate;
+  --stripe:linear-gradient(90deg,#c9dc3c,#f6ffc4 50%,#c9dc3c)}
+.sp-rugby,body[data-sport="rugby"]{--f-sport:"Alfa Slab One",Rockwell,serif;--f-score:"Alfa Slab One",Rockwell,serif;--fw:400;--fw2:400;--fst:normal;--fs:.96;--fs2:.86;--ls:.03em;--stretch:100%;--sa:#3fa7d6;--ic:var(--ic-rugby);--icload:var(--ic-rugby);--load:spin 1.1s linear infinite;
+  --stripe:linear-gradient(90deg,#1b5fbf,#3fa7d6 45%,#f1f2f1 45% 55%,#3fa7d6 55%,#1b5fbf)}
+.sp-moto,body[data-sport="moto"]{--f-sport:"Racing Sans One",system-ui,sans-serif;--f-score:"Orbitron",var(--f-mono);--fw:400;--fw2:900;--fst:normal;--fs:1.14;--fs2:.82;--ls:.05em;--stretch:100%;--sa:#e5383b;--ic:var(--ic-moto);--icload:var(--ic-wheel);--load:spin .7s linear infinite;
+  --stripe:repeating-linear-gradient(90deg,#e5383b 0 16px,#f6f6f6 16px 32px)}
+
+/* --- sfondi illustrati --- */
+body{position:relative;z-index:0}
+body::before,body::after{content:"";position:fixed;pointer-events:none;z-index:-1}
+body::before{inset:0;background:var(--bgl,none)}
+body[data-sport="home"]{--bgl:var(--art-home) 0 0/300px 300px repeat,radial-gradient(1100px 620px at 0% -10%,rgba(229,56,59,.18),transparent 70%)}
+body[data-sport="calcio"]{--bgl:var(--art-calcio) center 120px/min(1500px,150vw) auto no-repeat,repeating-linear-gradient(90deg,rgba(47,191,113,.07) 0 90px,rgba(47,191,113,.02) 90px 180px),radial-gradient(1200px 700px at 50% -10%,rgba(47,191,113,.22),transparent 70%)}
+body[data-sport="basket"]{--bgl:var(--art-basket) center bottom/min(900px,120vw) auto no-repeat,repeating-linear-gradient(0deg,transparent 0 298px,rgba(0,0,0,.25) 298px 300px),repeating-linear-gradient(90deg,rgba(196,136,79,.075) 0 42px,rgba(150,95,50,.025) 42px 84px),radial-gradient(900px 600px at 85% -10%,rgba(245,128,62,.25),transparent 70%)}
+body[data-sport="tennis"]{--bgl:var(--art-tennis) center 140px/min(1600px,160vw) auto no-repeat,radial-gradient(1100px 760px at 50% 45%,rgba(36,92,170,.32),transparent 75%),radial-gradient(700px 500px at 0% 0%,rgba(201,220,60,.17),transparent 70%)}
+body[data-sport="rugby"]{--bgl:var(--art-rugby) center/cover no-repeat,radial-gradient(1000px 700px at 50% 0%,rgba(63,167,214,.24),transparent 70%),linear-gradient(180deg,rgba(31,107,58,.14),rgba(31,107,58,.03))}
+body[data-sport="moto"]{--bgl:var(--art-moto) 0 0/220px 220px repeat,repeating-linear-gradient(115deg,transparent 0 120px,rgba(255,255,255,.025) 120px 123px,transparent 123px 260px),radial-gradient(1000px 600px at 100% 0%,rgba(229,56,59,.24),transparent 70%)}
+/* filigrana: l'icona dello sport, enorme e quasi invisibile */
+body::after{right:-7vmin;bottom:-9vmin;width:52vmin;height:52vmin;background:var(--sa);opacity:.055;-webkit-mask:var(--ic) center/contain no-repeat;mask:var(--ic) center/contain no-repeat;transform:rotate(-16deg);animation:float 14s ease-in-out infinite}
+body[data-sport="rugby"]::after{-webkit-mask-image:var(--ic-posts);mask-image:var(--ic-posts)}
+body[data-sport="moto"]::after{-webkit-mask-image:var(--ic-flag);mask-image:var(--ic-flag);transform:rotate(-8deg)}
+@keyframes float{50%{transform:rotate(-10deg) translateY(-2vmin)}}
+
+/* pannelli un filo trasparenti, così lo sfondo si intravede */
+.card{background:color-mix(in srgb,var(--panel) 88%,transparent);backdrop-filter:blur(3px)}
+.mtile,.mrow,.htile,.chip,.tabs,.tmatch{background-color:color-mix(in srgb,var(--panel) 90%,transparent)}
+html[data-couch="1"] .card,html[data-style="regia"][data-couch="1"] .card{backdrop-filter:none}
+
+/* --- striscia dello sport: in cima alla pagina e su ogni scheda --- */
+.top{border-top:0}
+.top::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:var(--stripe)}
+.card::before{content:"";position:absolute;left:14px;right:14px;top:-1px;height:3px;border-radius:0 0 3px 3px;background:var(--stripe);opacity:.85}
+.card.full::before{left:0;right:0}
+
+/* --- tipografia per sport (selettori forti: valgono in entrambi gli stili) --- */
+html[data-style] body .card>header h2{font-family:var(--f-sport);font-weight:var(--fw);font-style:var(--fst);font-stretch:var(--stretch);letter-spacing:var(--ls);font-size:calc(var(--h2size)*var(--fs));line-height:1.05;font-synthesis:none}
+html[data-style] body .card>header h2::before{width:15px;height:15px;border-radius:0;background:var(--sa);-webkit-mask:var(--ic) center/contain no-repeat;mask:var(--ic) center/contain no-repeat;vertical-align:-.12em;margin-right:8px}
+html[data-style] body .bug .score{font-family:var(--f-score);font-weight:var(--fw2);font-style:var(--fst);font-size:calc(var(--scoresize)*var(--fs2));font-synthesis:none;letter-spacing:.01em}
+html[data-style] body .bug .tm .nm{font-family:var(--f-sport);font-weight:var(--fw);font-style:var(--fst);font-size:calc(var(--nmsize)*var(--fs));letter-spacing:var(--ls);font-synthesis:none}
+html[data-style] body .mtile .sc{font-family:var(--f-score);font-weight:var(--fw2);font-style:var(--fst);font-size:calc(var(--mtsc)*var(--fs2));font-synthesis:none}
+html[data-style] body .mrow .s{font-family:var(--f-score);font-weight:var(--fw2);font-style:var(--fst);font-size:calc(var(--mrs)*var(--fs2));font-synthesis:none}
+html[data-style] body .htile .ln .v{font-family:var(--f-score);font-weight:var(--fw2);font-style:var(--fst);font-size:calc(var(--hv)*var(--fs2));font-synthesis:none}
+html[data-style] body .htile .ln .n{font-family:var(--f-sport);font-weight:var(--fw);font-style:var(--fst);font-size:calc(var(--hn)*var(--fs));letter-spacing:var(--ls);font-stretch:var(--stretch);font-synthesis:none}
+html[data-style] body .tabs button{font-family:var(--f-sport);font-weight:var(--fw);font-style:var(--fst);font-size:calc(var(--tabsz)*var(--fs));letter-spacing:var(--ls);font-stretch:var(--stretch);font-synthesis:none;text-transform:uppercase}
+html[data-style] body .al .big{font-family:var(--f-score);font-weight:var(--fw2);font-style:var(--fst);font-size:calc(var(--alb)*var(--fs2));font-synthesis:none}
+html[data-style] body .al .tt{font-family:var(--f-sport);font-weight:var(--fw);font-style:var(--fst);letter-spacing:var(--ls);font-synthesis:none}
+html[data-style] body .trow .p,html[data-style] body .cd,html[data-style] body .tmatch .sets b,html[data-style] body .setnum{font-family:var(--f-score);font-weight:var(--fw2);font-style:var(--fst);font-synthesis:none}
+html[data-style] body .hsec>h2{font-family:var(--f-sport);font-weight:var(--fw);font-style:var(--fst);letter-spacing:var(--ls)}
+
+/* --- icone --- */
+.ico{width:1.2em;height:1.2em;display:inline-block;vertical-align:-.24em;flex:none;overflow:visible}
+.tabs button .ico{width:17px;height:17px;color:var(--sa)}
+.tabs button[aria-pressed="true"] .ico{color:#0b0f19}
+.tabs button:not([aria-pressed="true"]):hover .ico{animation:var(--load);animation-iteration-count:2}
+.ico-y{color:var(--yellow)}.ico-r{color:var(--red)}.ico-g{color:var(--green)}.ico-sub{color:var(--cyan)}
+.feed li>span:nth-child(2){display:flex;justify-content:center}
+.feed li>span:nth-child(2) .ico{width:17px;height:17px;color:var(--sa)}
+.feed li>span:nth-child(2) .ico.ico-y{color:var(--yellow)}.feed li>span:nth-child(2) .ico.ico-r{color:var(--red)}.feed li>span:nth-child(2) .ico.ico-sub{color:var(--cyan)}.feed li>span:nth-child(2) .ico.ico-g{color:var(--green)}
+.sportpill .ico{width:15px;height:15px;color:var(--tc)}
+.chip .ico{width:15px;height:15px}
+.htile:hover .sportpill .ico,.htile:focus-visible .sportpill .ico{animation:var(--load);animation-iteration-count:2}
+
+/* --- caricamento: la palla dello sport rimbalza, il casco… la ruota gira --- */
+html[data-style] body .loading::after{width:20px;height:20px;border:0;border-radius:0;background:var(--sa);-webkit-mask:var(--icload) center/contain no-repeat;mask:var(--icload) center/contain no-repeat;animation:var(--load);vertical-align:-5px;margin-left:10px}
+@keyframes roll{from{transform:translateX(-12px) rotate(-200deg)}to{transform:translateX(12px) rotate(160deg)}}
+@keyframes dribble{from{transform:translateY(-12px)}to{transform:translateY(2px) scaleY(.9)}}
+@keyframes bounce{from{transform:translateY(-8px) rotate(-20deg)}to{transform:translateY(1px) rotate(20deg)}}
+@keyframes pulse2{50%{transform:scale(.8);opacity:.6}}
+
+/* --- testata dello sport --- */
+.sporthead{display:flex;align-items:center;gap:14px;min-width:0}
+.shicon{display:grid;place-items:center;width:calc(var(--shsize)*1.6);height:calc(var(--shsize)*1.6);border-radius:16px;background:color-mix(in srgb,var(--sa) 16%,transparent);border:1px solid color-mix(in srgb,var(--sa) 45%,transparent);flex:none}
+.shicon .ico{width:calc(var(--shsize)*1.05);height:calc(var(--shsize)*1.05);color:var(--sa);animation:var(--load);animation-iteration-count:3}
+.shtxt{min-width:0}
+.sporthead h1{font-family:var(--f-sport);font-weight:var(--fw);font-style:var(--fst);font-stretch:var(--stretch);letter-spacing:var(--ls);font-size:calc(var(--shsize)*var(--fs));line-height:.95;text-transform:uppercase;font-synthesis:none;color:var(--text)}
+.sporthead p{color:var(--muted);margin-top:4px;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html[data-couch="1"] .sporthead p{font-size:15px}
+.al .ico{width:20px;height:20px;color:var(--ac);margin-right:6px;vertical-align:-4px}

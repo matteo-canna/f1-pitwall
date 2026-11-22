@@ -111,8 +111,8 @@ SL.alert=function(a){
   if(SL.settings.alerts==="fav"&&!a.important)return;
   if(window.isFollower&&window.isFollower())return; /* le finestre secondarie non ripetono gli avvisi */
   if(a.id){if(recent.has(a.id)&&Date.now()-recent.get(a.id)<90000)return;recent.set(a.id,Date.now());}
-  const el=document.createElement("div");el.className="al";el.style.setProperty("--ac",a.color||"var(--green)");
-  el.innerHTML='<span class="big">'+SL.h(a.big||"LIVE")+'</span><span class="tt">'+SL.h(a.title||"")+'</span><span class="tx">'+SL.h(a.text||"")+'</span>';
+  const el=document.createElement("div");el.className="al sp-"+(a.sport||SL.state.sport||"home");el.style.setProperty("--ac",a.color||"var(--green)");
+  el.innerHTML='<span class="big">'+SL.h(a.big||"LIVE")+'</span><span class="tt">'+(a.icon||a.sport?SL.ico(a.icon||a.sport):"")+SL.h(a.title||"")+'</span><span class="tx">'+SL.h(a.text||"")+'</span>';
   if(a.go){el.style.cursor="pointer";el.addEventListener("click",()=>SL.go(a.go));}
   const box=$("alerts");box.prepend(el);while(box.children.length>4)box.lastChild.remove();
   setTimeout(()=>{el.classList.add("out");setTimeout(()=>el.remove(),450);},a.ms||9000);
@@ -206,6 +206,7 @@ SL.route=function(){
   const sub=$("subbar").cloneNode(false),main=$("main").cloneNode(false);$("subbar").replaceWith(sub);$("main").replaceWith(main);
   SL.ui.reset(st.sport);
   const mod=SL.sports[st.sport];
+  const head=SL.icons.head(st.sport);if(head)sub.appendChild(head);
   try{mod.mount({st,sub,main});}catch(e){console.error(e);main.innerHTML='<div class="empty" style="grid-column:1/-1">Qualcosa è andato storto in questa sezione. <b>Ricarica la pagina.</b></div>';}
   SL.syncOut();
   document.title=(st.sport==="home"?"Live ora":mod.name)+" · Sport LIVE APP";
@@ -215,7 +216,7 @@ SL.setLive=(sport,n)=>{SL.liveCount[sport]=n;const b=document.querySelector('#ta
 SL.renderTabs=function(){
   const t=$("tabs");
   if(!t.children.length){
-    t.innerHTML=SL.order.map(k=>{const m=SL.sports[k];return'<button type="button" data-s="'+k+'" style="--tabc:'+m.color+'" aria-pressed="false"><span class="ic" aria-hidden="true">'+m.icon+'</span>'+SL.h(m.tab||m.name).toUpperCase()+'<span class="ln"></span></button>';}).join("");
+    t.innerHTML=SL.order.map(k=>{const m=SL.sports[k];return'<button type="button" class="sp-'+k+'" data-s="'+k+'" style="--tabc:'+m.color+'" aria-pressed="false">'+SL.ico(k)+SL.h(m.tab||m.name)+'<span class="ln"></span></button>';}).join("");
     t.addEventListener("click",e=>{const b=e.target.closest("button");if(b)SL.go({sport:b.dataset.s});});
   }
   t.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.s===SL.state.sport)));
@@ -223,6 +224,7 @@ SL.renderTabs=function(){
 };
 
 SL.start=function(){
+  SL.icons.init();
   SL.applyLook();
   window.addEventListener("resize",()=>{if(SL.settings.couch==="auto")SL.applyLook();});
   window.addEventListener("popstate",SL.route);
