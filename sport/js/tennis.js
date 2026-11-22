@@ -50,13 +50,13 @@ M.onChange=function(p,it){const a=p.m,b=it.m;const nm=b.p.map(x=>x.name).join(" 
   return null;};
 
 const DEFS=[
+  {k:"tv",n:"Diretta TV",sz:2,fixed:true},
   {k:"match",n:"Partita",sz:2},
   {k:"today",n:"Partite",sz:2},
   {k:"ita",n:"Italiani",sz:2},
   {k:"draw",n:"Tabellone",sz:3,couch:false},
   {k:"rank",n:"Ranking ATP",sz:2},
-  {k:"cal",n:"Calendario tornei",sz:2},
-  {k:"tv",n:"Diretta TV",sz:2,couch:false}
+  {k:"cal",n:"Calendario tornei",sz:2}
 ];
 M.mount=function(ctx){
   const st=ctx.st;const S={evs:[],matches:[],t:st.t||"",sel:st.e||"",f:st.f||"all",type:"S",rank:null};

@@ -19,9 +19,10 @@ UI.mount=function(main,defs){
   defs.forEach(d=>{
     let show=true;
     if(solo)show=solo.indexOf(d.k)>=0;
+    else if(d.fixed)show=true; /* la Diretta TV si vede sempre */
     else if(hid.indexOf(d.k)>=0){show=false;hiddenUser.push(d);}
     else if(couch&&d.couch===false&&!all){show=false;hiddenCouch++;}
-    const el=document.createElement("article");el.className="card";el.dataset.k=d.k;el.dataset.sz=String(sz[d.k]||d.sz||2);
+    const el=document.createElement("article");el.className="card";el.dataset.k=d.k;el.dataset.sz=String(d.fixed?d.sz:(sz[d.k]||d.sz||2));if(d.fixed)el.classList.add("fixed");
     el.innerHTML='<header><h2>'+h(d.n)+'</h2><span class="sub"></span><div class="tools"></div><button type="button" class="mbtn" aria-label="Opzioni sezione '+h(d.n)+'" title="Misura e schermo intero">⋯</button></header><div class="body'+(d.flush?" flush":"")+'"><div class="loading">Carico</div></div>';
     if(!show)el.hidden=true;
     main.appendChild(el);
@@ -51,7 +52,7 @@ UI.mount=function(main,defs){
 UI.menu=function(c){
   document.querySelectorAll(".menu").forEach(m=>m.remove());
   const cur=+c.el.dataset.sz,m=document.createElement("div");m.className="menu";m.setAttribute("role","menu");
-  m.innerHTML=[1,2,3].map(v=>'<button type="button" data-sz="'+v+'" aria-pressed="'+(cur===v)+'">'+SZN[v]+'</button>').join("")+
+  m.innerHTML=c.def.fixed?'<button type="button" data-a="full">⛶ SCHERMO INTERO</button>':[1,2,3].map(v=>'<button type="button" data-sz="'+v+'" aria-pressed="'+(cur===v)+'">'+SZN[v]+'</button>').join("")+
     '<button type="button" data-a="full">⛶ INTERO</button>'+(SL.solo?"":'<button type="button" data-a="hide">NASCONDI</button>');
   c.el.appendChild(m);m.querySelector("button").focus();
   m.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;e.stopPropagation();

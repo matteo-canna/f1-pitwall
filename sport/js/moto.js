@@ -48,20 +48,20 @@ M.onChange=function(p,it){if(!it.R)return null;const a=p.R&&p.R[0],b=it.R[0];if(
 
 /* ---------- pagina ---------- */
 const DEFS_GP=[
+  {k:"tv",n:"Diretta TV",sz:2,fixed:true},
   {k:"timing",n:"Live timing",sz:2},
   {k:"gap",n:"Distacchi in pista",sz:2},
   {k:"weekend",n:"Weekend",sz:1},
   {k:"results",n:"Risultati sessione",sz:2},
   {k:"standings",n:"Classifica mondiale",sz:2},
-  {k:"cal",n:"Calendario",sz:1,couch:false},
-  {k:"tv",n:"Diretta TV",sz:2,couch:false}
+  {k:"cal",n:"Calendario",sz:1,couch:false}
 ];
 const DEFS_SBK=[
+  {k:"tv",n:"Diretta TV",sz:2,fixed:true},
   {k:"latest",n:"Ultima sessione",sz:2},
   {k:"round",n:"Round e sessioni",sz:2},
   {k:"standings",n:"Classifica mondiale",sz:2},
-  {k:"cal",n:"Calendario",sz:2,couch:false},
-  {k:"tv",n:"Diretta TV",sz:2,couch:false}
+  {k:"cal",n:"Calendario",sz:2,couch:false}
 ];
 M.mount=function(ctx){
   const st=ctx.st,ser=st.s==="sbk"?"sbk":"gp";
@@ -69,7 +69,7 @@ M.mount=function(ctx){
   r.appendChild(UI.chips([{k:"gp",n:"MotoGP"},{k:"sbk",n:"WorldSBK"}],ser,v=>SL.go({s:v==="gp"?"":v})));
   ctx.sub.appendChild(r);
   if(!SL.extData()){
-    const cards=UI.mount(ctx.main,[{k:"need",n:"Dati moto",sz:2},{k:"tv",n:"Diretta TV",sz:2}]);UI.tv(cards.tv,"moto");
+    const cards=UI.mount(ctx.main,[{k:"tv",n:"Diretta TV",sz:2,fixed:true},{k:"need",n:"Dati moto",sz:2}]);UI.tv(cards.tv,"moto");
     const tvLike=SL.isTVLike();
     cards.need.body.innerHTML='<div class="empty" style="text-align:left;line-height:1.6"><b>MotoGP e Superbike non permettono ad altri siti di leggere i loro dati.</b><br>'+
       (tvLike?"Su Smart TV e tablet questa sezione non può mostrarli. Aprila da un PC con Chrome o Edge e l'estensione dell'app.":"Installa (o aggiorna) l'estensione per Chrome/Edge da <b>Impostazioni ⚙</b>: sblocca live timing, risultati e classifiche. È la stessa estensione della Diretta TV dell'app F1.")+

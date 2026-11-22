@@ -30,6 +30,7 @@ M.onChange=function(p,it){const a=p.ev,b=it.ev,t=b.away.name+" "+b.away.score+" 
   return null;};
 
 const DEFS=[
+  {k:"tv",n:"Diretta TV",sz:2,fixed:true},
   {k:"match",n:"Partita",sz:2},
   {k:"wp",n:"Probabilità di vittoria",sz:2},
   {k:"games",n:"Tutte le partite",sz:3},
@@ -37,8 +38,7 @@ const DEFS=[
   {k:"leaders",n:"Migliori in campo",sz:1},
   {k:"box",n:"Box score",sz:3},
   {k:"pbp",n:"Play-by-play",sz:2,couch:false},
-  {k:"table",n:"Classifica",sz:2},
-  {k:"tv",n:"Diretta TV",sz:2,couch:false}
+  {k:"table",n:"Classifica",sz:2}
 ];
 M.mount=function(ctx){
   const st=ctx.st,day=+st.d||0;

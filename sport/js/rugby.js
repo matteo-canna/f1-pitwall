@@ -31,12 +31,12 @@ function trackScore(ev){if(!ev.live&&!ev.done)return;const k="rgtl."+ev.id,tl=SL
   tl.h=hs;tl.a=as;SL.store.sset(k,tl);}
 
 const DEFS=[
+  {k:"tv",n:"Diretta TV",sz:2,fixed:true},
   {k:"match",n:"Partita",sz:2},
   {k:"lineup",n:"Formazioni in campo",sz:2},
   {k:"matches",n:"Calendario e risultati",sz:3},
   {k:"table",n:"Classifica",sz:2},
-  {k:"form",n:"Forma e precedenti",sz:1},
-  {k:"tv",n:"Diretta TV",sz:2,couch:false}
+  {k:"form",n:"Forma e precedenti",sz:1}
 ];
 M.mount=function(ctx){
   const st=ctx.st;let comp=st.c||"ita";if(comp!=="ita"&&!L.find(x=>x.k===comp))comp="ita";
