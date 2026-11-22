@@ -64,9 +64,9 @@ const DEFS_SBK=[
   {k:"cal",n:"Calendario",sz:2,couch:false}
 ];
 M.mount=function(ctx){
-  const st=ctx.st,ser=st.s==="sbk"?"sbk":"gp";
+  const st=ctx.st,ser=st.s==="sbk"?"sbk":st.s==="live"?"live":"gp";
   const r=document.createElement("div");r.className="row";
-  r.appendChild(UI.chips([{k:"gp",n:"MotoGP"},{k:"sbk",n:"WorldSBK"}],ser,v=>SL.go({s:v==="gp"?"":v})));
+  r.appendChild(UI.chips([UI.liveChip("moto"),{k:"gp",n:"MotoGP"},{k:"sbk",n:"WorldSBK"}],ser,v=>SL.go({s:v==="gp"?"":v})));
   ctx.sub.appendChild(r);
   if(!SL.extData()){
     const cards=UI.mount(ctx.main,[{k:"tv",n:"Diretta TV",sz:2,fixed:true},{k:"need",n:"Dati moto",sz:2}]);UI.tv(cards.tv,"moto");
@@ -76,8 +76,34 @@ M.mount=function(ctx){
       '<br><br>'+(SL.ext()?'<span class="tag big">Hai la versione '+h(SL.ext())+': aggiornala con lo zip nuovo.</span>':"")+(!tvLike?' <button type="button" class="btn pri" id="motoSet">⚙ APRI IMPOSTAZIONI</button>':"")+'</div>';
     const b=cards.need.body.querySelector("#motoSet");if(b)b.onclick=()=>UI.openSettings();
     return;}
-  if(ser==="gp")mountGP(ctx);else mountSBK(ctx);
+  if(ser==="live")mountLive(ctx);else if(ser==="gp")mountGP(ctx);else mountSBK(ctx);
 };
+
+/* ---------- "Live ora": apre la serie che è in pista adesso ---------- */
+async function mountLive(ctx){
+  const rid=SL.routeId,note=document.createElement("div");note.className="row";ctx.sub.appendChild(note);
+  note.appendChild(UI.liveNote("Cerco chi è in pista adesso…"));
+  const [lt,sb]=await Promise.all([SL.tryGet(GP+"timing-gateway/livetiming-lite",{ttl:5000}),SL.tryGet(SBK+"wsbk-results/v1/sessions/latest",{ttl:20000})]);
+  if(rid!==SL.routeId)return; /* nel frattempo hai cambiato pagina */
+  const gpLive=lt&&ltToday(lt)&&ltState(lt)==="in";
+  const a=sb&&sb.data&&sb.data.attributes||{},sbkLive=!!(a.effective_start_date&&!a.effective_end_date);
+  note.innerHTML="";
+  if(gpLive){note.appendChild(UI.liveNote("In pista adesso: "+(lt.head.category||"MotoGP")+" · "+lt.head.session_name+" · "+lt.head.event_tv_name));mountGP(ctx);}
+  else if(sbkLive){note.appendChild(UI.liveNote("In pista adesso: WorldSBK · "+(SBKN[a.short_name]||a.short_name||"")));mountSBK(ctx);}
+  else{
+    const cards=UI.mount(ctx.main,[{k:"tv",n:"Diretta TV",sz:2,fixed:true},{k:"nolive",n:"Live ora",sz:2}]);UI.tv(cards.tv,"moto");
+    note.innerHTML='<span class="muted">Nessuna sessione in pista in questo momento. Controllo di nuovo ogni minuto.</span>';
+    /* prossima sessione: nel GP di questo weekend, altrimenti in quello successivo */
+    let nx="";try{const evs=await events(),cur=currentEvent(evs),i=evs.indexOf(cur);
+      for(const ev of [cur,evs[i+1]].filter(Boolean)){const cat=await gpCat(ev.id),S=await gpSessions(ev.id,cat.id);const n=S.filter(s=>new Date(s.date)>Date.now()).sort((x,y)=>new Date(x.date)-new Date(y.date))[0];
+        if(n){nx="La prossima MotoGP: <b>"+h(sesName(n))+"</b> "+h(SL.when(n.date))+" · "+h(ev.sponsored_name||ev.name)+".";break;}}
+      const ne=evs.find(e=>new Date(e.date_start)>Date.now());if(!nx&&ne)nx="Prossimo GP: <b>"+h(ne.sponsored_name||ne.name)+"</b>, dal "+h(SL.fmtDay(ne.date_start))+" (orari non ancora pubblicati).";}catch(e){}
+    if(rid!==SL.routeId)return;
+    cards.nolive.body.innerHTML='<div class="nolive">'+SL.ico("flag")+'<div>Nessuna sessione MotoGP o WorldSBK in pista adesso.<br>'+(nx||"")+'</div></div>';
+    SL.every(async()=>{const d=await SL.tryGet(GP+"timing-gateway/livetiming-lite",{ttl:5000});if(d&&ltToday(d)&&ltState(d)==="in"&&rid===SL.routeId)SL.route();},60000,{delay:60000});
+  }
+  UI.dock(ctx.sub,ctx.main);
+}
 
 function mountGP(ctx){
   const cards=UI.mount(ctx.main,DEFS_GP);UI.tv(cards.tv,"moto");

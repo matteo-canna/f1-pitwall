@@ -197,8 +197,9 @@ if(SL.chan)SL.chan.onmessage=ev=>{const m=ev.data||{};
 };
 
 /* ---------- disegno della pagina ---------- */
+SL.routeId=0;
 SL.route=function(){
-  const st=SL.parseHash();SL.state=st;
+  const st=SL.parseHash();SL.state=st;SL.routeId++;
   SL.clearTimers();
   document.body.dataset.sport=st.sport;
   SL.renderTabs();
@@ -210,7 +211,7 @@ SL.route=function(){
   const head=SL.icons.head(st.sport);if(head)sub.appendChild(head);
   try{mod.mount({st,sub,main});}catch(e){console.error(e);main.innerHTML='<div class="empty" style="grid-column:1/-1">Qualcosa è andato storto in questa sezione. <b>Ricarica la pagina.</b></div>';}
   /* Diretta TV in alto a sinistra: la barra di competizioni e partite le si affianca a destra */
-  if(main.querySelector('.card[data-k="tv"]:not([hidden])')&&!SL.solo){sub.classList.add("ingrid");main.prepend(sub);}
+  SL.ui.dock(sub,main);
   SL.syncOut();
   document.title=(st.sport==="home"?"Live ora":mod.name)+" · Sport LIVE APP";
 };

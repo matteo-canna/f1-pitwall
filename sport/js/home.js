@@ -21,7 +21,7 @@ async function tickToday(){
       if(prev&&prev.sig!==it.sig&&m.onChange){const a=m.onChange(prev,it);if(a){a.important=a.important!=null?a.important:it.important;a.go=a.go||it.go;a.sport=s;SL.alert(a);SL.emit("flash",it.id);}}});});
   LIVE.updated=Date.now();
   SL.setLive("home",[...LIVE.items.values()].filter(x=>x.live).length);
-  SL.emit("live");
+  SL.emit("live");SL.ui.refreshLiveChips();
 }
 SL.sports.home={
   name:"Live ora",tab:"Live ora",icon:"●",color:"#e5383b",

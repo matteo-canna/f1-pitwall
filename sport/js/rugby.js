@@ -39,26 +39,33 @@ const DEFS=[
   {k:"form",n:"Forma e precedenti",sz:1}
 ];
 M.mount=function(ctx){
-  const st=ctx.st;let comp=st.c||"ita";if(comp!=="ita"&&!L.find(x=>x.k===comp))comp="ita";
+  const st=ctx.st;let comp=st.c||"ita";if(comp!=="ita"&&comp!=="live"&&!L.find(x=>x.k===comp))comp="ita";
+  const liveMode=comp==="live";
   const r=document.createElement("div");r.className="row";
-  r.appendChild(UI.chips([{k:"ita",n:"Italia",ic:"ita"}].concat(L.map(x=>({k:x.k,n:x.n}))),comp,v=>SL.go({c:v,e:""})));
+  r.appendChild(UI.chips([UI.liveChip("rugby"),{k:"ita",n:"Italia",ic:"ita"}].concat(L.map(x=>({k:x.k,n:x.n}))),comp,v=>SL.go({c:v,e:""})));
   ctx.sub.appendChild(r);
+  if(liveMode){const r2=document.createElement("div");r2.className="row";r2.appendChild(UI.liveNote("Solo le partite in corso adesso, in tutte le competizioni seguite."));ctx.sub.appendChild(r2);}
   const cards=UI.mount(ctx.main,DEFS);UI.tv(cards.tv,"rugby");
   const S={evs:[],sel:st.e||"",sum:null};
   const sel=()=>S.evs.find(x=>x.id===S.sel);
   cards.matches.body.addEventListener("click",e=>{const b=e.target.closest(".mrow");if(b)select(b.dataset.ev);});
   function select(id){if(id===S.sel)return;S.sel=id;SL.setQuiet({e:id});drawList();S.sum=null;["match","lineup","form"].forEach(k=>cards[k].body.innerHTML='<div class="loading">Carico</div>');loadMatch();loadTable();}
   async function loadList(){
-    const y=new Date().getFullYear(),list=comp==="ita"?L:L.filter(x=>x.k===comp),all=[],seen=new Set();const today=SL.dayKey(Date.now());
+    const y=new Date().getFullYear(),list=comp==="ita"||liveMode?L:L.filter(x=>x.k===comp),all=[],seen=new Set();const today=SL.dayKey(Date.now());
     await Promise.all(list.map(async c=>{
-      const [a,b,t]=await Promise.all([SL.tryGet(SL.ESPN+"rugby/"+c.k+"/scoreboard?dates="+y,{ttl:600000}),SL.tryGet(SL.ESPN+"rugby/"+c.k+"/scoreboard?dates="+(y+1),{ttl:36e5}),SL.tryGet(SL.ESPN+"rugby/"+c.k+"/scoreboard?dates="+today,{ttl:15000})]);
+      /* in "Live ora" basta il tabellone di oggi */
+      const [a,b,t]=await Promise.all([liveMode?null:SL.tryGet(SL.ESPN+"rugby/"+c.k+"/scoreboard?dates="+y,{ttl:600000}),liveMode?null:SL.tryGet(SL.ESPN+"rugby/"+c.k+"/scoreboard?dates="+(y+1),{ttl:36e5}),SL.tryGet(SL.ESPN+"rugby/"+c.k+"/scoreboard?dates="+today,{ttl:15000})]);
       const evs=[].concat((t&&t.events)||[],(a&&a.events)||[],(b&&b.events)||[]);
       evs.forEach(e=>{if(seen.has(String(e.id)))return;const ev=E.norm(e,"rugby",c.k,c.n);if(comp==="ita"&&ev.home.name!=="Italia"&&ev.away.name!=="Italia")return;seen.add(ev.id);all.push(ev);});}));
-    S.evs=all.sort((a,b)=>new Date(a.date)-new Date(b.date));
+    S.today=all;
+    S.evs=(liveMode?all.filter(x=>x.live||(x.id===S.sel&&x.done)):all).sort((a,b)=>new Date(a.date)-new Date(b.date));
     S.evs.forEach(trackScore);
     if(!S.sel||!sel()){const now=Date.now();const p=S.evs.find(x=>x.live)||S.evs.filter(x=>x.done).pop()||S.evs.find(x=>new Date(x.date)>now)||S.evs[0];S.sel=p?p.id:"";if(S.sel)SL.setQuiet({e:S.sel});}
     drawList();}
-  function drawList(){const c=cards.matches;if(!S.evs.length){c.body.innerHTML=UI.empty("Nessuna partita trovata per questa scelta.");return;}
+  function drawList(){const c=cards.matches;
+    if(liveMode&&!S.evs.length){const nx=(S.today||[]).filter(x=>x.state==="pre").sort((a,b)=>new Date(a.date)-new Date(b.date))[0];
+      c.body.innerHTML='<div class="nolive">'+SL.ico("rugby")+'<div>'+(nx?"Nessuna partita in corso. La prossima: <b>"+h(nx.home.name+" – "+nx.away.name)+"</b> alle "+h(SL.fmtTime(nx.date))+" ("+h(nx.comp)+").":"Nessuna partita di rugby in corso e nessun'altra oggi nelle competizioni seguite.")+'</div></div>';c.sub("in corso adesso");return;}
+    if(!S.evs.length){c.body.innerHTML=UI.empty("Nessuna partita trovata per questa scelta.");return;}
     const now=Date.now(),live=S.evs.filter(x=>x.live),next=S.evs.filter(x=>x.state==="pre"&&new Date(x.date)>now-36e5).slice(0,8),past=S.evs.filter(x=>x.done).slice(-12).reverse();
     const row=ev=>{const sc=ev.state!=="pre";const ita=ev.home.name==="Italia"||ev.away.name==="Italia";
       return'<button type="button" class="mrow'+(ev.id===S.sel?" sel":"")+(ita?" ":"")+'" data-ev="'+ev.id+'"'+(ita?' style="border-left:3px solid var(--ita)"':"")+'><span class="min'+(ev.live?" live":"")+'">'+h(ev.live?ev.clock||"LIVE":ev.done?SL.fmtDay(ev.date):SL.fmtDay(ev.date))+'</span>'+
@@ -69,8 +76,8 @@ M.mount=function(ctx){
     if(live.length)s+='<div class="grp-h">In diretta</div>'+live.map(row).join("");
     s+='<div class="grp-h">Prossime</div>'+(next.length?next.map(row).join(""):'<div class="muted">Nessuna partita in calendario per ora.</div>');
     if(past.length)s+='<div class="grp-h">Risultati</div>'+past.map(row).join("");
-    c.body.innerHTML=s+'</div>';c.sub(comp==="ita"?"Italia · tutte le competizioni":compN(comp));}
-  async function loadMatch(){const ev=sel();if(!ev){["match","lineup","form"].forEach(k=>cards[k].body.innerHTML=UI.empty("Scegli una partita."));return;}
+    c.body.innerHTML=s+'</div>';c.sub(liveMode?"in corso adesso":comp==="ita"?"Italia · tutte le competizioni":compN(comp));}
+  async function loadMatch(){const ev=sel();if(!ev){["match","lineup","form"].forEach(k=>cards[k].body.innerHTML=UI.empty(liveMode?"Nessuna partita in corso adesso: appena ne inizia una compare qui.":"Scegli una partita."));return;}
     S.sum=await SL.tryGet(SL.ESPN+"rugby/"+ev.league+"/summary?event="+ev.id,{ttl:ev.live?10000:600000});
     drawMatch();drawLineup();drawForm();}
   function drawMatch(){const c=cards.match,ev=sel();if(!ev)return;const [ch,ca]=V.pair(ev.home.color,ev.away.color);
@@ -102,7 +109,8 @@ M.mount=function(ctx){
     (sum.lastFiveGames||[]).forEach(t=>{const n=SL.tr.team((t.team||{}).displayName||"");s+='<h4 class="muted" style="margin:6px 0 4px">'+h(n)+' · ultime partite</h4>'+(t.events||[]).slice(0,5).map(e=>'<div class="row" style="justify-content:space-between;border-bottom:1px solid var(--line);padding:3px 0"><span>'+h(SL.tr.team((e.opponent||{}).displayName||""))+'</span><span><b style="color:'+(e.gameResult==="W"?"var(--green)":e.gameResult==="L"?"var(--red)":"var(--muted)")+'">'+h(res[e.gameResult]||e.gameResult||"")+'</b> '+h(e.score||"")+'</span></div>').join("");});
     const hh=(sum.headToHeadGames||[])[0];if(hh&&hh.events&&hh.events.length)s+='<h4 class="muted" style="margin:10px 0 4px">Precedenti</h4>'+hh.events.slice(0,5).map(e=>'<div class="row" style="justify-content:space-between;border-bottom:1px solid var(--line);padding:3px 0"><span>'+h(SL.fmtDay(e.gameDate||e.date||""))+'</span><span>'+h(e.score||"")+'</span></div>').join("");
     c.body.innerHTML=s||UI.empty("Dati di forma non disponibili.");}
-  async function loadTable(){const c=cards.table,ev=sel();const lg=ev?ev.league:comp==="ita"?"17567":comp;
+  async function loadTable(){const c=cards.table,ev=sel();if(liveMode&&!ev){c.body.innerHTML=UI.empty("La classifica compare quando c'è una partita in corso.");c.sub("");return;}
+    const lg=ev?ev.league:comp==="ita"?"17567":comp;
     if(lg==="289234"){c.body.innerHTML=UI.empty("I test match non hanno classifica.");c.sub("");return;}
     const d=await SL.tryGet(SL.ESPN2+"rugby/"+lg+"/standings",{ttl:600000});const G=d?E.groups(d):[];
     if(!G.length){c.body.innerHTML=UI.empty("Classifica non disponibile.");return;}
@@ -111,7 +119,7 @@ M.mount=function(ctx){
       g.entries.slice().sort((a,b)=>E.stat(b,"points")-E.stat(a,"points")||E.stat(b,"pointsDifference")-E.stat(a,"pointsDifference")).map((x,i)=>{const n=SL.tr.team(x.team.displayName),me=ev&&(String(x.team.id)===ev.home.id||String(x.team.id)===ev.away.id);
         return'<tr class="'+(n==="Italia"?"ita":"")+(me?" me":"")+'"><td>'+(i+1)+'</td><td class="l"><span class="tn"><img class="logo-t" src="'+h(x.team.logos&&x.team.logos[0]&&x.team.logos[0].href||"")+'" alt="" loading="lazy">'+h(n)+'</span></td><td>'+E.stat(x,"gamesPlayed")+'</td><td>'+E.stat(x,"gamesWon")+'</td><td>'+E.stat(x,"gamesDrawn")+'</td><td>'+E.stat(x,"gamesLost")+'</td><td>'+h(E.statD(x,"pointsDifference"))+'</td><td>'+E.stat(x,"triesFor")+'</td><td>'+E.stat(x,"bonusPoints")+'</td><td><b>'+E.stat(x,"points")+'</b></td></tr>';}).join("")+'</tbody></table>').join("")+'</div><p class="note">Bonus: punti extra per 4+ mete o sconfitta di misura.</p>';}
   const anyLive=()=>S.evs.some(x=>x.live)||S.evs.some(x=>x.state==="pre"&&new Date(x.date)-Date.now()<15*60000&&new Date(x.date)>Date.now());
-  SL.every(async()=>{await loadList();if(!S.sum)await loadMatch();else{const ev=sel();if(ev&&ev.live){await loadMatch();}}},()=>anyLive()?15000:300000);
+  SL.every(async()=>{await loadList();if(!S.sum)await loadMatch();else{const ev=sel();if(ev&&ev.live){await loadMatch();}}},()=>liveMode||anyLive()?15000:300000);
   SL.every(loadTable,600000,{delay:1200});
   SL.every(()=>{const el=cards.match.body.querySelector(".cdown"),ev=sel();if(el&&ev)el.textContent=SL.countdown(new Date(ev.date)-Date.now());},1000,{delay:1000});
 };

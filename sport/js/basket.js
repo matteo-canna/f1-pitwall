@@ -41,10 +41,14 @@ const DEFS=[
   {k:"table",n:"Classifica",sz:2}
 ];
 M.mount=function(ctx){
-  const st=ctx.st,day=+st.d||0;
-  const r=document.createElement("div");r.className="row";r.appendChild(UI.daynav(day,v=>SL.go({d:v||"",e:""})));
-  const hint=document.createElement("span");hint.className="muted";hint.textContent="Orari italiani: le partite della notte sono nel giorno in cui iniziano da noi.";r.appendChild(hint);
-  const strip=document.createElement("div");strip.className="strip";ctx.sub.append(r,strip);
+  const st=ctx.st,liveMode=st.f==="live",day=liveMode?0:(+st.d||0);
+  const r0=document.createElement("div");r0.className="row";
+  r0.appendChild(UI.chips([UI.liveChip("basket"),{k:"all",n:"Tutte le partite"}],liveMode?"live":"all",v=>SL.go({f:v==="live"?"live":"",e:"",d:""})));
+  const r=document.createElement("div");r.className="row";
+  if(liveMode)r.appendChild(UI.liveNote("Solo le partite NBA in corso adesso. Si aggiorna da sola."));
+  else{r.appendChild(UI.daynav(day,v=>SL.go({d:v||"",e:""})));
+    const hint=document.createElement("span");hint.className="muted";hint.textContent="Orari italiani: le partite della notte sono nel giorno in cui iniziano da noi.";r.appendChild(hint);}
+  const strip=document.createElement("div");strip.className="strip";ctx.sub.append(r0,r,strip);
   const cards=UI.mount(ctx.main,DEFS);UI.tv(cards.tv,"basket");
   const S={evs:[],sel:st.e||"",sum:null,team:"all",shot3d:SL.store.get("shot3d","2d"),boxT:"a"};
   const sel=()=>S.evs.find(x=>x.id===S.sel);
@@ -57,19 +61,22 @@ M.mount=function(ctx){
   SL.onPage("resize",()=>{drawWP();});
   function select(id){if(id===S.sel)return;S.sel=id;SL.setQuiet({e:id});drawStrip();drawGames();S.sum=null;shots3D=null;["match","wp","shots","leaders","box","pbp"].forEach(k=>cards[k].body.innerHTML='<div class="loading">Carico</div>');loadGame(true);}
   async function loadBoard(){
-    S.evs=await dayGames(day,15000);
+    const all=await dayGames(day,15000);
+    S.evs=liveMode?all.filter(x=>x.live||(x.id===S.sel&&x.done)):all;
+    if(liveMode&&!S.evs.some(x=>x.live)){const nx=all.concat(await dayGames(1,600000)).filter(x=>x.state==="pre").sort((a,b)=>new Date(a.date)-new Date(b.date))[0];
+      S.next=nx?"Nessuna partita in corso. La prossima: <b>"+h(nx.away.name+" @ "+nx.home.name)+"</b> "+h(SL.when(nx.date))+".":"Nessuna partita NBA in corso.";}else S.next="";
     if(!S.sel||!sel()){const p=S.evs.find(x=>x.live&&x.fav)||S.evs.find(x=>x.live)||S.evs.find(x=>x.fav)||S.evs.find(x=>x.done)||S.evs[0];S.sel=p?p.id:"";if(S.sel)SL.setQuiet({e:S.sel});}
     drawStrip();drawGames();}
-  function drawStrip(){strip.innerHTML=S.evs.map(ev=>{const t=E.tile(ev,S.sel);return t;}).join("")||'<span class="muted">Nessuna partita NBA in questo giorno.</span>';}
+  function drawStrip(){strip.innerHTML=S.evs.map(ev=>{const t=E.tile(ev,S.sel);return t;}).join("")||'<span class="muted">'+(liveMode?S.next:"Nessuna partita NBA in questo giorno.")+'</span>';}
   function drawGames(){const c=cards.games;const n=S.evs.filter(x=>x.live).length;c.sub(n?n+" in diretta":S.evs.length+" partite");
-    if(!S.evs.length){c.body.innerHTML=UI.empty("Nessuna partita NBA in questo giorno.");return;}
+    if(!S.evs.length){c.body.innerHTML=liveMode?'<div class="nolive">'+SL.ico("basket")+'<div>'+S.next+'</div></div>':UI.empty("Nessuna partita NBA in questo giorno.");return;}
     c.body.innerHTML='<div class="mlist">'+S.evs.map(ev=>{const sc=ev.state!=="pre";
       return'<button type="button" class="mrow'+(ev.id===S.sel?" sel":"")+'" data-ev="'+ev.id+'"><span class="min'+(ev.live?" live":"")+'">'+h(ev.live?ev.clock:ev.done?"FIN":SL.fmtTime(ev.date))+'</span>'+
         '<span class="tt"><img class="logo-t" src="'+h(ev.away.logo)+'" alt="" loading="lazy"><span>'+h(ev.away.name)+'</span></span><span class="s">'+(sc?h(ev.away.score):"")+'</span>'+
         '<span class="tt"><img class="logo-t" src="'+h(ev.home.logo)+'" alt="" loading="lazy"><span>'+h(ev.home.name)+'</span></span><span class="s">'+(sc?h(ev.home.score):"")+'</span>'+
         '<span class="last">'+h(ev.away.rec&&ev.home.rec?ev.away.rec+" · "+ev.home.rec:ev.venue)+'</span></button>';}).join("")+'</div>';}
 
-  async function loadGame(first){const ev=sel();if(!ev){["match","wp","shots","leaders","box","pbp"].forEach(k=>cards[k].body.innerHTML=UI.empty("Scegli una partita."));return;}
+  async function loadGame(first){const ev=sel();if(!ev){["match","wp","shots","leaders","box","pbp"].forEach(k=>cards[k].body.innerHTML=UI.empty(liveMode?"Nessuna partita in corso adesso: appena ne inizia una compare qui.":"Scegli una partita."));return;}
     try{S.sum=await E.summary("basketball","nba",ev.id,ev.live?8000:600000);}catch(e){if(first)cards.match.body.innerHTML=UI.empty("Dati della partita non disponibili ora.");return;}
     drawMatch();drawWP();drawShots(first);drawLeaders();drawBox();drawPbp();}
   function T(){const ev=sel(),[ch,ca]=V.pair(ev.home.color,ev.away.color);return{ev,ch,ca,hid:ev.home.id,aid:ev.away.id};}
@@ -150,7 +157,7 @@ M.mount=function(ctx){
       return'<h4 class="muted" style="margin:8px 0 4px">'+h(g.name.replace("Eastern Conference","Est").replace("Western Conference","Ovest"))+'</h4><table class="tbl"><thead><tr><th>#</th><th class="l">Squadra</th><th>V</th><th>P</th><th>%</th><th>GB</th><th>SERIE</th></tr></thead><tbody>'+
         rows.map((x,i)=>{const id=String(x.team.id),me=ev&&(id===ev.home.id||id===ev.away.id);return'<tr class="'+(i<6?"zone-cl":i<10?"zone-el":"")+(me?" me":"")+'"><td>'+(i+1)+'</td><td class="l"><span class="tn"><img class="logo-t" src="'+h(x.team.logos&&x.team.logos[0]&&x.team.logos[0].href||"")+'" alt="" loading="lazy">'+h(x.team.displayName)+'</span></td><td>'+E.stat(x,"wins")+'</td><td>'+E.stat(x,"losses")+'</td><td>'+h(E.statD(x,"winPercent"))+'</td><td>'+h(E.statD(x,"gamesBehind"))+'</td><td>'+h(E.statD(x,"streak"))+'</td></tr>';}).join("")+'</tbody></table>';}).join("")+'</div><div class="legend"><span><i style="background:var(--blue)"></i>Playoff</span><span><i style="background:var(--orange)"></i>Play-in</span></div>';}
   const anyLive=()=>S.evs.some(x=>x.live)||S.evs.some(x=>x.state==="pre"&&new Date(x.date)-Date.now()<15*60000);
-  SL.every(async()=>{await loadBoard();if(!S.sum)await loadGame(true);},()=>anyLive()?15000:180000);
+  SL.every(async()=>{await loadBoard();if(!S.sum)await loadGame(true);},()=>liveMode||anyLive()?15000:180000);
   SL.every(async()=>{const ev=sel();if(ev&&ev.live)await loadGame(false);},10000,{delay:10000});
   SL.every(loadTable,600000,{delay:1500});
   SL.every(()=>{const el=cards.match.body.querySelector(".cdown"),ev=sel();if(el&&ev)el.textContent=SL.countdown(new Date(ev.date)-Date.now());},1000,{delay:1000});

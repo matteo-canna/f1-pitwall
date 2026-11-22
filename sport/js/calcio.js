@@ -50,14 +50,16 @@ const DEFS=[
 ];
 M.defs=DEFS;
 M.mount=function(ctx){
-  const st=ctx.st,day=+st.d||0;let compK=st.c||"ita.1";if(compK!=="all"&&!compOf(compK))compK="ita.1";
+  const st=ctx.st;let compK=st.c||"ita.1";if(compK!=="all"&&compK!=="live"&&!compOf(compK))compK="ita.1";
+  const liveMode=compK==="live",day=liveMode?0:(+st.d||0);
   const dayKey=SL.dayKey(SL.addDays(Date.now(),day));
   /* sottobarra */
   const r1=document.createElement("div");r1.className="row";
   const liveBy={};(SL.live.bySport.calcio||[]).forEach(x=>{if(x.live)liveBy[x.ev.compK]=(liveBy[x.ev.compK]||0)+1;});
-  r1.appendChild(UI.chips([{k:"all",n:"Tutte",live:Object.keys(liveBy).length>0}].concat(COMPS.map(c=>({k:c.k,n:c.n,live:!!liveBy[c.k]}))),compK,v=>SL.go({c:v,e:""})));
+  r1.appendChild(UI.chips([UI.liveChip("calcio"),{k:"all",n:"Tutte",live:Object.keys(liveBy).length>0}].concat(COMPS.map(c=>({k:c.k,n:c.n,live:!!liveBy[c.k]}))),compK,v=>SL.go({c:v,e:"",d:""})));
   const r2=document.createElement("div");r2.className="row";
-  r2.appendChild(UI.daynav(day,v=>SL.go({d:v||"",e:""})));
+  if(liveMode)r2.appendChild(UI.liveNote("Solo le partite in corso adesso, in tutte le competizioni. Si aggiorna da sola."));
+  else r2.appendChild(UI.daynav(day,v=>SL.go({d:v||"",e:""})));
   const nextBox=document.createElement("span");nextBox.className="muted";r2.appendChild(nextBox);
   const strip=document.createElement("div");strip.className="strip";strip.setAttribute("aria-label","Partite");
   ctx.sub.append(r1,r2,strip);
@@ -80,12 +82,15 @@ M.mount=function(ctx){
 
   /* tabellone del giorno */
   async function loadBoard(){
-    const list=compK==="all"?COMPS:[compOf(compK)],all=[],seen=new Set();
+    const list=compK==="all"||liveMode?COMPS:[compOf(compK)],all=[],seen=new Set();
     await Promise.all(list.map(async c=>{const l=await E.soccerDay(c,dayKey,15000);l.forEach(ev=>{if(!seen.has(ev.id)){seen.add(ev.id);all.push(ev);}});}));
-    S.evs=E.sort(all);
+    S.day=all;
+    /* "Live ora": solo le partite in corso; quella che stai guardando resta finché non ne scegli un'altra */
+    S.evs=E.sort(liveMode?all.filter(x=>x.live||(x.id===S.sel&&x.done)):all);
     if(!S.sel||!sel()){const pick=S.evs.find(x=>x.live&&x.important)||S.evs.find(x=>x.live)||S.evs.find(x=>x.important&&!x.done)||S.evs.find(x=>x.state==="pre")||S.evs[S.evs.length-1];S.sel=pick?pick.id:"";if(S.sel)SL.setQuiet({e:S.sel});}
     drawStrip();drawMulti();
-    if(!S.evs.length)await nextDate();else nextBox.textContent="";
+    if(liveMode)nextBox.innerHTML=S.evs.some(x=>x.live)?"":nextKick();
+    else if(!S.evs.length)await nextDate();else nextBox.textContent="";
     if(S.table)drawTable();
   }
   async function nextDate(){
@@ -97,9 +102,12 @@ M.mount=function(ctx){
     const b=nextBox.querySelector("button");if(b)b.onclick=()=>SL.go({d:SL.dayOff(nx)||"",e:""});
   }
   function drawStrip(){strip.innerHTML=S.evs.length?S.evs.map(ev=>E.tile(ev,S.sel)).join(""):"";const b=strip.querySelector('[aria-pressed="true"]');if(b&&b.scrollIntoViewIfNeeded)b.scrollIntoViewIfNeeded();}
+  function nextKick(){const n=(S.day||[]).filter(x=>x.state==="pre").sort((a,b)=>new Date(a.date)-new Date(b.date))[0];
+    return n?"Nessuna partita in corso. La prossima: <b>"+h(n.home.name+" – "+n.away.name)+"</b> alle "+h(SL.fmtTime(n.date))+" ("+h(n.comp)+").":"Nessuna partita in corso e nessun'altra in programma oggi.";}
   function drawMulti(){
     const c=cards.multi,evs=S.evs;const live=evs.filter(x=>x.live).length;
     c.sub(live?live+" in diretta":evs.length?evs.length+" partite":"");
+    if(liveMode&&!live&&!evs.length){c.body.innerHTML='<div class="nolive">'+SL.ico("calcio")+'<div>'+nextKick()+'</div></div>';return;}
     if(!evs.length){c.body.innerHTML=UI.empty("Nessuna partita in questo giorno per "+(compK==="all"?"le competizioni seguite":h(compOf(compK).n))+".");return;}
     const groups={};evs.forEach(ev=>{(groups[ev.comp]=groups[ev.comp]||[]).push(ev);});
     let s='<div class="mlist">';
@@ -114,7 +122,7 @@ M.mount=function(ctx){
 
   /* partita selezionata */
   async function loadMatch(first){
-    const ev=sel();if(!ev){["match","stats","momentum","pitch","shots","events","cronaca"].forEach(k=>cards[k].body.innerHTML=UI.empty("Scegli una partita."));return;}
+    const ev=sel();if(!ev){["match","stats","momentum","pitch","shots","events","cronaca"].forEach(k=>cards[k].body.innerHTML=UI.empty(liveMode?"Nessuna partita in corso adesso: appena ne inizia una compare qui.":"Scegli una partita."));return;}
     try{S.sum=await E.summary("soccer",ev.league,ev.id,ev.live?8000:600000);}catch(e){if(first)cards.match.body.innerHTML=UI.empty("Dati della partita non disponibili ora. Riprovo tra poco.");return;}
     S.xg=null;
     drawMatch();drawStats();drawMomentum();drawPitch(first);drawShots();drawEvents();drawCronaca();
@@ -347,7 +355,7 @@ M.mount=function(ctx){
 
   /* classifica live */
   async function loadTable(){
-    const ev=sel();const c=cards.table;if(!ev){c.body.innerHTML=UI.empty("Scegli una partita.");return;}
+    const ev=sel();const c=cards.table;if(!ev){c.body.innerHTML=UI.empty(liveMode?"Nessuna partita in corso adesso: appena ne inizia una compare qui.":"Scegli una partita.");return;}
     const lg=ev.league;if(/friendly/.test(lg)){c.body.innerHTML=UI.empty("Amichevole: nessuna classifica.");c.sub("");S.table=null;return;}
     const d=await SL.tryGet(SL.ESPN2+"soccer/"+lg+"/standings",{ttl:300000});
     if(!d){c.body.innerHTML=UI.empty("Classifica non disponibile.");return;}
@@ -380,7 +388,7 @@ M.mount=function(ctx){
 
   /* aggiornamenti */
   const anyLive=()=>S.evs.some(x=>x.live)||S.evs.some(x=>x.state==="pre"&&new Date(x.date)-Date.now()<15*60000);
-  SL.every(async()=>{await loadBoard();if(!S.sum)await loadMatch(true);},()=>anyLive()?15000:120000);
+  SL.every(async()=>{await loadBoard();if(!S.sum)await loadMatch(true);},()=>liveMode||anyLive()?15000:120000);
   SL.every(async()=>{const ev=sel();if(ev&&ev.live)await loadMatch(false);},12000,{delay:12000});
   SL.every(loadTable,300000,{delay:1500});
   SL.every(()=>{const el=cards.match.body.querySelector(".cdown"),ev=sel();if(el&&ev)el.textContent=SL.countdown(new Date(ev.date)-Date.now());},1000,{delay:1000});

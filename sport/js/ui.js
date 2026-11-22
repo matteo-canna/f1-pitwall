@@ -75,8 +75,15 @@ UI.empty=(t)=>'<div class="empty">'+t+'</div>';
 
 /* ---------- sottobarra: competizioni e giorno ---------- */
 UI.chips=function(items,cur,on,extraCls){const w=document.createElement("div");w.className="chips "+(extraCls||"");
-  w.innerHTML=items.map(it=>'<button type="button" class="chip" data-v="'+h(it.k)+'" aria-pressed="'+(it.k===cur)+'">'+(it.live?'<i class="lv" title="in diretta"></i>':"")+(it.ic?SL.ico(it.ic):"")+h(it.n)+(it.c!=null?' <span class="n">'+it.c+'</span>':"")+'</button>').join("");
+  w.innerHTML=items.map(it=>'<button type="button" class="chip'+(it.hot?" hot"+(it.c?"":" zero"):"")+'"'+(it.hot?' data-sp="'+h(it.hot)+'"':"")+' data-v="'+h(it.k)+'" aria-pressed="'+(it.k===cur)+'">'+(it.live||it.hot?'<i class="lv" title="in diretta"></i>':"")+(it.ic?SL.ico(it.ic):"")+h(it.n)+(it.c!=null?' <span class="n">'+it.c+'</span>':"")+'</button>').join("");
   w.addEventListener("click",e=>{const b=e.target.closest("button");if(b)on(b.dataset.v);});return w;};
+/* filtro "Live ora": eventi in corso adesso in tutte le competizioni dello sport; il numero si aggiorna da solo */
+UI.liveCount=sport=>(SL.live.bySport[sport]||[]).filter(x=>x.live).length;
+UI.liveChip=sport=>({k:"live",n:"Live ora",hot:sport,c:UI.liveCount(sport)});
+UI.refreshLiveChips=()=>document.querySelectorAll(".chip.hot[data-sp]").forEach(b=>{const n=UI.liveCount(b.dataset.sp);const el=b.querySelector(".n");if(el)el.textContent=n;b.classList.toggle("zero",!n);});
+UI.liveNote=t=>{const s=document.createElement("span");s.className="muted";s.innerHTML='<span class="tag live">LIVE</span> '+h(t);return s;};
+/* con la Diretta TV in pagina, la barra di competizioni e partite le si affianca a destra */
+UI.dock=(sub,main)=>{if(!SL.solo&&main.querySelector('.card[data-k="tv"]:not([hidden])')){sub.classList.add("ingrid");main.prepend(sub);}};
 UI.daynav=function(off,on){const w=document.createElement("div");w.className="daynav";const d=SL.addDays(Date.now(),off);
   w.innerHTML='<button type="button" data-d="-1" aria-label="Giorno precedente">‹</button><button type="button" class="cur" data-d="0">'+h(off===0?"Oggi · "+SL.fmtDay(d):SL.relDay(d)===SL.fmtDay(d)?SL.fmtDay(d):SL.relDay(d)+" · "+SL.fmtDay(d))+'</button><button type="button" data-d="1" aria-label="Giorno successivo">›</button>';
   w.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const v=+b.dataset.d;on(v===0?0:off+v);});return w;};
