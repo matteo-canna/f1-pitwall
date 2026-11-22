@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="it" data-style="pitwall">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#090d16">
+<title>Sport LIVE APP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23e5383b'/%3E%3Ccircle cx='32' cy='32' r='13' fill='none' stroke='white' stroke-width='6'/%3E%3Ccircle cx='32' cy='32' r='4' fill='white'/%3E%3C/svg%3E">
+</head>
+<body>
+<header class="top" id="top">
+  <a class="logo" href="#/home" aria-label="Sport LIVE APP, adesso in diretta"><span>SPORT</span><b>LIVE</b></a>
+  <nav class="tabs" id="tabs" aria-label="Sport"></nav>
+  <div class="topr">
+    <span class="clock mono" id="clock" aria-live="off"></span>
+    <button class="tbtn" id="btnScreens" title="Più schermi">⧉ <span>SCHERMI</span></button>
+    <button class="tbtn" id="btnSettings" title="Impostazioni">⚙ <span>IMPOSTAZIONI</span></button>
+    <a class="tbtn f1" id="toF1" href="../" title="Apri F1 Pit Wall">F1 <span>PIT WALL</span> ↗</a>
+  </div>
+</header>
+<div class="follow" id="followBar" hidden>
+  <span class="logo sm"><span>SPORT</span><b>LIVE</b></span>
+  <span id="followTxt">Schermo secondario · segue la finestra principale</span>
+  <a class="tbtn" id="followHome" href="./">⌂ HOME</a>
+</div>
+<div class="subbar" id="subbar"></div>
+<main id="main" class="grid" tabindex="-1"></main>
+<div class="alerts" id="alerts" aria-live="polite"></div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<dialog id="dlgSettings" aria-labelledby="setH">
+  <form method="dialog" class="dlg">
+    <div class="dlgh"><h2 id="setH" class="disp">Impostazioni</h2><button class="x" value="close" aria-label="Chiudi">✕</button></div>
+    <div class="setgrid">
+      <section>
+        <h3>Stile grafico</h3>
+        <div class="seg" id="setStyle" role="group" aria-label="Stile grafico">
+          <button type="button" data-v="pitwall">PIT WALL</button>
+          <button type="button" data-v="regia">REGIA TV</button>
+        </div>
+        <p class="hint">Pit wall: scuro e denso come l'app F1. Regia TV: grafica da sovrimpressione, numeri grandi e colori delle squadre.</p>
+        <h3>Modalità divano</h3>
+        <div class="seg" id="setCouch" role="group" aria-label="Modalità divano">
+          <button type="button" data-v="auto">AUTOMATICA</button>
+          <button type="button" data-v="on">SEMPRE</button>
+          <button type="button" data-v="off">MAI</button>
+        </div>
+        <p class="hint">Testi più grandi e solo le sezioni principali, comoda su Smart TV e tablet. Automatica: si attiva da sola su TV, tablet e schermi lontani. <span id="couchNow"></span></p>
+      </section>
+      <section>
+        <h3>Avvisi a schermo</h3>
+        <div class="seg" id="setAlerts" role="group" aria-label="Avvisi">
+          <button type="button" data-v="fav">SOLO PREFERITI E ITALIA</button>
+          <button type="button" data-v="all">TUTTE LE PARTITE</button>
+          <button type="button" data-v="off">NESSUNO</button>
+        </div>
+        <label class="chk"><input type="checkbox" id="setSound"> Suono quando arriva un avviso</label>
+        <h3>Preferiti <small id="favCount"></small></h3>
+        <p class="hint">Tocca la ★ accanto a una squadra, un tennista o un pilota. Sono salvati solo su questo dispositivo.</p>
+        <ul class="favlist" id="favList"></ul>
+      </section>
+      <section>
+        <h3>Estensione per PC</h3>
+        <p class="hint" id="extState"></p>
+        <p class="hint">Serve su Chrome o Edge per computer: mostra la diretta TV dentro il riquadro e sblocca i dati di MotoGP e Superbike. È la stessa estensione dell'app F1, aggiornata.</p>
+        <p><a class="btn" id="extZip" href="../estensione-diretta-tv.zip" download>⬇ SCARICA ESTENSIONE</a></p>
+        <ol class="hint steps">
+          <li>Estrai lo zip in una cartella che non cancellerai.</li>
+          <li>Apri <b>chrome://extensions</b> (Edge: edge://extensions) e attiva "Modalità sviluppatore".</li>
+          <li>Se avevi già l'estensione F1, premi ↻ su di essa; altrimenti "Carica estensione non pacchettizzata" e scegli la cartella <b>f1pw-tv</b>.</li>
+          <li>Ricarica questa pagina.</li>
+        </ol>
+        <h3>Sezioni</h3>
+        <p><button type="button" class="btn" id="setResetCards">↺ RIPRISTINA SEZIONI E MISURE</button></p>
+        <p class="hint">Dati: ESPN (calcio, NBA, tennis, rugby) e siti ufficiali MotoGP / WorldSBK. Fonti gratuite non ufficiali: a volte possono mancare dati o arrivare in ritardo.</p>
+      </section>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlgScreens" aria-labelledby="scrH">
+  <form method="dialog" class="dlg">
+    <div class="dlgh"><h2 id="scrH" class="disp">Più schermi</h2><button class="x" value="close" aria-label="Chiudi">✕</button></div>
+    <p class="hint" id="scrIntro"></p>
+    <div class="scrtools">
+      <label>Schermi <select id="scrN"></select></label>
+      <button type="button" class="btn" id="scrDetect">🖥 RILEVA SCHERMI</button>
+      <button type="button" class="btn" id="scrAuto">✦ DISPOSIZIONE AUTOMATICA</button>
+    </div>
+    <div class="scrmap" id="scrMap"></div>
+    <div class="dlgf">
+      <button type="button" class="btn" id="scrCloseAll">✕ CHIUDI FINESTRE</button>
+      <button type="button" class="btn pri" id="scrGo">▶ APRI SUGLI SCHERMI</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="js/core.js"></script>
+<script src="js/translate.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/viz.js"></script>
+<script src="js/data.js"></script>
+<script src="js/home.js"></script>
+<script src="js/calcio.js"></script>
+<script src="js/basket.js"></script>
+<script src="js/tennis.js"></script>
+<script src="js/rugby.js"></script>
+<script src="js/moto.js"></script>
+<script>SL.start();</script>
+</body>
+</html>

@@ -29,6 +29,8 @@ button:disabled{cursor:not-allowed;opacity:.45}
 
 /* ---------- top bar ---------- */
 .top{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding:12px 16px;border-bottom:1px solid var(--line);border-top:3px solid var(--flagc,transparent)}
+.sportlink{display:inline-flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:7px 11px;font:800 12px/1 var(--f-mono);letter-spacing:.05em;color:var(--text);text-decoration:none;white-space:nowrap}
+.sportlink:hover{border-color:var(--accent)}
 .logo{background:var(--accent);color:#fff;border-radius:8px;padding:7px 12px;font:900 20px/1 var(--f-display);font-stretch:112%;letter-spacing:-.01em;white-space:nowrap}
 .gp{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:7px 12px;min-width:0;flex:0 1 auto}
 .gpcode{font:800 12px/1 var(--f-mono);color:var(--accent);border:1px solid var(--accent);border-radius:5px;padding:5px 6px}
@@ -603,6 +605,7 @@ body.sgl .p-tv .tvext:not(.open){padding-top:10px;padding-bottom:10px}
 <div class="app" id="app">
 <header class="top">
   <span class="logo">F1 26</span>
+  <a class="sportlink" href="sport/" title="Sport LIVE APP: calcio, basket, tennis, rugby e moto">SPORT LIVE ↗</a>
   <label class="gp" for="gpSel">
     <span id="gpFlag"></span>
     <span class="gpmeta">

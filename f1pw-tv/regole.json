@@ -10,8 +10,27 @@
       ]
     },
     "condition": {
-      "requestDomains": ["nowtv.it", "sky.it", "formula1.com", "dazn.com", "tv8.it"],
+      "requestDomains": ["nowtv.it", "sky.it", "formula1.com", "dazn.com", "tv8.it", "primevideo.com", "amazon.it", "mediaset.it", "raiplay.it", "rai.it", "nba.com", "supertennis.tv", "hbomax.com"],
       "resourceTypes": ["sub_frame"]
+    }
+  },
+  {
+    "id": 2,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        { "header": "origin", "operation": "remove" }
+      ],
+      "responseHeaders": [
+        { "header": "access-control-allow-origin", "operation": "set", "value": "*" }
+      ]
+    },
+    "condition": {
+      "requestDomains": ["api.motogp.pulselive.com", "api.pulselive.worldsbk.com"],
+      "initiatorDomains": ["matteo-canna.github.io", "localhost"],
+      "requestMethods": ["get"],
+      "resourceTypes": ["xmlhttprequest"]
     }
   }
 ]
