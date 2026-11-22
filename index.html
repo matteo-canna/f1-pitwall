@@ -181,6 +181,10 @@ button:disabled{cursor:not-allowed;opacity:.45}
 .tabs{display:none}
 
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+/* collegamento alla Sport LIVE APP (cartella sport/ del sito) */
+.sportlink{display:inline-flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:7px 11px;font:800 12px/1 var(--f-mono);letter-spacing:.05em;color:var(--text);text-decoration:none;white-space:nowrap}
+.sportlink:hover{border-color:var(--accent)}
+body.sgl .top .sportlink{padding:6px 9px;font-size:11px}
 [hidden]{display:none!important}
 :root{--accent:#E10600;--cyan:#06B6D4;--green:#10B981;--yellow:#F59E0B;--purple:#A855F7;--bg:#04060a;--panel:#090d16;--panel2:#0e1420;--line:#27272a}
 .flag{border-radius:2px;vertical-align:middle;flex:none}
@@ -665,12 +669,18 @@ body.sgl .top>.soloBar.in-top{gap:5px}
 /* telemetria in una striscia molto bassa: solo la riga dei valori */
 @container (max-height:230px){body.sgl #vTele>.panel:not(:first-child){display:none}body.sgl #vTele{overflow:hidden}}
 @container (max-width:470px){body.sgl .p-map .tools .tog{padding:5px 8px;font-size:10px}}
+/* barra comandi dello schermo singolo ancora più compatta: una riga a 1920 px */
+body.sgl .top .gp{max-width:262px}
+body.sgl .top .tv input{width:84px}
+body.sgl .top .seg button{padding-left:10px;padding-right:10px}
+body.sgl .top .logo{padding:6px 10px;font-size:18px}
 </style>
 </head>
 <body data-view="pista" data-mode="pit">
 <div class="app" id="app">
 <header class="top">
   <span class="logo">F1 26</span>
+  <a class="sportlink" href="sport/" title="Sport LIVE APP: calcio, basket, tennis, rugby e moto">SPORT LIVE ↗</a>
   <label class="gp" for="gpSel">
     <span id="gpFlag"></span>
     <span class="gpmeta">
@@ -3835,6 +3845,7 @@ if(window.ResizeObserver){const ro=new ResizeObserver(()=>{if(SGL.on)sglLayout()
   [sglEl("tv").querySelector(".panel-h"),sglEl("tv").querySelector(".tvbar"),$("tvMsg"),$("tvExtBox")].forEach(el=>{if(el)ro.observe(el);});}
 $("tvExtMore").addEventListener("click",()=>{const o=$("tvExtBox").classList.toggle("open");$("tvExtMore").setAttribute("aria-expanded",String(o));setT($("tvExtMore"),o?"CHIUDI ISTRUZIONI":"ISTRUZIONI");});
 $("tvExtHide").addEventListener("click",()=>{TV.guideOff=true;$("tvExtBox").hidden=true;toast("Guida nascosta fino al prossimo caricamento della pagina.");});
+{const sl=document.querySelector(".sportlink");if(sl&&inClaude)sl.hidden=true;}
 /* all'avvio: se l'ultima volta era attivo, riapre lo schermo singolo */
 window.sglBoot=()=>{if(store.get("sglOn",false)&&innerWidth>=900&&!SOLO)sglEnter(SGL.cfg);};
 
