@@ -29,8 +29,6 @@ button:disabled{cursor:not-allowed;opacity:.45}
 
 /* ---------- top bar ---------- */
 .top{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding:12px 16px;border-bottom:1px solid var(--line);border-top:3px solid var(--flagc,transparent)}
-.sportlink{display:inline-flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:7px 11px;font:800 12px/1 var(--f-mono);letter-spacing:.05em;color:var(--text);text-decoration:none;white-space:nowrap}
-.sportlink:hover{border-color:var(--accent)}
 .logo{background:var(--accent);color:#fff;border-radius:8px;padding:7px 12px;font:900 20px/1 var(--f-display);font-stretch:112%;letter-spacing:-.01em;white-space:nowrap}
 .gp{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:7px 12px;min-width:0;flex:0 1 auto}
 .gpcode{font:800 12px/1 var(--f-mono);color:var(--accent);border:1px solid var(--accent);border-radius:5px;padding:5px 6px}
@@ -515,7 +513,7 @@ body:not(.solo) .p-table[data-sz="l"] .tbl{font-size:14px}
 .sgl-pre:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
 .sgl-pre.on{border-color:var(--cyan);box-shadow:inset 0 0 0 1px var(--cyan);background:#0d1626}
 .sgl-pre b{font-size:12.5px;font-weight:800;display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}
-.sgl-pre b i{font:700 9.5px var(--f-mono);font-style:normal;color:var(--cyan)}
+.sgl-pre b i{font:700 9.5px var(--f-mono);font-style:normal;color:var(--cyan);display:inline;width:auto;height:auto;background:none;margin:0;border-radius:0}
 .sgl-pre>span{font-size:10.5px;color:var(--muted);line-height:1.35}
 .sgl-mini{display:block;position:relative;aspect-ratio:var(--ar);background:#05070c;border-radius:6px;border:1px solid #232c40}
 .sgl-pre .sgl-grid{position:absolute;inset:3px;gap:2px}
@@ -525,7 +523,7 @@ body:not(.solo) .p-table[data-sz="l"] .tbl{font-size:14px}
 .sgl-pre .sgl-tvc{background:#e5383b;border:0;border-radius:2px}
 @media (max-width:980px){.sgl-presets{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .sgl-stage{padding:14px;margin:2px 20px 0;border-radius:14px;background:radial-gradient(80% 120% at 50% 100%,#111a2b 0%,#070a11 80%);border:1px solid var(--line)}
-.sgl-screen{display:flex;flex-direction:column;gap:3px;width:min(100%,calc(min(44vh,420px) * var(--ar,1.78)));aspect-ratio:var(--ar,1.78);margin:0 auto;background:#05070c;border:2px solid #2b3550;border-radius:10px;padding:5px;box-shadow:0 10px 30px rgba(0,0,0,.45)}
+.sgl-screen{display:flex;flex-direction:column;gap:3px;width:min(100%,calc(min(40vh,400px) * var(--ar,1.78)));aspect-ratio:var(--ar,1.78);margin:0 auto;background:#05070c;border:2px solid #2b3550;border-radius:10px;padding:5px;box-shadow:0 10px 30px rgba(0,0,0,.45)}
 .sgl-hd,.sgl-sb{flex:0 0 auto;border-radius:3px;font:700 8.5px var(--f-mono);letter-spacing:.07em;color:#566078;display:flex;align-items:center;padding:0 6px;overflow:hidden;white-space:nowrap}
 .sgl-hd{height:calc(var(--hdp) * 100%);background:#0d1220;border:1px solid #1d2638}
 .sgl-sb{height:calc(var(--sbp) * 100%);min-height:11px;background:#070a11;border:1px solid #1d2638}
@@ -572,40 +570,107 @@ body.sgl .p-tv .tvbar{padding:8px 50px 0 10px}
 body.sgl .p-tv.on .tvstage{margin:8px 10px 10px;min-height:0}
 body.sgl .p-tv .tvext{position:absolute;left:10px;right:10px;bottom:10px;z-index:3;max-height:58%;overflow:auto;margin:0;background:rgba(9,13,22,.97);box-shadow:0 -10px 30px rgba(0,0,0,.5)}
 body.sgl .p-tv .tvemb{position:absolute;left:14px;bottom:14px;z-index:3}
-/* barra comandi su una riga */
-body.sgl .top{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;padding-top:8px;padding-bottom:8px}
-body.sgl .top>*{flex:none}
-body.sgl .top .tools2{flex-wrap:nowrap}
-body.sgl .top .gp{max-width:330px}
-/* meteo e controllo sessione in una striscia: scorre di lato se non ci sta */
-body.sgl .zrow>section.tiles.on{grid-template-columns:none!important;grid-auto-flow:column;grid-auto-columns:minmax(232px,1fr);overflow:auto hidden;align-content:stretch;scrollbar-width:thin}
-body.sgl .zrow>section.tiles.on>.t-lap{order:-1}
-body.sgl .zrow>section.tiles.on>.tile{min-height:0}
+
+
 body.sgl .zrow .panel-h{padding-top:8px;padding-bottom:8px}
 body.sgl .zcol>section.tiles.on{grid-template-columns:minmax(0,1fr)!important;overflow:auto;align-content:start}
 body.sgl .zcol>#vTele>*{grid-column:1/-1!important}
 body.sgl .zcol>#vShow{grid-template-columns:minmax(0,1fr)!important}
 body.sgl .zrow .p-feed .feed{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
 body.sgl .sglz .p-map.on .mapbox{min-height:140px}
-body.sgl .sglz .p-map .panel-h{flex-wrap:nowrap}
-body.sgl .sglz .p-map .panel-h>div:first-child{min-width:0}
-body.sgl .sglz .p-map .panel-h .tools{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;min-width:0}
-body.sgl .sglz .p-map .panel-h .tools>*{flex:none}
-body.sgl .zcol .p-map .panel-h{flex-direction:column;align-items:stretch;gap:6px}
-body.sgl .zcol .p-map #mapSub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
 /* guida estensione compatta sopra la TV: si apre con ISTRUZIONI */
 .tvext #tvExtMore{display:none}
 body.sgl .p-tv .tvext #tvExtMore{display:inline-block}
 body.sgl .p-tv .tvext:not(.open) ol,body.sgl .p-tv .tvext:not(.open) .note{display:none}
 body.sgl .p-tv .tvext:not(.open){padding-top:10px;padding-bottom:10px}
 .sgl-pre-tv{font:700 10px var(--f-mono);color:#ff8a85;letter-spacing:.02em}
+
+/* ===== schermo singolo: niente sovrapposizioni ===== */
+/* barra comandi: va a capo invece di accavallarsi, più compatta */
+body.sgl .top{flex-wrap:wrap;overflow:visible;gap:6px 8px;padding-top:8px;padding-bottom:8px}
+body.sgl .top>*,body.sgl .top .tools2>*{flex:none}
+body.sgl .top .gp{max-width:320px}
+body.sgl .top .chip,body.sgl .top .btn{padding:6px 11px;font-size:11px}
+body.sgl .top .tv{padding:5px 12px;white-space:nowrap}
+body.sgl .top .tv label{white-space:nowrap}
+body.sgl .top .seg button{padding-top:6px;padding-bottom:6px}
+/* ogni sezione conosce lo spazio che ha e si adatta */
+body.sgl .sglz>[data-unit].on{container-type:size}
+/* mappa */
+body.sgl .sglz .p-map .panel-h{flex-wrap:wrap;gap:6px 10px}
+body.sgl .sglz .p-map .panel-h>div:first-child{min-width:0}
+body.sgl .sglz .p-map .panel-h .tools{flex-wrap:wrap;min-width:0}
+body.sgl .sglz .p-map #mapSub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@container (max-width:600px){body.sgl .p-map .tools .lg{display:none}}
+@container (max-width:360px){body.sgl .p-map #mapSub{display:none}body.sgl .p-map .tools .tog{padding:5px 8px;font-size:10px}}
+@container (max-height:460px){body.sgl .p-map .pitwin,body.sgl .p-map .maphint{display:none}}
+@container (max-height:320px){body.sgl .p-map #mapSub{display:none}body.sgl .p-map .panel-h{padding-top:6px;padding-bottom:6px}}
+/* classifica: nelle colonne strette spariscono le colonne meno importanti invece di tagliarsi */
+@container (max-width:480px){body.sgl .tbl .c-pit,body.sgl .tbl th.c-pit{display:none}}
+@container (max-width:410px){body.sgl .tbl .c-int,body.sgl .tbl #thInt{display:none}}
+@container (max-width:340px){body.sgl .tbl .c-last,body.sgl .p-table .tbl th:last-child{display:none}}
+/* console */
+@container (max-width:430px){body.sgl .p-console .ctabs button{font-size:10.5px;letter-spacing:.02em;padding-left:2px;padding-right:2px}}
+/* meteo e sessione: in striscia un numero intero di card, le altre scorrendo di lato */
+body.sgl .sglz>section.tiles.on>.t-lap{order:-1}
+body.sgl .zrow>section.tiles.on{grid-template-columns:none!important;grid-auto-flow:column;grid-auto-columns:auto;gap:10px;overflow:auto hidden;align-content:stretch;scrollbar-width:thin;scroll-snap-type:x mandatory}
+body.sgl .zrow>section.tiles.on>.tile{min-height:0;scroll-snap-align:start;--tw:calc((100cqw - 40px) / 5.25);width:var(--tw)}
+body.sgl .zrow>section.tiles.on>.t-lap{width:calc(var(--tw) * 1.25)}
+@container (max-width:1300px){body.sgl .zrow>section.tiles.on>.tile{--tw:calc((100cqw - 30px) / 4.25)}}
+@container (max-width:1040px){body.sgl .zrow>section.tiles.on>.tile{--tw:calc((100cqw - 20px) / 3.25)}}
+@container (max-width:780px){body.sgl .zrow>section.tiles.on>.tile{--tw:calc((100cqw - 10px) / 2.25)}}
+@container (max-width:520px){body.sgl .zrow>section.tiles.on>.tile{--tw:calc(100cqw / 1.25)}}
+body.sgl .zcol>section.tiles.on{gap:10px}
+/* telemetria in una striscia bassa: solo i valori principali, su una riga che scorre */
+@container (max-height:330px){
+  body.sgl #vTele>.panel.wide:first-child .panel-h{padding-top:8px;padding-bottom:4px}
+  body.sgl #vTele>.panel.wide:first-child .panel-h p{display:none}
+  body.sgl #vTele #tKpi{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:minmax(124px,1fr);overflow-x:auto;padding-top:8px;padding-bottom:10px;scrollbar-width:thin}
+}
+/* TV: con la guida dell'estensione aperta il testo centrale si riduce al simbolo */
+body.sgl .p-tv:has(#tvExtBox:not([hidden])) .tvidle p{display:none}
+body.sgl .p-tv .tvext{padding:8px 10px;font-size:11.5px;line-height:1.4}
+body.sgl .p-tv .tvext .tog{padding:5px 9px;font-size:10px}
+/* pulsanti dello schermo singolo dentro la barra comandi */
+body.sgl .top>.soloBar.in-top{flex:none;padding:0;margin:0 0 0 auto;border:0;background:none;gap:6px}
+body.sgl .top>.soloBar.in-top #soloTxt,body.sgl .top>.soloBar.in-top .led,body.sgl .top>.soloBar.in-top .spacer{display:none}
+body.sgl .top>.soloBar.in-top .tog{padding:6px 10px;font-size:10.5px}
+/* riquadro TV: guida e testi in base allo spazio */
+body.sgl .p-tv.on{container-type:size}
+body.sgl .p-tv .tvext>b{display:block}
+@container (max-width:760px){body.sgl .p-tv .tvext{display:flex;flex-wrap:wrap;align-items:center;gap:6px}body.sgl .p-tv .tvext>b,body.sgl .p-tv .tvext>ol,body.sgl .p-tv .tvext>.note{flex:1 1 100%}body.sgl .p-tv .tvext>b{font-size:11px}}
+@container (max-height:420px){body.sgl .p-tv .tvidle b{font-size:24px}body.sgl .p-tv .tvext{max-height:46%}}
+/* titoli lunghi delle sezioni nelle zone: una riga con i puntini */
+body.sgl .sglz .panel-h h2{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body.sgl .sglz .panel-h>div:first-child{min-width:0;max-width:100%}
+body.sgl .sglz .panel-h>div:first-child p{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* card meteo/sessione nelle strisce: comandi compatti, mai sovrapposti */
+body.sgl .zrow>section.tiles.on>.tile{overflow:hidden;padding:10px 12px;gap:7px}
+body.sgl .zrow .t-lap .tile-h{flex-wrap:nowrap;gap:6px}
+body.sgl .zrow .t-lap .ctl{gap:3px}
+body.sgl .zrow .t-lap .ctl button{min-width:24px;height:24px;padding:0 4px;font-size:10.5px}
+body.sgl .zrow .t-lap #lapPct{display:none}
+body.sgl .zrow .t-lap .flags button{padding:7px 1px;font-size:10px}
+.sgl-cell.cramped::after{content:"⚠";position:absolute;left:3px;top:1px;font-size:10px;color:#F59E0B}
+body.sgl .sglz .p-map .maphint{display:none}
+/* pulsanti dello schermo singolo nella barra comandi: icone compatte */
+body.sgl .top>.soloBar.in-top #soloLay,body.sgl .top>.soloBar.in-top #soloHd,body.sgl .top>.soloBar.in-top #soloFs{font-size:0;width:32px;height:30px;padding:0;display:inline-grid;place-items:center}
+body.sgl .top>.soloBar.in-top #soloLay::before{content:"⚙";font-size:14px}
+body.sgl .top>.soloBar.in-top #soloHd::before{content:"☰";font-size:13px}
+body.sgl .top>.soloBar.in-top #soloFs::before{content:"⛶";font-size:14px}
+body.sgl .top>.soloBar.in-top #soloExit{font-size:0;width:32px;height:30px;padding:0;display:inline-grid;place-items:center}
+body.sgl .top>.soloBar.in-top #soloExit::before{content:"✕";font-size:13px}
+body.sgl .top>.soloBar.in-top{gap:5px}
+/* telemetria in una striscia molto bassa: solo la riga dei valori */
+@container (max-height:230px){body.sgl #vTele>.panel:not(:first-child){display:none}body.sgl #vTele{overflow:hidden}}
+@container (max-width:470px){body.sgl .p-map .tools .tog{padding:5px 8px;font-size:10px}}
 </style>
 </head>
 <body data-view="pista" data-mode="pit">
 <div class="app" id="app">
 <header class="top">
   <span class="logo">F1 26</span>
-  <a class="sportlink" href="sport/" title="Sport LIVE APP: calcio, basket, tennis, rugby e moto">SPORT LIVE ↗</a>
   <label class="gp" for="gpSel">
     <span id="gpFlag"></span>
     <span class="gpmeta">
@@ -715,8 +780,8 @@ body.sgl .p-tv .tvext:not(.open){padding-top:10px;padding-bottom:10px}
         <div><h2 id="mapTitle">Circuito</h2><p id="mapSub"></p></div>
         <div class="tools">
           <button class="tog" id="secBtn" type="button" aria-pressed="true">S1/S2/S3</button>
-          <button class="tog" id="battleBtn" type="button" aria-pressed="true">BATTLE LINKS &lt;0.8s</button>
-          <button class="tog" id="ghostBtn" type="button" aria-pressed="true">GHOST CAR (PIT WINDOW)</button>
+          <button class="tog" id="battleBtn" type="button" aria-pressed="true">BATTLE<span class="lg"> LINKS &lt;0.8s</span></button>
+          <button class="tog" id="ghostBtn" type="button" aria-pressed="true">GHOST<span class="lg"> CAR (PIT WINDOW)</span></button>
           <button class="tog sq" id="zoomIn" type="button" aria-label="Zoom avanti sul pilota">+</button>
           <button class="tog sq" id="zoomOut" type="button" aria-label="Zoom indietro">−</button>
           <button class="tog" id="zoomRst" type="button">RESET</button>
@@ -1859,19 +1924,37 @@ function drawMap(a){
     ctx.beginPath();ctx.arc(g[0],g[1],R+2+pulse*2.5,0,6.2832);ctx.strokeStyle="rgba(6,182,212,"+(0.6+0.4*pulse)+")";ctx.setLineDash([3,3]);ctx.lineWidth=1.8;ctx.stroke();ctx.setLineDash([]);
     ctx.lineWidth=3;ctx.strokeStyle="rgba(9,13,22,.9)";const gl="GHOST −"+sim.c.pit.toFixed(1)+"s";ctx.strokeText(gl,g[0],g[1]+R+15);ctx.fillStyle="#06B6D4";ctx.fillText(gl,g[0],g[1]+R+15);
   }
+  /* prima i pallini, poi i nomi: ogni nome cerca un posto libero attorno al suo pallino */
+  const vis=[];
   for(let i=ord.length-1;i>=-1;i--){
     const c=i<0?sc:ord[i];if(i>=0&&c===sc)continue;
     const d=DRIVERS[c.id],p=carXY[c.id],x=p[0],y=p[1];
     if(x<-20||y<-20||x>W+20||y>H+20||c.hidden)continue;
-    const isSel=c===sc;
+    const isSel=c===sc;vis.push(c);
     ctx.globalAlpha=c.pit>0||c.finished?0.55:1;
     ctx.beginPath();ctx.arc(x,y,isSel?R+2:R,0,6.2832);ctx.fillStyle=TEAMS[d.team].c;ctx.fill();ctx.lineWidth=isSel?2.4:1.4;ctx.strokeStyle=isSel?"#ffffff":"#0b0f18";ctx.stroke();
     if(isSel){ctx.beginPath();ctx.arc(x,y,R+7,0,6.2832);ctx.setLineDash([2,3]);ctx.strokeStyle="#ffffff";ctx.lineWidth=1.2;ctx.stroke();ctx.setLineDash([]);}
-    ctx.lineWidth=3;ctx.strokeStyle="rgba(9,13,22,.9)";const lab=d.code+(c.pit>0?" PIT":"");
-    ctx.strokeText(lab,x,y-R-(isSel?9:4));ctx.fillStyle=isSel?"#ffffff":"#d5dcea";ctx.fillText(lab,x,y-R-(isSel?9:4));
+    ctx.globalAlpha=1;
+  }
+  const fh=zoom?11:9.5,used=[],hit=(r)=>{for(const q of used)if(r[0]<q[2]&&r[2]>q[0]&&r[1]<q[3]&&r[3]>q[1])return true;return false;};
+  if(ghostOn&&race&&!sc.finished&&sc.pit===0&&sim.started){const g=scr(sc.prev+(sc.dist-sc.prev)*a-sim.c.pit/sc.lt*tr.L,0),gw=ctx.measureText("GHOST −00.0s").width;used.push([g[0]-gw/2-2,g[1]+R+15-fh,g[0]+gw/2+2,g[1]+R+18]);}
+  const prio=vis.slice().sort((u,v)=>(u===sc?-1:v===sc?1:u.pos-v.pos));
+  for(const c of prio){
+    const d=DRIVERS[c.id],p=carXY[c.id],x=p[0],y=p[1],isSel=c===sc,lab=d.code+(c.pit>0?" PIT":"");
+    const w=ctx.measureText(lab).width+4,o=(isSel?R+8:R+3),cand=[[0,-o],[0,o+fh],[o+w/2,fh/2-1],[-o-w/2,fh/2-1],[o+w/2-4,-o+2],[-o-w/2+4,-o+2],[o+w/2-4,o+fh-2],[-o-w/2+4,o+fh-2]];
+    const last=labPos[c.id]|0,order=[last].concat(cand.map((_,k)=>k).filter(k=>k!==last));
+    let pick=-1,box=null;
+    for(const k of order){const cx=x+cand[k][0],cy=y+cand[k][1],r=[cx-w/2,cy-fh+1,cx+w/2,cy+2];
+      if(r[0]<1||r[2]>W-1||r[1]<1||r[3]>H-1)continue;if(!hit(r)){pick=k;box=r;break;}}
+    if(pick<0){if(!isSel)continue;pick=0;box=[x-w/2,y-o-fh+1,x+w/2,y-o+2];}
+    labPos[c.id]=pick;used.push(box);
+    const cx=(box[0]+box[2])/2,cy=box[3]-2;
+    ctx.globalAlpha=c.pit>0||c.finished?0.6:1;
+    ctx.lineWidth=3;ctx.strokeStyle="rgba(9,13,22,.9)";ctx.strokeText(lab,cx,cy);ctx.fillStyle=isSel?"#ffffff":"#d5dcea";ctx.fillText(lab,cx,cy);
     ctx.globalAlpha=1;
   }
 }
+const labPos=[];
 cv.addEventListener("click",e=>{
   const r=cv.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;let best=-1,bd=26*26;
   for(let i=0;i<carXY.length;i++){const p=carXY[i];if(!p)continue;const d=(p[0]-x)*(p[0]-x)+(p[1]-y)*(p[1]-y);if(d<bd){bd=d;best=i;}}
@@ -3515,6 +3598,9 @@ cardApply();
 const SGL_ZONES=["T","L","R","B"];
 const SGL_ZNAME={T:"Sopra",L:"Sinistra",R:"Destra",B:"Sotto"};
 const SGL_WN=["","S","M","L"];
+const SGL_TALL=["map","table","console","show"];
+const SGL_MINW={tiles:250,feed:290,tele:330,map:280,table:330,console:330,show:340};
+const SGL_MINH={tiles:132,feed:134,tele:142,map:260,table:230,console:320,show:330};
 const SGL_PRESETS=[
   {id:"regia",n:"Regia",d:"Equilibrato: meteo e comandi sopra, classifica, mappa, radio e telemetria attorno.",tv:.62,Z:{T:["tiles"],L:["table"],R:["map","feed"],B:["tele"]}},
   {id:"cinema",n:"Cinema",d:"La TV più grande possibile: solo classifica a sinistra, mappa e radio a destra.",tv:.8,Z:{T:[],L:["table"],R:["map","feed"],B:[]}},
@@ -3545,7 +3631,9 @@ function sglRestoreEl(k){const el=sglEl(k);if(SGL.ph[k]){SGL.ph[k].parentNode.in
 /* ---------- geometria: la TV resta 16:9, centrata, la più grande possibile ---------- */
 function sglGeom(W,H,c,chrome,padW){
   const g=10,Z=c.Z,lr=Z.L.length+Z.R.length>0,tb=Z.T.length+Z.B.length>0;
-  const sideMin=lr?Math.round(clamp(W*.17,250,340)):0,stripMin=tb?(Z.T.concat(Z.B).indexOf("tiles")>=0?128:104):0;
+  /* ogni sezione ha una larghezza minima in colonna e un'altezza minima in striscia: la TV si adatta */
+  const sideMin=lr?Math.round(Math.min(Math.max(clamp(W*.17,250,340),...Z.L.concat(Z.R).map(k=>SGL_MINW[k]||250)),W*.25)):0;
+  const stripMin=tb?Math.round(Math.max(Z.T.concat(Z.B).indexOf("tiles")>=0?SGL_MINH.tiles:112,Math.min(Math.max(...Z.T.concat(Z.B).map(k=>SGL_MINH[k]||120)),H*.19))):0;
   let w=Math.min(c.tv*W,W-(lr?2*(sideMin+g):0)),ch=(w-padW)*9/16+chrome;
   const maxH=H-(tb?2*(stripMin+g):0);
   if(ch>maxH){ch=maxH;w=(ch-chrome)*16/9+padW;}
@@ -3555,17 +3643,17 @@ function sglGeom(W,H,c,chrome,padW){
 function sglArea(hd,preview){
   const top=document.querySelector(".top"),sb=$("soloBar"),live=SGL.on&&top&&top.offsetHeight;
   if(live&&live!==SGL.hdPx){SGL.hdPx=live;store.set("sglHdH",live);}
-  const hdH=hd?(live||SGL.hdPx||store.get("sglHdH",80))+10:0,sbH=((SGL.on&&sb&&!sb.hidden&&sb.offsetHeight)||37)+10;
+  const hdH=hd?(live||SGL.hdPx||store.get("sglHdH",80))+10:0,sbH=hd?0:((SGL.on&&sb&&!sb.hidden&&!sb.classList.contains("in-top")&&sb.offsetHeight)||37)+10;
   const W=(preview?document.documentElement.clientWidth:$("app").clientWidth)-20;
   return{W:Math.max(600,W),H:Math.max(320,innerHeight-10-hdH-sbH),hdH,sbH};
 }
 function sglLayout(){
   if(!SGL.on)return;
   const c=SGL.cfg,app=$("app"),hd=c.hd!==false;
-  document.body.classList.toggle("sgl-nohd",!hd);
+  document.body.classList.toggle("sgl-nohd",!hd);sglBarPlace(hd);
   const a=sglArea(hd,false),g=sglGeom(a.W,a.H,c,SGL.chrome,SGL.padW);SGL.geom=g;
-  app.style.gridTemplateAreas=(hd?'"hd hd hd" ':'')+'"sb sb sb" "L T R" "L V R" "L B R"';
-  app.style.gridTemplateRows=(hd?"auto ":"")+"auto minmax(0,1fr) "+g.h+"px minmax(0,1fr)";
+  app.style.gridTemplateAreas=(hd?'"hd hd hd" ':'"sb sb sb" ')+'"L T R" "L V R" "L B R"';
+  app.style.gridTemplateRows="auto minmax(0,1fr) "+g.h+"px minmax(0,1fr)";
   app.style.gridTemplateColumns="minmax(0,1fr) "+g.w+"px minmax(0,1fr)";
   /* misura i bordi reali del riquadro TV (barra, messaggi) e ricalcola se servono */
   requestAnimationFrame(()=>{
@@ -3576,8 +3664,16 @@ function sglLayout(){
     sizeMap();if(window.sizeViews)window.sizeViews();if(window.holo3d&&window.holo3d.size)window.holo3d.size();lastSlow=0;dirty=true;
   });
 }
+function sglBarPlace(inTop){
+  const sb=$("soloBar"),top=document.querySelector(".top");
+  if(!SGL.barPh){SGL.barPh=document.createComment("barra finestra");sb.parentNode.insertBefore(SGL.barPh,sb);}
+  if(inTop&&sb.parentNode!==top){top.appendChild(sb);}
+  else if(!inTop&&sb.parentNode===top){SGL.barPh.parentNode.insertBefore(sb,SGL.barPh.nextSibling);}
+  sb.classList.toggle("in-top",!!inTop);
+  [["soloLay","Disposizione dello schermo singolo"],["soloHd","Mostra o nascondi la barra comandi"],["soloFs","Schermo intero"],["soloExit","Esci dallo schermo singolo"]].forEach(([id,l])=>{const b=$(id);if(inTop){b.title=l;b.setAttribute("aria-label",l);}else{b.removeAttribute("title");b.removeAttribute("aria-label");}});
+}
 function sglTeardown(){
-  if(!SGL.on)return;SGL.on=false;window.sglOn=false;
+  if(!SGL.on)return;SGL.on=false;window.sglOn=false;sglBarPlace(false);
   document.body.classList.remove("sgl","sgl-nohd");
   Object.keys(UK).forEach(k=>{const el=sglEl(k);if(!el)return;if(el.parentNode&&el.parentNode.classList&&el.parentNode.classList.contains("sglz"))sglRestoreEl(k);el.style.removeProperty("--fw");});
   SGL_ZONES.forEach(z=>{SGL.zones[z].hidden=true;});
@@ -3649,7 +3745,7 @@ function sglGridHTML(c,mini){
     if(!L.length&&!mini)h+='<span class="sgl-zl">'+SGL_ZNAME[z]+'</span>';
     L.forEach(k=>{const w=c.w[k]||2;
       h+=mini?'<i style="--uc:'+UCOL[k]+';flex:'+w+' 1 0"></i>':
-      '<div class="sgl-cell'+(SGL.armed===k?' armed':'')+'" draggable="true" data-u="'+k+'" tabindex="0" role="button" aria-pressed="'+(SGL.armed===k)+'" aria-label="'+USHORT[k]+', zona '+SGL_ZNAME[z].toLowerCase()+', misura '+SGL_WN[w]+'" style="--uc:'+UCOL[k]+';flex:'+w+' 1 0" title="Trascina in un\'altra zona, oppure tocca e poi tocca la zona">'+
+      '<div class="sgl-cell'+(SGL.armed===k?' armed':'')+((z==="T"||z==="B")&&SGL_TALL.indexOf(k)>=0?' cramped':'')+'" draggable="true" data-u="'+k+'" tabindex="0" role="button" aria-pressed="'+(SGL.armed===k)+'" aria-label="'+USHORT[k]+', zona '+SGL_ZNAME[z].toLowerCase()+', misura '+SGL_WN[w]+'" style="--uc:'+UCOL[k]+';flex:'+w+' 1 0" title="Trascina in un\'altra zona, oppure tocca e poi tocca la zona">'+
       '<span class="sgl-cn"><em>'+UICON[k]+'</em>'+USHORT[k]+'</span><span class="sgl-cb"><button type="button" class="sgl-w" data-w="'+k+'" title="Misura nella zona: S, M o L" aria-label="Cambia misura di '+USHORT[k]+' (ora '+SGL_WN[w]+')">'+SGL_WN[w]+'</button><button type="button" class="sgl-x" data-rm="'+k+'" title="Togli" aria-label="Togli '+USHORT[k]+'">×</button></span></div>';});
     h+='</div>';});
   return h+'<div class="sgl-tvc">'+(mini?'':'<b>▶ DIRETTA TV</b><small>'+g.vw+' × '+g.vh+' px</small>')+'</div></div>';
@@ -3660,19 +3756,20 @@ function sglRender(){
     return'<button type="button" class="sgl-pre'+(on?" on":"")+'" role="radio" aria-checked="'+on+'" data-p="'+p.id+'"><span class="sgl-mini" style="--ar:'+sglPreviewDims(pc).ar.toFixed(3)+'">'+sglGridHTML(pc,true)+'</span><b>'+p.n+(on&&d.mod?'<i>modificato</i>':'')+'</b><small class="sgl-pre-tv">TV '+pg.vw+' × '+pg.vh+'</small><span>'+p.d+'</span></button>';}).join("");
   const{a,ar,g}=sglPreviewDims(d),scr=$("sglScreen"),hd=d.hd!==false;
   scr.style.setProperty("--ar",ar.toFixed(3));scr.style.setProperty("--hdp",(hd?a.hdH/innerHeight:0).toFixed(3));scr.style.setProperty("--sbp",(a.sbH/innerHeight).toFixed(3));
-  scr.innerHTML=(hd?'<div class="sgl-hd">BARRA COMANDI</div>':'')+'<div class="sgl-sb">SCHERMO SINGOLO · '+escapeHtml(sglName(d).toUpperCase())+'</div>'+sglGridHTML(d,false);
+  scr.innerHTML=(hd?'<div class="sgl-hd">BARRA COMANDI · SCHERMO SINGOLO</div>':'<div class="sgl-sb">SCHERMO SINGOLO · '+escapeHtml(sglName(d).toUpperCase())+'</div>')+sglGridHTML(d,false);
   setT($("sglName"),sglName(d));
   $("sglTv").value=String(Math.round(d.tv*100));
   const asked=Math.round(d.tv*a.W),capped=g.w<asked-4;
   setT($("sglTvOut"),"TV "+g.vw+" × "+g.vh+(capped?" · massimo per questo schermo":""));
-  const tb=d.Z.T.length+d.Z.B.length>0,lim=capped&&(g.h>=a.H-(tb?2*(128+10):0)-2);
+  const tb=d.Z.T.length+d.Z.B.length>0,lim=capped&&tb;
   $("sglTvOut").title=lim?"Per ingrandirla ancora: togli la barra comandi o lascia vuote le zone sopra e sotto.":"";
   $("sglHd").checked=hd;
   const used=SGL_ZONES.reduce((n,z)=>n.concat(d.Z[z]),[]),free=UNITS.filter(u=>u.k!=="tv"&&used.indexOf(u.k)<0);
   $("sglPal").innerHTML=free.length?free.map(u=>'<button type="button" class="ms-chip'+(SGL.armed===u.k?" on":"")+'" draggable="true" data-u="'+u.k+'" style="--uc:'+UCOL[u.k]+'" aria-pressed="'+(SGL.armed===u.k)+'"><i>'+UICON[u.k]+'</i><span>'+u.n+'</span><small>non mostrata</small></button>').join(""):'<p class="note sgl-allin">Tutte le sezioni sono sullo schermo.</p>';
   setT($("sglPalH"),free.length?"SEZIONI NON MOSTRATE · trascinale in una zona":"SEZIONI NON MOSTRATE");
   const tip=capped&&(hd||tb)?" Per una TV ancora più grande: "+(hd?"togli la barra comandi":"")+(hd&&tb?" o ":"")+(tb?"lascia vuote le zone sopra e sotto":"")+".":"";
-  $("sglHint").textContent=SGL.armed?"Ora tocca la zona dove mettere "+USHORT[SGL.armed]+" (o una sezione per metterla prima di quella).":"Trascina le sezioni tra le zone attorno alla TV. S/M/L cambia lo spazio nella zona, × la toglie."+tip;
+  const cr=d.Z.T.concat(d.Z.B).filter(k=>SGL_TALL.indexOf(k)>=0),warn=cr.length?" ⚠ "+cr.map(k=>USHORT[k]).join(", ")+" sopra o sotto la TV "+(cr.length>1?"hanno":"ha")+" poco spazio: rende meglio in una colonna laterale.":"";
+  $("sglHint").textContent=SGL.armed?"Ora tocca la zona dove mettere "+USHORT[SGL.armed]+" (o una sezione per metterla prima di quella).":"Trascina le sezioni tra le zone attorno alla TV. S/M/L cambia lo spazio nella zona, × la toglie."+tip+warn;
 }
 function sglEdited(){const d=SGL.draft;d.mod=!!d.base;}
 function sglMove(k,z,idx){
