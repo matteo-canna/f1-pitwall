@@ -501,3 +501,13 @@ html[data-style] body .loading::after{width:20px;height:20px;border:0;border-rad
 .sporthead p{color:var(--muted);margin-top:4px;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 html[data-couch="1"] .sporthead p{font-size:15px}
 .al .ico{width:20px;height:20px;color:var(--ac);margin-right:6px;vertical-align:-4px}
+
+/* =====================================================================
+   DIRETTA TV SEMPRE PRIMA: misura M, a sinistra, subito sotto la barra
+   ===================================================================== */
+.grid>.card[data-k="tv"]{order:-2;grid-column:1/span 6;grid-row:1/span 2}
+.grid>.subbar.ingrid{order:-1;grid-column:7/-1;grid-row:1;padding:0;align-self:start;min-width:0}
+.card.fixed .tvstage{aspect-ratio:16/9}
+@media (max-width:760px){
+  .grid>.card[data-k="tv"],.grid>.subbar.ingrid{grid-column:1/-1;grid-row:auto}
+}

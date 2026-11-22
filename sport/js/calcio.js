@@ -37,6 +37,7 @@ M.onChange=function(p,it){
 
 /* ---------- pagina ---------- */
 const DEFS=[
+  {k:"tv",n:"Diretta TV",sz:2,fixed:true},
   {k:"match",n:"Partita",sz:2},
   {k:"stats",n:"Statistiche",sz:2},
   {k:"multi",n:"Multi-partita live",sz:3},
@@ -45,8 +46,7 @@ const DEFS=[
   {k:"shots",n:"Mappa tiri · xG stimato",sz:2,couch:false},
   {k:"table",n:"Classifica live",sz:2},
   {k:"events",n:"Eventi",sz:1},
-  {k:"cronaca",n:"Cronaca",sz:2,couch:false},
-  {k:"tv",n:"Diretta TV",sz:2,couch:false}
+  {k:"cronaca",n:"Cronaca",sz:2,couch:false}
 ];
 M.defs=DEFS;
 M.mount=function(ctx){
