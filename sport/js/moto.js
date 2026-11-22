@@ -46,6 +46,25 @@ M.onChange=function(p,it){if(!it.R)return null;const a=p.R&&p.R[0],b=it.R[0];if(
   if(a&&a.rider_number!==b.rider_number&&it.state==="in")return{id:"l:"+it.id+":"+b.rider_number+":"+b.num_lap,big:"IN TESTA",title:nm,text:"Giro "+b.num_lap+" · MotoGP "+it.head.session_name,color:"var(--yellow)",important:imp};
   return null;};
 
+/* ---------- fatti: ultima gara e vincitore, leader del mondiale, prossimo GP, Superbike ---------- */
+M.facts=async function(){
+  if(!SL.extData())return[{l:"MotoGP e Superbike",v:"risultati e classifiche con l'estensione per PC"}];
+  const out=[];
+  try{
+    const evs=await events(),cur=currentEvent(evs),i=evs.indexOf(cur),now=Date.now();
+    for(const ev of [cur,evs[i-1]].filter(Boolean)){const cat=await gpCat(ev.id),S=await gpSessions(ev.id,cat.id);const race=S.filter(s=>s.type==="RAC"&&new Date(s.date)<now).pop();if(!race)continue;
+      const d=await SL.tryGet(GP+"results/session/"+race.id+"/classification?test=false",{ttl:600000});const w=d&&d.classification&&d.classification[0];
+      if(w&&w.rider){out.push({l:"Ultima gara · "+(ev.sponsored_name||ev.name).replace(/^.*?Grand Prix of /i,"GP "),v:"vince "+w.rider.full_name,go:{sport:"moto"}});break;}}
+    const s=await season(),cat=await gpCat(cur.id),st=await SL.tryGet(GP+"results/standings?seasonUuid="+s.id+"&categoryUuid="+cat.id,{ttl:900000});
+    const top=st&&st.classification&&st.classification[0];if(top)out.push({l:"Leader MotoGP "+s.year,v:top.rider.full_name+" · "+top.points+" pt"});
+    const ne=evs.find(e=>new Date(e.date_start).getTime()>now);if(ne)out.push({l:"Prossimo GP",v:(ne.sponsored_name||ne.name)+" · dal "+SL.fmtDay(ne.date_start),go:{sport:"moto"}});
+  }catch(e){}
+  try{const y=new Date().getFullYear(),d=await SL.tryGet(SBK+"wsbk-results/v1/seasons/"+y+"/categories/SBK/riders/standings",{ttl:900000});
+    if(d&&d.data&&d.data.length){const top=d.data.slice().sort((a,b)=>a.attributes.position-b.attributes.position)[0];const rd=(d.included||[]).find(x=>x.type==="riders"&&x.id===top.relationships.rider.data.id);
+      if(rd)out.push({l:"Leader WorldSBK "+y,v:rd.attributes.name+" "+rd.attributes.surname+" · "+top.attributes.points+" pt",go:{sport:"moto",s:"sbk"}});}}catch(e){}
+  return out;
+};
+
 /* ---------- pagina ---------- */
 const DEFS_GP=[
   {k:"tv",n:"Diretta TV",sz:2,fixed:true},

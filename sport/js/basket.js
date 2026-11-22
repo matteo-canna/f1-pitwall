@@ -29,6 +29,17 @@ M.onChange=function(p,it){const a=p.ev,b=it.ev,t=b.away.name+" "+b.away.score+" 
   if(b.fav&&b.period>=4&&lead(a)!==lead(b)&&lead(b)!==0)return{id:"l:"+b.id+":"+E.score(b),big:"SORPASSO",title:t,text:b.clock,color:"var(--yellow)"};
   return null;};
 
+/* fatti: ultima partita finita, prime della classe a Est e Ovest, prossima palla a due */
+M.facts=async function(){
+  const [a,b,c]=await Promise.all([dayGames(0,60000),dayGames(-1,900000),dayGames(1,900000)]);const all=a.concat(b,c);
+  const done=all.filter(x=>x.done).sort((x,y)=>new Date(y.date)-new Date(x.date))[0],next=all.filter(x=>x.state==="pre").sort((x,y)=>new Date(x.date)-new Date(y.date))[0];
+  const out=[];
+  if(done)out.push({l:"Ultima finita",v:done.away.name+" "+done.away.score+"-"+done.home.score+" "+done.home.name,go:{sport:"basket",e:done.id,d:SL.dayOff(done.date)||""}});
+  const d=await SL.tryGet(SL.ESPN2+"basketball/nba/standings",{ttl:900000});
+  if(d)E.groups(d).forEach(g=>{const top=g.entries.slice().sort((x,y)=>E.stat(y,"winPercent")-E.stat(x,"winPercent"))[0];if(top)out.push({l:"Prima a "+(/East/i.test(g.name)?"Est":"Ovest"),v:top.team.displayName+" · "+E.stat(top,"wins")+"-"+E.stat(top,"losses")});});
+  if(next)out.push({l:"Prossima",v:next.away.name+" @ "+next.home.name+" · "+SL.when(next.date),go:{sport:"basket",e:next.id,d:SL.dayOff(next.date)||""}});
+  return out;
+};
 const DEFS=[
   {k:"tv",n:"Diretta TV",sz:2,fixed:true},
   {k:"match",n:"Partita",sz:2},

@@ -531,3 +531,88 @@ html[data-couch="1"] .sporthead p{font-size:15px}
 .chip.hot.zero[aria-pressed="true"] .n,.chip.hot.zero[aria-pressed="true"] .lv{color:#fff;background:#fff}
 .chip.hot.zero[aria-pressed="true"] .n{background:none}
 @media (max-width:1500px){.clock{display:none}}
+
+/* =====================================================================
+   SFONDI FOTOGRAFICI (sostituiscono le illustrazioni)
+   Foto vera dello sport + velatura scura che si infittisce verso il basso, dove ci sono i dati.
+   ===================================================================== */
+body::after{display:none}
+body[data-sport]{--bgl:var(--veil),var(--photo) var(--ppos,center)/cover no-repeat}
+:root{--veil:linear-gradient(180deg,rgba(6,9,16,.50) 0%,rgba(6,9,16,.70) 38%,rgba(6,9,16,.86) 75%,rgba(6,9,16,.93) 100%)}
+html[data-style="regia"]{--veil:linear-gradient(180deg,rgba(4,6,12,.58) 0%,rgba(4,6,12,.76) 40%,rgba(4,6,12,.9) 100%)}
+body[data-sport="home"]{--photo:url("img/bg-home.jpg");--ppos:center 70%}
+body[data-sport="calcio"]{--photo:url("img/bg-calcio.jpg");--ppos:center 62%}
+body[data-sport="basket"]{--photo:url("img/bg-basket.jpg");--ppos:center 55%}
+body[data-sport="tennis"]{--photo:url("img/bg-tennis.jpg");--ppos:center 40%}
+body[data-sport="rugby"]{--photo:url("img/bg-rugby.jpg");--ppos:center 58%}
+body[data-sport="moto"]{--photo:url("img/bg-moto.jpg");--ppos:center 35%}
+@media (max-width:900px){
+  body[data-sport="home"]{--photo:url("img/bg-home-sm.jpg")}
+  body[data-sport="calcio"]{--photo:url("img/bg-calcio-sm.jpg")}
+  body[data-sport="basket"]{--photo:url("img/bg-basket-sm.jpg")}
+  body[data-sport="tennis"]{--photo:url("img/bg-tennis-sm.jpg")}
+  body[data-sport="rugby"]{--photo:url("img/bg-rugby-sm.jpg")}
+  body[data-sport="moto"]{--photo:url("img/bg-moto-sm.jpg")}
+}
+/* in stile regia i pannelli sono molto trasparenti: sopra una foto servono un po' più pieni */
+html[data-style="regia"] .card{background:rgba(10,14,24,.72)}
+html[data-style="regia"] .mtile,html[data-style="regia"] .mrow,html[data-style="regia"] .htile,html[data-style="regia"] .tmatch,html[data-style="regia"] .chip{background-color:rgba(12,16,28,.78)}
+/* credito della foto */
+.photocredit{position:fixed;right:10px;bottom:6px;z-index:5;font-size:10px;color:rgba(255,255,255,.42);text-decoration:none;text-shadow:0 1px 2px #000}
+.photocredit:hover{color:#fff}
+
+/* =====================================================================
+   INFORMAZIONI UTILI NELLA TESTATA
+   ===================================================================== */
+.facts{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:8px;min-width:0}
+.fact{display:inline-flex;flex-direction:column;gap:3px;background:transparent;border:0;border-left:2px solid var(--sa);padding:1px 0 1px 9px;text-align:left;color:var(--text);min-width:0;max-width:100%}
+.fact small{font:700 10px/1.1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.fact b{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+button.fact:hover b,button.fact:focus-visible b{text-decoration:underline}
+.fact.load{border-left-color:var(--line)}
+html[data-couch="1"] .fact b{font-size:16px}
+html[data-couch="1"] .fact small{font-size:12px}
+
+/* =====================================================================
+   STRISCIA NOTIZIE SOTTO IL MENU
+   ===================================================================== */
+.ticker{display:flex;align-items:center;height:38px;background:rgba(6,9,16,.86);border-bottom:1px solid var(--line);backdrop-filter:blur(6px);overflow:hidden;position:relative;z-index:20}
+.tk-label{flex:none;display:flex;align-items:center;gap:7px;height:100%;padding:0 24px 0 16px;background:var(--sa);color:#0b0f19;font:900 12px/1 var(--f-display);font-stretch:118%;letter-spacing:.08em;clip-path:polygon(0 0,100% 0,calc(100% - 12px) 100%,0 100%)}
+.tk-label .ico{width:16px;height:16px;color:#0b0f19}
+.tk-view{flex:1;min-width:0;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 28px,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(90deg,transparent,#000 28px,#000 calc(100% - 28px),transparent)}
+.tk-track{display:flex;width:max-content}
+.tk-track.go{animation:tk var(--tkdur,40s) linear infinite}
+.tk-view:hover .tk-track,.tk-view:focus-within .tk-track{animation-play-state:paused}
+@keyframes tk{to{transform:translateX(-50%)}}
+.tk-run{display:flex;align-items:center;gap:16px;padding-right:16px}
+.tk-it{display:inline-flex;align-items:center;gap:7px;background:transparent;border:0;color:var(--text);font-size:12.5px;white-space:nowrap;padding:4px 2px;cursor:pointer}
+.tk-it.tk-empty{cursor:default;color:var(--muted)}
+.tk-it .ico{width:15px;height:15px;color:var(--sa)}
+.tk-it b{font-weight:800}
+.tk-tag{font:800 10.5px/1 var(--f-mono);letter-spacing:.06em;padding:4px 6px;border-radius:5px;background:var(--panel2);color:var(--muted);text-transform:uppercase}
+.tk-tag.live{background:var(--red);color:#fff}
+.tk-tag.fin{background:rgba(255,255,255,.12);color:#fff}
+.tk-tag.fact{background:color-mix(in srgb,var(--sa) 24%,transparent);color:var(--text)}
+.tk-sub{color:var(--dim);font-size:11px}
+.tk-sep{color:var(--dim);font-size:8px}
+.tk-x{flex:none;height:100%;padding:0 15px;background:transparent;border:0;border-left:1px solid var(--line);color:var(--muted);font-weight:800}
+.tk-x:hover,.tk-x:focus-visible{color:#fff}
+#btnTicker[aria-pressed="false"]{opacity:.55}
+html[data-couch="1"] .ticker{height:48px}
+html[data-couch="1"] .tk-it{font-size:15.5px}
+html[data-couch="1"] .tk-tag{font-size:12px}
+@media (max-width:760px){.tk-label{padding:0 18px 0 12px}.tk-label{font-size:0}.tk-label .ico{width:18px;height:18px}}
+@media (prefers-reduced-motion:reduce){.tk-view{overflow-x:auto}.tk-run[aria-hidden]{display:none}}
+/* ritocco: foto più presente, schede a vetro smerigliato (su TV restano piene) */
+:root{--veil:linear-gradient(180deg,rgba(6,9,16,.34) 0%,rgba(6,9,16,.58) 35%,rgba(6,9,16,.78) 75%,rgba(6,9,16,.88) 100%)}
+html[data-style="regia"]{--veil:linear-gradient(180deg,rgba(4,6,12,.42) 0%,rgba(4,6,12,.64) 40%,rgba(4,6,12,.86) 100%)}
+.card{background:color-mix(in srgb,var(--panel) 80%,transparent);backdrop-filter:blur(8px) saturate(1.1)}
+html[data-couch="1"] .card{background:color-mix(in srgb,var(--panel) 92%,transparent)}
+/* credito della foto: in fondo alla pagina, non sopra i dati */
+.photocredit{position:static;display:block;text-align:right;padding:0 16px 16px;text-shadow:none}
+/* testata e filtri sopra la foto: fondo a vetro per leggerli bene */
+.grid>.subbar.ingrid,body:not([data-sport="home"]) .subbar:not(.ingrid){background:rgba(8,11,20,.58);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);padding:12px 14px}
+body:not([data-sport="home"]) .subbar:not(.ingrid){margin:12px 16px 0}
+html[data-couch="1"] .grid>.subbar.ingrid{background:rgba(8,11,20,.82);backdrop-filter:none}
+.fact small{color:rgba(233,238,248,.72)}
+.hero{text-shadow:0 2px 12px rgba(0,0,0,.6)}

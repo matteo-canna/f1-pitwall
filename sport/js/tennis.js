@@ -49,6 +49,24 @@ M.onChange=function(p,it){const a=p.m,b=it.m;const nm=b.p.map(x=>x.name).join(" 
   if(a.state==="pre"&&b.state==="in")return{id:"k:"+b.id,big:"VIA",title:nm,text:b.tourn+" · "+b.round+(b.court?" · "+b.court:""),color:"var(--cyan)"};
   return null;};
 
+/* fatti: n.1 del mondo, primo italiano, ultimo torneo concluso e chi l'ha vinto, prossimo torneo */
+M.facts=async function(){
+  const out=[],y=new Date().getFullYear(),now=Date.now();
+  const rk=await SL.tryGet(BASE+"rankings",{ttl:36e5});const R=rk&&rk.rankings&&rk.rankings[0]&&rk.rankings[0].ranks;
+  if(R&&R[0])out.push({l:"N.1 ATP",v:R[0].athlete.displayName+" · "+Number(R[0].points).toLocaleString("it-IT")+" pt"});
+  const it=R&&R.find(r=>isIta(r.athlete));if(it)out.push({l:"Primo italiano",v:it.athlete.displayName+" · n."+it.current});
+  const [a,b]=await Promise.all([SL.tryGet(BASE+"scoreboard?dates="+y,{ttl:216e5}),SL.tryGet(BASE+"scoreboard?dates="+(y+1),{ttl:216e5})]);
+  const evs=[].concat((a&&a.events)||[],(b&&b.events)||[]).sort((x,z)=>new Date(x.date)-new Date(z.date));
+  /* ultimo torneo concluso: cerco la finale del singolare nel tabellone del suo ultimo giorno */
+  const past=evs.filter(e=>new Date(e.endDate||e.date).getTime()<now).reverse();
+  for(const e of past.slice(0,3)){/* ESPN mette la fine al mattino dopo: la finale è il giorno prima */
+    const d=await SL.tryGet(BASE+"scoreboard?dates="+SL.dayKey(SL.addDays(e.endDate||e.date,-1)),{ttl:216e5});
+    const ev=d&&(d.events||[]).find(x=>String(x.id)===String(e.id));if(!ev)continue;let win=null;
+    (ev.groupings||[]).forEach(g=>{if(/doubles/i.test(g.grouping&&g.grouping.displayName||""))return;(g.competitions||[]).forEach(c=>{if(/^final$/i.test(c.round&&c.round.displayName||"")){const w=(c.competitors||[]).find(k=>k.winner);if(w)win=w.athlete&&w.athlete.displayName;}});});
+    if(win){out.push({l:"Ultimo torneo · "+e.name.replace(/ presented by.*$/i,""),v:"vince "+win});break;}}
+  const nx=evs.find(e=>new Date(e.date).getTime()>now);if(nx)out.push({l:"Prossimo torneo",v:nx.name.replace(/ presented by.*$/i,"")+" · dal "+SL.fmtDay(nx.date)});
+  return out;
+};
 const DEFS=[
   {k:"tv",n:"Diretta TV",sz:2,fixed:true},
   {k:"match",n:"Partita",sz:2},

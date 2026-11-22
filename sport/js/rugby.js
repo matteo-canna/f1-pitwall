@@ -30,6 +30,19 @@ function trackScore(ev){if(!ev.live&&!ev.done)return;const k="rgtl."+ev.id,tl=SL
   if(tl.h!=null&&ev.live){if(hs>tl.h)tl.ev.push({s:"h",d:hs-tl.h,c:ev.clock,sc:hs+"-"+as});if(as>tl.a)tl.ev.push({s:"a",d:as-tl.a,c:ev.clock,sc:hs+"-"+as});}
   tl.h=hs;tl.a=as;SL.store.sset(k,tl);}
 
+/* fatti: ultima e prossima dell'Italia, capolista del Nations Championship / Sei Nazioni */
+M.facts=async function(){
+  const y=new Date().getFullYear(),all=[];
+  await Promise.all(L.map(async c=>{for(const yy of [y,y+1]){const d=await SL.tryGet(SL.ESPN+"rugby/"+c.k+"/scoreboard?dates="+yy,{ttl:900000});
+    ((d&&d.events)||[]).forEach(e=>{const ev=E.norm(e,"rugby",c.k,c.n);if(ev.home.name==="Italia"||ev.away.name==="Italia")all.push(ev);});}}));
+  const done=all.filter(x=>x.done).sort((a,b)=>new Date(b.date)-new Date(a.date))[0],next=all.filter(x=>x.state==="pre").sort((a,b)=>new Date(a.date)-new Date(b.date))[0];
+  const out=[];
+  if(done)out.push({l:"Ultima dell'Italia",v:done.home.name+" "+E.score(done)+" "+done.away.name+" · "+done.comp,go:{sport:"rugby",c:"ita",e:done.id}});
+  if(next)out.push({l:"Prossima dell'Italia",v:next.home.name+" – "+next.away.name+" · "+SL.when(next.date),go:{sport:"rugby",c:"ita",e:next.id}});
+  for(const lg of ["17567","180659"]){const d=await SL.tryGet(SL.ESPN2+"rugby/"+lg+"/standings",{ttl:900000});const G=d?E.groups(d):[];
+    const en=[].concat(...G.map(g=>g.entries));if(en.length){const top=en.sort((a,b)=>E.stat(b,"points")-E.stat(a,"points"))[0];out.push({l:"In testa · "+compN(lg),v:SL.tr.team(top.team.displayName)+" · "+E.stat(top,"points")+" pt"});break;}}
+  return out;
+};
 const DEFS=[
   {k:"tv",n:"Diretta TV",sz:2,fixed:true},
   {k:"match",n:"Partita",sz:2},

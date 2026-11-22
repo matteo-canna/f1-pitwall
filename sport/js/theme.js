@@ -59,10 +59,18 @@ I.init=function(){
   st.setProperty("--art-home",svgUrl(confetti()));
 };
 
-/* ---------- testata di ogni sport ---------- */
-const MOTTO={calcio:"Novanta minuti (più recupero) di pura passione",basket:"Canestro dopo canestro, fino alla sirena",tennis:"Quindici, trenta, quaranta… gioco!",rugby:"Avanti si va, sostenendosi a vicenda",moto:"Gas aperto fino alla bandiera a scacchi"};
-I.head=function(sport){if(sport==="home"||window.isFollower())return null;const m=SL.sports[sport];
+/* ---------- testata di ogni sport: nome + informazioni utili che cambiano (capolista, ultimo vincitore, prossimo evento…) ---------- */
+I.head=function(sport){if(sport==="home"||window.isFollower())return null;const m=SL.sports[sport],h=SL.h;
   const el=document.createElement("div");el.className="sporthead";
-  el.innerHTML='<span class="shicon">'+SL.ico(sport)+'</span><div class="shtxt"><h1>'+SL.h(m.name)+'</h1><p>'+SL.h(MOTTO[sport]||"")+'</p></div>';
+  el.innerHTML='<span class="shicon">'+SL.ico(sport)+'</span><div class="shtxt"><h1>'+h(m.name)+'</h1><div class="facts" aria-live="polite"><span class="fact load"><small>Carico le ultime notizie…</small></span></div></div>';
+  const st=Object.assign({},SL.state),rid=SL.routeId;
+  SL.ticker.facts(sport,st).then(F=>{if(rid!==SL.routeId)return;const box=el.querySelector(".facts");
+    box.innerHTML=F.length?F.map(f=>f.go?'<button type="button" class="fact" data-go="'+h(JSON.stringify(f.go))+'"><small>'+h(f.l)+'</small><b>'+h(f.v)+'</b></button>':'<span class="fact"><small>'+h(f.l)+'</small><b>'+h(f.v)+'</b></span>').join(""):"";});
+  el.addEventListener("click",e=>{const b=e.target.closest(".fact[data-go]");if(b)try{SL.go(JSON.parse(b.dataset.go));}catch(x){}});
   return el;};
+/* ---------- credito della foto di sfondo ---------- */
+const CRED={calcio:["Foto: Unsplash","https://unsplash.com/license"],basket:["Foto: Unsplash","https://unsplash.com/license"],tennis:["Foto: Unsplash","https://unsplash.com/license"],home:["Foto: Unsplash","https://unsplash.com/license"],
+  rugby:["Foto: David Roberts · CC BY 2.0","https://commons.wikimedia.org/wiki/File:2015_Rugby_World_Cup,_France_vs._Romania_(21048401024).jpg"],
+  moto:["Foto: TeamEG00 · pubblico dominio","https://commons.wikimedia.org/wiki/File:Marc_M%C3%A1rquez_leading_the_pack_during_the_2025_Aragon_motorcycle_Grand_Prix.jpg"]};
+I.credit=function(sport){const a=document.getElementById("photoCredit");if(!a)return;const c=CRED[sport]||CRED.home;a.textContent=c[0];a.href=c[1];a.hidden=window.isFollower();};
 })();

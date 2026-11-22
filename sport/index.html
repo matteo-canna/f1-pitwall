@@ -17,11 +17,17 @@
   <nav class="tabs" id="tabs" aria-label="Sport"></nav>
   <div class="topr">
     <span class="clock mono" id="clock" aria-live="off"></span>
+    <button class="tbtn" id="btnTicker" title="Mostra o nascondi la striscia delle notizie" aria-pressed="true">≡ <span>NOTIZIE</span></button>
     <button class="tbtn" id="btnScreens" title="Più schermi">⧉ <span>SCHERMI</span></button>
     <button class="tbtn" id="btnSettings" title="Impostazioni">⚙ <span>IMPOSTAZIONI</span></button>
     <a class="tbtn f1" id="toF1" href="../" title="Apri F1 Pit Wall">F1 <span>PIT WALL</span> ↗</a>
   </div>
 </header>
+<div class="ticker" id="ticker" hidden>
+  <span class="tk-label" id="tkLabel">ULTIME</span>
+  <div class="tk-view"><div class="tk-track" id="tkTrack"></div></div>
+  <button type="button" class="tk-x" id="tkHide" aria-label="Nascondi la striscia delle notizie" title="Nascondi la striscia">✕</button>
+</div>
 <div class="follow" id="followBar" hidden>
   <span class="logo sm"><span>SPORT</span><b>LIVE</b></span>
   <span id="followTxt">Schermo secondario · segue la finestra principale</span>
@@ -31,6 +37,7 @@
 <main id="main" class="grid" tabindex="-1"></main>
 <div class="alerts" id="alerts" aria-live="polite"></div>
 <div class="toast" id="toast" role="status" hidden></div>
+<a class="photocredit" id="photoCredit" target="_blank" rel="noopener" hidden></a>
 
 <dialog id="dlgSettings" aria-labelledby="setH">
   <form method="dialog" class="dlg">
@@ -74,6 +81,10 @@
           <li>Se avevi già l'estensione F1, premi ↻ su di essa; altrimenti "Carica estensione non pacchettizzata" e scegli la cartella <b>f1pw-tv</b>.</li>
           <li>Ricarica questa pagina.</li>
         </ol>
+        <h3>Striscia notizie</h3>
+        <p class="hint">Scorre sotto il menu: in home tutti gli sport, nelle pagine solo quello sport. Si mostra o nasconde col pulsante ≡ NOTIZIE in alto o con la ✕ sulla striscia.</p>
+        <h3>Foto di sfondo</h3>
+        <p class="hint">Calcio, basket, tennis e home: Unsplash. Rugby: David Roberts, CC BY 2.0 (Wikimedia Commons). Moto: TeamEG00, pubblico dominio (Wikimedia Commons).</p>
         <h3>Sezioni</h3>
         <p><button type="button" class="btn" id="setResetCards">↺ RIPRISTINA SEZIONI E MISURE</button></p>
         <p class="hint">Dati: ESPN (calcio, NBA, tennis, rugby) e siti ufficiali MotoGP / WorldSBK. Fonti gratuite non ufficiali: a volte possono mancare dati o arrivare in ritardo.</p>
@@ -105,6 +116,7 @@
 <script src="js/ui.js"></script>
 <script src="js/viz.js"></script>
 <script src="js/data.js"></script>
+<script src="js/ticker.js"></script>
 <script src="js/home.js"></script>
 <script src="js/calcio.js"></script>
 <script src="js/basket.js"></script>

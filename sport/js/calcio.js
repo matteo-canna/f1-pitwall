@@ -35,6 +35,24 @@ M.onChange=function(p,it){
   return null;
 };
 
+/* ---------- fatti per testata e striscia: capolista, ultimo risultato, prossima partita ---------- */
+M.facts=async function(st){
+  const ck=st&&st.c;const comp=compOf(ck&&ck!=="all"&&ck!=="live"?ck:"ita.1")||compOf("ita.1");
+  const span=comp.multi?[-1,0,1,2]:[-3,-2,-1,0,1,2,3];
+  const get=days=>Promise.all(days.map(d=>E.soccerDay(comp,SL.dayKey(SL.addDays(Date.now(),d)),d===0?60000:900000)));
+  let all=[].concat(...await get(span));
+  if(!all.some(x=>x.done)&&!comp.multi)all=all.concat(...await get([-7,-6,-5,-4]));
+  if(!all.some(x=>x.state==="pre")&&!comp.multi)all=all.concat(...await get([4,5,6,7]));
+  const done=all.filter(x=>x.done).sort((a,b)=>new Date(b.date)-new Date(a.date)),next=all.filter(x=>x.state==="pre").sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const out=[];
+  if(!comp.multi&&!/coppa/.test(comp.k)){const d=await SL.tryGet(SL.ESPN2+"soccer/"+comp.k+"/standings",{ttl:600000});const g=d&&E.groups(d);
+    if(g&&g.length===1&&g[0].entries.length){const top=g[0].entries.slice().sort((a,b)=>(E.stat(a,"rank")||99)-(E.stat(b,"rank")||99))[0];out.push({l:"Capolista "+comp.n,v:top.team.displayName+" · "+E.stat(top,"points")+" pt"});}}
+  const g=ev=>({sport:"calcio",c:comp.k,e:ev.id,d:SL.dayOff(ev.date)||""});
+  if(done[0])out.push({l:"Ultimo risultato",v:done[0].home.name+" "+E.score(done[0])+" "+done[0].away.name,go:g(done[0])});
+  if(next[0])out.push({l:"Prossima partita",v:next[0].home.name+" – "+next[0].away.name+" · "+SL.when(next[0].date),go:g(next[0])});
+  return out;
+};
+
 /* ---------- pagina ---------- */
 const DEFS=[
   {k:"tv",n:"Diretta TV",sz:2,fixed:true},
