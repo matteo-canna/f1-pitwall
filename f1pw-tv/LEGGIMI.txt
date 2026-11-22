@@ -1,14 +1,19 @@
-F1 Pit Wall – Diretta TV nel riquadro
+Pit Wall – Diretta TV e dati sport (versione 1.1.0)
+Serve sia a F1 Pit Wall sia a Sport LIVE APP.
 
 Cosa fa
-Quando il riquadro "Diretta TV" del Pit Wall carica NOW, Sky Go, F1 TV, DAZN o TV8,
-l'estensione toglie le due intestazioni con cui questi siti vietano di essere mostrati
-dentro un'altra pagina. Agisce solo sui riquadri (non quando apri il sito normalmente)
-e solo su questi domini. Non legge password, cookie o dati.
+1. Diretta TV nel riquadro: quando il riquadro "Diretta TV" carica NOW, Sky Go, F1 TV, DAZN, TV8,
+   Prime Video, Mediaset Infinity, RaiPlay, NBA League Pass, SuperTennis o HBO Max, l'estensione toglie
+   le due intestazioni con cui questi siti vietano di essere mostrati dentro un'altra pagina.
+   Agisce solo sui riquadri (non quando apri il sito normalmente) e solo su questi domini.
+2. Dati moto: permette a Sport LIVE APP (e solo a lei, dal sito matteo-canna.github.io) di leggere
+   i dati pubblici di live timing, risultati e classifiche dai siti ufficiali MotoGP e WorldSBK.
+Non legge password, cookie o dati personali.
 
 Installazione (Chrome o Edge su computer)
 1. Estrai lo zip in una cartella che non cancellerai.
 2. Apri chrome://extensions (Edge: edge://extensions).
 3. Attiva "Modalità sviluppatore" in alto a destra.
 4. Premi "Carica estensione non pacchettizzata" e scegli la cartella f1pw-tv.
-5. Ricarica la pagina del Pit Wall.
+   Se avevi già la versione precedente: sostituisci i file nella stessa cartella e premi ↻ sull'estensione.
+5. Ricarica la pagina dell'app.

@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "F1 Pit Wall – Diretta TV nel riquadro",
-  "version": "1.0.0",
-  "description": "Permette al riquadro Diretta TV del F1 Pit Wall di mostrare NOW, Sky Go, F1 TV, DAZN o TV8. Agisce solo quando questi siti sono dentro un riquadro.",
+  "name": "Pit Wall – Diretta TV e dati sport",
+  "version": "1.1.0",
+  "description": "Per F1 Pit Wall e Sport LIVE APP: mostra i servizi di streaming nel riquadro Diretta TV e permette all'app di leggere i dati pubblici di MotoGP e WorldSBK.",
   "permissions": [
     "declarativeNetRequest"
   ],
@@ -12,7 +12,18 @@
     "https://*.formula1.com/*",
     "https://*.dazn.com/*",
     "https://*.tv8.it/*",
-    "https://matteo-canna.github.io/*"
+    "https://*.primevideo.com/*",
+    "https://*.amazon.it/*",
+    "https://*.mediaset.it/*",
+    "https://*.raiplay.it/*",
+    "https://*.rai.it/*",
+    "https://*.nba.com/*",
+    "https://*.supertennis.tv/*",
+    "https://*.hbomax.com/*",
+    "https://api.motogp.pulselive.com/*",
+    "https://api.pulselive.worldsbk.com/*",
+    "https://matteo-canna.github.io/*",
+    "http://localhost/*"
   ],
   "declarative_net_request": {
     "rule_resources": [
@@ -27,6 +38,7 @@
     {
       "matches": [
         "https://matteo-canna.github.io/*",
+        "http://localhost/*",
         "file:///*"
       ],
       "js": [
