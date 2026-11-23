@@ -1198,3 +1198,62 @@ html[data-couch="1"] .top .clock{display:inline-block;font-size:16px}
 html[data-couch="1"] .fv-tx b{font-size:18px}
 html[data-couch="1"] .fv-st{font-size:15px}
 html[data-couch="1"] .chip.fvadd{min-height:44px;font-size:14px}
+
+/* =====================================================================
+   HOME: "Oggi" in primo piano (grande, a tutta larghezza), gli altri giorni sotto
+   ===================================================================== */
+.dtoday{display:flex;flex-direction:column;min-width:0;border-radius:18px;background:rgba(7,10,18,.55);backdrop-filter:blur(3px);
+  border:1px solid color-mix(in srgb,var(--red) 55%,var(--line));box-shadow:0 18px 40px -22px #000,0 0 0 1px color-mix(in srgb,var(--red) 30%,transparent)}
+.dtoday>.dch{padding:16px 18px 12px;border-radius:18px 18px 0 0;background:linear-gradient(90deg,color-mix(in srgb,var(--red) 32%,transparent),transparent 70%)}
+.dtoday>.dch .dn{font-size:36px;color:#fff}
+.dtoday>.dch .dd{font-size:15px}
+.dtoday>.dch .dc{font-size:13px}
+.dtoday>.dbody{overflow:visible;padding:14px 16px 16px;gap:14px}
+.dtoday .dgh{font-size:14px}
+.dtoday .dslot{font-size:14px;margin-top:6px}
+.dgrid{display:flex;flex-direction:column;gap:8px}
+.dtoday .dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(360px,100%),1fr));gap:12px;align-items:start}
+.dtoday .dgrid>.dslot{grid-column:1/-1}
+.dothers{margin-top:6px;color:var(--muted)}
+/* gli altri giorni: tre colonne più compatte */
+.dcols.dsec{grid-template-columns:repeat(3,minmax(0,1fr))}
+.dsec .dcol{max-height:min(70vh,760px)}
+.dsec .dch .dn{font-size:19px}
+
+/* ---------- casella grande (scheda Oggi): più spazio e più informazioni ---------- */
+.htile.big .ht-band{padding:8px 12px;gap:8px}
+.htile.big .ht-band .ico{width:18px;height:18px}
+.htile.big .ht-band .cmp{font-size:12.5px}
+.htile.big .ht-st{font-size:14px;padding:4px 9px}
+.htile.big .ht-body{gap:8px;padding:12px 14px 10px}
+.htile.big .k-tm .ln{grid-template-columns:34px minmax(0,1fr) auto;gap:10px}
+.htile.big .k-tm .lg{width:34px;height:34px}
+.htile.big .n{font-size:calc(17px*var(--fs))}
+.htile.big .v{font-size:calc(30px*var(--fs2))}
+.htile.big .k-tn .sets b{min-width:26px;padding:5px 0;font-size:15px}
+.htile.big .k-lb .n{font-size:calc(15px*var(--fs))}
+.htile.big .k-lb .v{font-size:calc(17px*var(--fs2))}
+.htile.big .k-lb .pos{height:24px;font-size:12.5px}
+.nsub{display:block;margin-top:2px;font:600 11.5px/1.2 var(--f-mono);color:var(--muted);letter-spacing:0;text-transform:none;font-style:normal}
+.fm{display:inline-grid;place-items:center;width:15px;height:15px;margin-right:2px;border-radius:3px;font:800 10px/1 var(--f-mono);font-style:normal;color:#0b0f19;background:#8b93a7}
+.fm.fV{background:#2fbf71}.fm.fN{background:#c9c9c9}.fm.fP{background:#e5383b;color:#fff}
+.ht-info{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;padding:0 14px 10px}
+.hi{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:7px;background:rgba(255,255,255,.06);color:var(--text);font-size:12px;line-height:1.2;max-width:100%}
+.hi .ico{width:14px;height:14px;color:var(--sa);flex:none}
+.hi b{font-weight:800}
+.hi.cd{background:color-mix(in srgb,var(--sa) 18%,transparent)}
+.hi.prog{flex:1 1 100%;height:6px;padding:0;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden}
+.hi.prog i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--sa),var(--red))}
+.htile.big .ht-ft{padding:0 14px 10px;font-size:12px}
+html[data-couch="1"] .dtoday>.dch .dn{font-size:44px}
+html[data-couch="1"] .htile.big .n{font-size:calc(21px*var(--fs))}
+html[data-couch="1"] .htile.big .v{font-size:calc(36px*var(--fs2))}
+html[data-couch="1"] .hi{font-size:14.5px}
+html[data-couch="1"] .nsub{font-size:13px}
+html[data-couch="1"] .dtoday .dgrid{grid-template-columns:repeat(auto-fill,minmax(420px,1fr))}
+@media (max-width:1279px){.dcols.dsec{display:flex}.dsec .dcol{flex:0 0 calc(50% - 6px)}}
+@media (max-width:760px){.dsec .dcol{flex:0 0 100%;max-height:none}.dtoday>.dch .dn{font-size:28px}.dtoday>.dbody{padding:10px}}
+/* nella scheda Oggi le caselle di una stessa riga hanno la stessa altezza; il piè di pagina va in fondo */
+.dtoday .dgrid{align-items:stretch}
+.htile.big{height:100%}
+.htile.big .ht-ft{margin-top:auto}
