@@ -244,5 +244,6 @@ SL.start=function(){
   if(window.isFollower()){$("top").hidden=true;try{SL.chan&&SL.chan.postMessage({type:"ping"});}catch(e){}}
   SL.route();
   SL.sports.home.background&&SL.sports.home.background();
+  if(window.SLintro)window.SLintro.ready(); /* pagina pronta: la sigla d'apertura può chiudersi */
 };
 })();

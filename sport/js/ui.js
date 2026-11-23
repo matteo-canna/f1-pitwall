@@ -162,6 +162,7 @@ UI.openSettings=function(){
   segInit("setStyle",S.style,v=>{S.style=v;SL.saveSettings();SL.applyLook();bcLook();SL.emit("resize");});
   segInit("setCouch",S.couch,v=>{S.couch=v;SL.saveSettings();SL.applyLook();bcLook();couchNow();SL.route();});
   segInit("setAlerts",S.alerts,v=>{S.alerts=v;SL.saveSettings();});
+  segInit("setIntro",S.intro===false?"off":"on",v=>{S.intro=v==="on";SL.saveSettings();SL.toast(S.intro?"La sigla comparirà alla prossima apertura.":"Sigla d'apertura spenta.");});
   segInit("setTilt",S.tilt===false?"off":"on",v=>{S.tilt=v==="on";SL.saveSettings();if(!S.tilt)document.querySelectorAll(".card.tilting").forEach(c=>{c.classList.remove("tilting");c.style.cssText="";});});
   $("setSound").checked=!!S.sound;$("setSound").onchange=e=>{S.sound=e.target.checked;SL.saveSettings();};
   couchNow();favRender();
