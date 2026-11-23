@@ -31,6 +31,12 @@ SL.sports.home={
   mount
 };
 
+/* ---------- Italia e preferiti, separati ----------
+   Italia: Nazionale, Serie A e Coppa Italia, club italiani nelle coppe, tennisti, piloti e golfisti italiani.
+   Preferiti: squadre e atleti segnati con ★ su questo dispositivo. */
+SL.homeIta=x=>!!((x.ev&&(x.ev.ita||(x.sport==="calcio"&&/^ita\./.test(x.ev.league||""))))||(x.m&&x.m.ita)||(x.lines||[]).some(l=>l.ita));
+SL.homeFav=x=>!!((x.ev&&x.ev.fav)||(x.m&&x.m.fav)||(x.T&&x.T.P&&x.T.P.some(p=>p.fav))||(x.lines||[]).some(l=>l.n&&SL.fav.hasName(x.sport,String(l.n).replace(/^\(\d+\)\s*/,""))));
+
 /* ---------- casella di un evento: stessa struttura, ma ogni sport ha colore, forma, trama e impaginazione sue ---------- */
 const COL={calcio:"#2fbf71",basket:"#f5803e",tennis:"#c9dc3c",rugby:"#3fa7d6",moto:"#e5383b",golf:"#d8b45a"};
 const stTxt=it=>it.live?(it.status||"LIVE"):it.done?(it.status||"FINALE"):it.allDay?(it.status||"in giornata"):it.tbd?"da definire":SL.fmtTime(it.date);
@@ -44,7 +50,7 @@ SL.homeTile=function(it){
     if(kind==="lb")return'<span class="ln lb'+(l.pos!=null&&/^T?1$/.test(String(l.pos))?" first":"")+'">'+(l.pos!=null?'<span class="pos">'+h(l.pos)+'</span>':pic(l))+(l.pos!=null&&l.img?'<img class="fl" src="'+h(l.img)+'" alt="" loading="lazy">':"")+name(l)+'<span class="v">'+h(l.v==null?"":l.v)+'</span></span>';
     return'<span class="ln'+(l.lose?" l":"")+'">'+pic(l)+name(l)+'<span class="v">'+h(l.v==null?"":l.v)+'</span></span>';}).join("");
   return'<button type="button" class="htile sp-'+sp+(it.live?" is-live":it.done?" is-done":"")+(it.important?" fav":"")+'" style="--tc:'+COL[sp]+'" data-go="'+h(JSON.stringify(it.go||{sport:sp}))+'" data-id="'+h(it.id)+'">'+
-    '<span class="ht-band">'+SL.ico(sp)+'<span class="cmp">'+h(it.comp||SL.sports[sp].name)+'</span>'+(it.important?'<span class="ht-star" title="Preferiti o Italia">★</span>':"")+'<span class="ht-st">'+(it.live?'<i class="dot"></i>':"")+h(stTxt(it))+'</span></span>'+
+    '<span class="ht-band">'+SL.ico(sp)+'<span class="cmp">'+h(it.comp||SL.sports[sp].name)+'</span>'+(SL.homeIta(it)&&!(sp==="calcio"&&it.ev&&!it.ev.ita)?'<span class="ht-ita" title="Italia">'+SL.ico("ita")+'</span>':"")+(SL.homeFav(it)?'<span class="ht-star" title="Preferito">★</span>':"")+'<span class="ht-st">'+(it.live?'<i class="dot"></i>':"")+h(stTxt(it))+'</span></span>'+
     '<span class="ht-body k-'+kind+'">'+lines+'</span>'+
     (it.foot?'<span class="ht-ft">'+h(it.foot)+'</span>':"")+'</button>';
 };
@@ -74,15 +80,15 @@ function floatLayer(){
 const DAYC={}; /* giorni diversi da oggi: {giorno: {t, res}} */
 const DAYS=[-1,0,1,2];
 const dayName=d=>d===0?"Oggi":d===-1?"Ieri":d===1?"Domani":"Dopodomani";
-const FAVF="home.onlyfav";
+const ONLYK="home.only"; /* "" tutti, "ita" solo Italia, "fav" solo preferiti */
 function mount(ctx){
   const st=ctx.st,main=ctx.main;
   floatLayer();
-  const S={f:SPORTS.indexOf(st.f)>=0?st.f:"all",fav:!!SL.store.get(FAVF,false),open:{}};
+  const S={f:SPORTS.indexOf(st.f)>=0?st.f:"all",only:["ita","fav"].indexOf(SL.store.get(ONLYK,""))>=0?SL.store.get(ONLYK,""):"",open:{}};
   main.innerHTML='<div class="home">'+
     '<div class="hhero"><div><h1><em>●</em> Adesso in diretta</h1><p id="hSub">Carico partite e sessioni di tutti gli sport…</p></div><div class="hstats" id="hStats"></div></div>'+
     '<nav class="sportsel" id="hSports" aria-label="Apri uno sport"></nav>'+
-    '<div class="dtools"><h2 class="dt-h">Giorno per giorno</h2><div id="hFilter"></div><button type="button" class="chip favchip" id="hFav" aria-pressed="'+S.fav+'">★ Solo preferiti e Italia</button>'+
+    '<div class="dtools"><h2 class="dt-h">Giorno per giorno</h2><div id="hFilter"></div><div class="chips onlyf" id="hOnly" role="group" aria-label="Mostra solo"><button type="button" class="chip itachip" data-only="ita" aria-pressed="'+(S.only==="ita")+'" title="Solo Nazionale, campionati italiani, club e atleti italiani">'+SL.ico("ita")+'Italia</button><button type="button" class="chip favchip" data-only="fav" aria-pressed="'+(S.only==="fav")+'" title="Solo squadre e atleti che hai segnato con ★">★ Preferiti</button></div>'+
       (!SL.extData()&&!SL.isTVLike()?'<span class="muted dt-note">MotoGP e Superbike: con l\'estensione per PC (⚙)</span>':"")+'</div>'+
     '<div class="dswitch" id="hSwitch">'+DAYS.map(d=>'<button type="button" data-day="'+d+'" aria-pressed="'+(d===0)+'">'+dayName(d)+'</button>').join("")+'</div>'+
     '<div class="dcols" id="hCols">'+DAYS.map(d=>'<section class="dcol'+(d===0?" today":d<0?" past":"")+'" data-day="'+d+'" aria-label="'+dayName(d)+'"><header class="dch"><span class="dn">'+dayName(d)+'</span><span class="dd">'+h(SL.fmtDayLong(SL.addDays(Date.now(),d)))+'</span><span class="dc"></span></header><div class="dbody"><div class="loading">Carico</div></div></section>').join("")+'</div>'+
@@ -91,7 +97,9 @@ function mount(ctx){
   /* filtro per sport */
   const drawFilter=()=>{const box=$("hFilter");box.innerHTML="";box.appendChild(SL.ui.chips([{k:"all",n:"Tutti",ic:"home"}].concat(SPORTS.map(s=>({k:s,n:SL.sports[s].name,ic:s}))),S.f,v=>{S.f=v;SL.setQuiet({f:v==="all"?"":v});drawFilter();drawCols();},"dfilter"));};
   drawFilter();
-  $("hFav").addEventListener("click",e=>{S.fav=!S.fav;SL.store.set(FAVF,S.fav);e.currentTarget.setAttribute("aria-pressed",String(S.fav));drawCols();});
+  /* Italia e Preferiti: uno alla volta; ritoccare quello acceso lo spegne */
+  $("hOnly").addEventListener("click",e=>{const b=e.target.closest("[data-only]");if(!b)return;S.only=S.only===b.dataset.only?"":b.dataset.only;SL.store.set(ONLYK,S.only);
+    $("hOnly").querySelectorAll("[data-only]").forEach(x=>x.setAttribute("aria-pressed",String(x.dataset.only===S.only)));drawCols();});
 
   /* riquadri grandi degli sport, con le informazioni del momento */
   const facts={};
@@ -113,7 +121,7 @@ function mount(ctx){
 
   /* colonne dei giorni */
   const dayItems=d=>{const res=d===0?LIVE.bySport:(DAYC[d]&&DAYC[d].res);if(!res)return null;const all=[];
-    SPORTS.forEach(s=>{if(S.f!=="all"&&S.f!==s)return;(res[s]||[]).forEach(x=>{if(!S.fav||x.important)all.push(x);});});return all;};
+    SPORTS.forEach(s=>{if(S.f!=="all"&&S.f!==s)return;(res[s]||[]).forEach(x=>{if(!S.only||(S.only==="ita"?SL.homeIta(x):SL.homeFav(x)))all.push(x);});});return all;};
   const imp=x=>x.important?1:0;
   const byTime=(a,b)=>(new Date(a.date)-new Date(b.date))||(imp(b)-imp(a))||(SPORTS.indexOf(a.sport)-SPORTS.indexOf(b.sport));
   function group(id,title,list,opt){opt=opt||{};if(!list.length)return"";const max=opt.max||40,open=S.open[id],show=open?list:list.slice(0,max);
@@ -132,7 +140,7 @@ function mount(ctx){
       html=group("live",'<i class="dot"></i> In diretta ora',live,{cls:"g-live"})+group("pre","Prossime",pre,{slots:true,max:30})+group("done","Finite oggi",done,{max:8});}
     else if(d<0){const done=all.slice().sort(sortP);html=group("y","Risultati",done,{slots:true,max:30});}
     else{const pre=all.slice().sort(sortP);html=group("d"+d,"In programma",pre,{slots:true,max:30});}
-    body.innerHTML=html||'<div class="dempty">'+SL.ico(S.f==="all"?"home":S.f)+'<span>'+(S.fav?"Nessun evento con preferiti o italiani "+(d===0?"oggi":d<0?"ieri":d===1?"domani":"dopodomani")+".":"Nessun evento "+(d===0?"oggi":d<0?"ieri":d===1?"domani":"dopodomani")+(S.f!=="all"?" per "+SL.sports[S.f].name:"")+".")+'</span></div>';}
+    body.innerHTML=html||'<div class="dempty">'+SL.ico(S.f==="all"?"home":S.f)+'<span>'+(S.only==="ita"?"Nessun evento con squadre o atleti italiani "+(d===0?"oggi":d<0?"ieri":d===1?"domani":"dopodomani")+".":S.only==="fav"?"Nessun evento dei tuoi preferiti "+(d===0?"oggi":d<0?"ieri":d===1?"domani":"dopodomani")+". Tocca ★ accanto a squadre e atleti per aggiungerli.":"Nessun evento "+(d===0?"oggi":d<0?"ieri":d===1?"domani":"dopodomani")+(S.f!=="all"?" per "+SL.sports[S.f].name:"")+".")+'</span></div>';}
   function drawCols(){DAYS.forEach(drawCol);}
   function draw(){drawSports();drawCols();
     const L=dayItems(0)||[],n=[].concat(...SPORTS.map(s=>LIVE.bySport[s]||[])).filter(x=>x.live).length,tot=[].concat(...SPORTS.map(s=>LIVE.bySport[s]||[])).length;
