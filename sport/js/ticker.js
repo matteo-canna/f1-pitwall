@@ -23,7 +23,7 @@ TK.cachedFacts=(sport,st)=>{const c=fcache[sport+":"+((st&&(st.c||st.s))||"")];r
 /* ---------- elementi della striscia ---------- */
 function line(it){
   const L=it.lines||[];if(!L.length)return h(it.comp||"");
-  if(it.sport==="moto"||it.sport==="golf")return L.map(l=>h(l.n)+(l.v?" <b>"+h(l.v)+"</b>":"")).join(" · ");
+  if(it.sport==="moto"||it.sport==="golf")return L.map(l=>h((l.pos!=null?l.pos+(String(l.pos).match(/\d$/)?".":"")+" ":"")+l.n)+(l.v?" <b>"+h(l.v)+"</b>":"")).join(" · ");
   const a=L[0],b=L[1]||{};const num=x=>x!=null&&x!==""&&!isNaN(+x);
   if(num(a.v)&&num(b.v))return h(a.n)+" <b>"+h(a.v)+"-"+h(b.v)+"</b> "+h(b.n);
   if(a.v||b.v)return h(a.n)+" <b>"+h(a.v||"")+"</b> – "+h(b.n)+" <b>"+h(b.v||"")+"</b>";
