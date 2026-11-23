@@ -797,3 +797,47 @@ html[data-style] body .daynav button.cur{font-family:var(--f-mono);font-style:no
 .tabs button .ln{font-size:11.5px;min-width:20px;padding:2px 6px}
 .photocredit{font-size:11.5px}
 .bench h4,.rounds h4{font-size:12px}
+
+/* =====================================================================
+   DIRETTA TV: spenta = compatta e utile; accesa = schermo 16:9
+   ===================================================================== */
+.tvbar{display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+.tvsvc{display:flex;flex-wrap:wrap;gap:8px}
+.tvsvc .chip{min-height:var(--chip-h)}
+.tvcustom{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tvcustom input[type=url]{flex:1 1 220px;min-height:var(--btn-h);background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:0 10px;color:var(--text)}
+.tvacts{display:flex;gap:8px;flex-wrap:wrap}
+.tvacts .go{font-size:14px;padding:0 20px;min-height:calc(var(--btn-h) + 6px)}
+/* spenta: niente schermo nero, solo testo e partite in diretta */
+.card[data-k="tv"]:not(.tv-on) .tvstage{aspect-ratio:auto;background:transparent;overflow:visible;border-radius:0}
+.card[data-k="tv"]:not(.tv-on) .tvidle{position:static;display:flex;flex-direction:column;align-items:stretch;gap:12px;padding:0;background:none;text-align:left}
+.tvtxt{color:var(--muted);font-size:13.5px;line-height:1.5}
+.tvlive{display:flex;flex-direction:column;gap:6px}
+.tvlive h4{margin:2px 0 2px;display:flex;align-items:center;gap:8px;font:700 12px/1.2 var(--f-ui);font-style:var(--ui-st);text-transform:var(--ui-tt);letter-spacing:var(--ui-ls);color:var(--muted)}
+.tvl{display:grid;grid-template-columns:22px 1fr auto;gap:10px;align-items:center;min-height:var(--btn-h);padding:6px 12px;background:var(--panel2);border:1px solid color-mix(in srgb,var(--sa) 20%,var(--line));border-radius:var(--btn-r);color:var(--text);text-align:left;font-size:14px}
+.tvl .ico{width:18px;height:18px;color:var(--sa)}
+.tvl-t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tvl-s{font:700 12px/1 var(--f-mono);color:var(--red);white-space:nowrap}
+.tvl:hover{border-color:var(--sa)}
+/* accesa: schermo 16:9 come prima */
+.card[data-k="tv"].tv-on .tvstage{aspect-ratio:16/9;background:#000}
+.card[data-k="tv"].tv-on .tvidle{position:absolute;inset:0}
+.card[data-k="tv"].tv-on .tvlive{display:none}
+.card[data-k="tv"].tv-on .tvsvc{display:none}
+html[data-couch="1"] .tvl{font-size:16px}
+html[data-couch="1"] .tvtxt{font-size:15.5px}
+.tvbar{align-items:stretch}
+.tvacts{justify-content:flex-start}
+/* telefono: logo e pulsanti sulla stessa riga, più spazio ai contenuti */
+@media (max-width:760px){
+  .top{gap:8px 8px;padding:8px 12px}
+  .logo{font-size:15px}
+  .logo span,.logo b{padding:6px 7px}
+  .topr{gap:6px}
+  .tbtn{padding:0 10px;min-height:40px}
+}
+@media (max-width:760px){
+  .tvl{grid-template-columns:22px 1fr;row-gap:4px;padding:8px 12px}
+  .tvl-t{white-space:normal}
+  .tvl-s{grid-column:2}
+}

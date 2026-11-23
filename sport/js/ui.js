@@ -200,45 +200,62 @@ UI.tv=function(c,sport){
   const url=()=>{const u=cfg.svc==="custom"?cfg.url:svc().u;return/^https:\/\//i.test(u||"")?u:"";};
   const inline=()=>!!url()&&!SL.inFrame&&((svc().frame&&!!SL.ext())||(cfg.svc==="custom"&&cfg.embed));
   const tvLike=SL.isTVLike();
-  c.body.innerHTML='<div class="tvbar"><select aria-label="Servizio">'+list.map(k=>'<option value="'+k+'"'+(k===cfg.svc?" selected":"")+'>'+h(SVC[k].n)+'</option>').join("")+'</select>'+
-    '<input type="url" placeholder="https://…" aria-label="Indirizzo del sito" value="'+h(cfg.url)+'">'+
-    '<label class="chk emb"><input type="checkbox"'+(cfg.embed?" checked":"")+'> nel riquadro</label>'+
-    '<button type="button" class="btn pri go"></button><button type="button" class="btn stop">■ STOP</button><button type="button" class="btn fs">⛶</button></div>'+
-    '<div class="tvstage"><iframe title="Diretta TV" hidden allow="autoplay; encrypted-media; fullscreen; picture-in-picture; storage-access" referrerpolicy="strict-origin-when-cross-origin" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation allow-storage-access-by-user-activation"></iframe><div class="tvidle"><div class="big">Diretta TV</div><div class="tx"></div></div></div><div class="note msg" hidden></div>';
-  const q=s=>c.body.querySelector(s),fr=q("iframe"),sel=q("select"),inp=q("input[type=url]"),emb=q(".emb input");
+  /* due stati: spenta = riquadro compatto e utile (servizi + partite in diretta); accesa = schermo 16:9 */
+  c.body.innerHTML='<div class="tvbar"><div class="tvsvc" role="group" aria-label="Servizio">'+list.map(k=>'<button type="button" class="chip" data-svc="'+k+'" aria-pressed="'+(k===cfg.svc)+'">'+h(SVC[k].n)+'</button>').join("")+'</div>'+
+    '<div class="tvcustom"><input type="url" placeholder="https://…" aria-label="Indirizzo del sito" value="'+h(cfg.url)+'"><label class="chk emb"><input type="checkbox"'+(cfg.embed?" checked":"")+'> nel riquadro</label></div>'+
+    '<div class="tvacts"><button type="button" class="btn pri go"></button><button type="button" class="btn stop">■ STOP</button><button type="button" class="btn fs" aria-label="Schermo intero">⛶</button></div></div>'+
+    '<div class="tvstage"><iframe title="Diretta TV" hidden allow="autoplay; encrypted-media; fullscreen; picture-in-picture; storage-access" referrerpolicy="strict-origin-when-cross-origin" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation allow-storage-access-by-user-activation"></iframe>'+
+    '<div class="tvidle"><div class="tvtxt"></div><div class="tvlive"></div></div></div><div class="note msg" hidden></div>';
+  const q=s=>c.body.querySelector(s),fr=q("iframe"),inp=q(".tvcustom input[type=url]"),emb=q(".emb input");
   let loaded=false;
-  const render=()=>{const s=svc(),alive=!!(TV.win&&!TV.win.closed&&TV.card===c.el),show=inline()&&loaded;
-    inp.hidden=cfg.svc!=="custom";q(".emb").hidden=cfg.svc!=="custom";
-    q(".go").textContent=show?"↻ RICARICA":alive?"↻ RIPOSIZIONA":tvLike?"▶ APRI "+(cfg.svc==="custom"?"SITO":s.n.toUpperCase()):"▶ COLLEGA "+(cfg.svc==="custom"?"SITO":s.n.toUpperCase());
+  const on=()=>(inline()&&loaded)||!!(TV.win&&!TV.win.closed&&TV.card===c.el);
+  const render=()=>{const s=svc(),alive=!!(TV.win&&!TV.win.closed&&TV.card===c.el),show=inline()&&loaded,nm=cfg.svc==="custom"?"SITO":s.n.toUpperCase();
+    c.el.classList.toggle("tv-on",show||alive);
+    q(".tvcustom").hidden=cfg.svc!=="custom";
+    c.body.querySelectorAll("[data-svc]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.svc===cfg.svc)));
+    q(".go").textContent=show?"↻ RICARICA":alive?"↻ RIPOSIZIONA":(tvLike?"▶ APRI ":"▶ COLLEGA ")+nm;
     q(".stop").hidden=!(alive||show);q(".fs").hidden=!show;fr.hidden=!show;q(".tvidle").hidden=show;
-    c.sub(show?s.n+" nel riquadro":alive?s.n+" in finestra agganciata":"");
-    q(".tvidle .tx").textContent=tvLike?"Su Smart TV e tablet il video non può stare dentro l'app: APRI avvia "+s.n+" (o la sua app). Torna qui con il tasto indietro.":
-      alive?"La diretta è nella finestra di "+s.n+" sopra questo riquadro. Se hai spostato o ridimensionato, premi RIPOSIZIONA.":
-      inline()?"Premi COLLEGA: "+s.n+" si carica qui dentro. Accedi con il tuo abbonamento come sul sito.":
-      s.frame?"Con l'estensione per PC (Impostazioni ⚙) "+s.n+" si vede qui dentro. Senza, COLLEGA lo apre in una finestra appoggiata sopra il riquadro.":
-      "Premi COLLEGA: il sito si apre in una finestra appoggiata sopra il riquadro.";};
+    c.sub(show?s.n+" nel riquadro":alive?s.n+" in finestra agganciata":"spenta");
+    q(".tvtxt").textContent=tvLike?"Su Smart TV e tablet il video si apre nell'app o nel sito di "+s.n+": torna qui con il tasto indietro.":
+      alive?"La diretta è nella finestra di "+s.n+" sopra questo riquadro. Se hai spostato la pagina, premi RIPOSIZIONA.":
+      inline()?"Scegli il servizio e premi COLLEGA: "+s.n+" si carica qui dentro, con il tuo abbonamento.":
+      s.frame?"Premi COLLEGA: "+s.n+" si apre in una finestra appoggiata qui sopra. Con l'estensione per PC (⚙) si vede dentro il riquadro.":
+      "Premi COLLEGA: il sito si apre in una finestra appoggiata qui sopra.";
+    liveList();};
+  /* finché è spenta: le partite in diretta di questo sport, toccabili */
+  const liveList=()=>{const box=q(".tvlive");if(!box)return;if(on()){box.innerHTML="";return;}
+    const L=(SL.live.bySport[sport]||[]);const live=L.filter(x=>x.live).sort((a,b)=>b.important-a.important).slice(0,4);
+    const fmt=x=>{const l=x.lines||[];if(x.sport==="moto")return l.slice(0,2).map(y=>y.n).join(" · ");const a=l[0]||{},b=l[1]||{};const num=v=>v!==""&&v!=null&&!isNaN(+v);
+      return h(a.n||"")+(num(a.v)&&num(b.v)?" <b>"+h(a.v)+"-"+h(b.v)+"</b> ":" – ")+h(b.n||"");};
+    if(live.length){box.innerHTML='<h4><span class="tag live">LIVE</span> In diretta ora · tocca per aprire</h4>'+live.map(x=>'<button type="button" class="tvl" data-go="'+h(JSON.stringify(x.go||{sport}))+'">'+SL.ico(x.sport)+'<span class="tvl-t">'+fmt(x)+'</span><span class="tvl-s">'+h(x.status||"")+'</span></button>').join("");return;}
+    const nx=L.filter(x=>x.state==="pre").sort((a,b)=>new Date(a.date)-new Date(b.date))[0];
+    box.innerHTML=nx?'<h4>Nessuna partita in diretta · la prossima</h4><button type="button" class="tvl" data-go="'+h(JSON.stringify(nx.go||{sport}))+'">'+SL.ico(nx.sport)+'<span class="tvl-t">'+fmt(nx)+'</span><span class="tvl-s">'+h(SL.when(nx.date))+'</span></button>':'<h4>Nessuna partita in diretta in questo momento</h4>';};
+  c.body.addEventListener("click",e=>{const g=e.target.closest(".tvl[data-go]");if(g){try{SL.go(JSON.parse(g.dataset.go));}catch(x){}return;}
+    const b=e.target.closest("[data-svc]");if(b&&b.dataset.svc!==cfg.svc){stop();cfg.svc=b.dataset.svc;save();render();if(cfg.svc==="custom")inp.focus();}});
+  SL.onPage("live",liveList);
   const msg=(t)=>{const m=q(".msg");m.hidden=!t;m.textContent=t||"";};
   const rect=()=>{const r=q(".tvstage").getBoundingClientRect();if(!r.width)return null;const bx=Math.max(0,(window.outerWidth-window.innerWidth)/2),by=Math.max(0,window.outerHeight-window.innerHeight-bx);
     return{x:Math.round(window.screenX+bx+r.left),y:Math.round(window.screenY+by+r.top),w:Math.round(r.width),h:Math.round(r.height)};};
   const openWin=()=>{const u=url();if(!u){msg("Scrivi l'indirizzo del sito (deve iniziare con https://).");return;}
     if(tvLike){window.open(u,"_blank");return;}
     if(SL.inFrame){msg("Dentro un riquadro non si possono aprire finestre: apri il sito direttamente.");return;}
+    c.el.classList.add("tv-on"); /* prima allarga lo schermo, poi ci appoggia sopra la finestra */
     const R=rect()||{x:screenX+40,y:screenY+40,w:960,h:540};try{TV.win&&!TV.win.closed&&TV.win.close();}catch(e){}
     let w=null;try{w=window.open("about:blank","sl_tv","popup=yes,left="+R.x+",top="+R.y+",width="+R.w+",height="+R.h);}catch(e){}
-    if(!w){msg("Il browser ha bloccato la finestra: consenti i popup per questo sito e riprova.");return;}
+    if(!w){c.el.classList.remove("tv-on");msg("Il browser ha bloccato la finestra: consenti i popup per questo sito e riprova.");return;}
     try{w.moveTo(R.x,R.y);w.resizeTo(R.w,R.h);w.location.href=u;}catch(e){}
     TV.win=w;TV.at=R;TV.card=c.el;msg("");render();};
   const connect=()=>{if(inline()){loaded=true;fr.src=url();msg("");render();
       let got=false;fr.onload=()=>{got=true;};setTimeout(()=>{if(loaded&&!got)msg("Il sito non risponde nel riquadro. Se resta nero, premi ■ STOP e poi apri in finestra togliendo l'estensione.");},12000);return;}
     openWin();};
   const stop=()=>{try{TV.win&&TV.card===c.el&&TV.win.close();}catch(e){}if(TV.card===c.el)TV.win=null;loaded=false;fr.removeAttribute("src");render();};
-  sel.onchange=()=>{cfg.svc=sel.value;save();stop();render();};
   inp.onchange=()=>{cfg.url=inp.value.trim();save();render();};
   emb.onchange=()=>{cfg.embed=emb.checked;save();render();};
   q(".go").onclick=connect;q(".stop").onclick=stop;
   q(".fs").onclick=()=>{try{const p=q(".tvstage").requestFullscreen();p&&p.catch&&p.catch(()=>{});}catch(e){}};
-  /* la finestra agganciata segue il riquadro */
-  const follow=setInterval(()=>{if(!TV.win||TV.win.closed||TV.card!==c.el)return;const r=rect();if(!r)return;const a=TV.at||{};
+  /* la finestra agganciata segue il riquadro; se l'hai chiusa a mano il riquadro torna compatto */
+  const follow=setInterval(()=>{if(TV.card===c.el&&TV.win&&TV.win.closed){TV.win=null;render();return;}
+    if(!TV.win||TV.win.closed||TV.card!==c.el)return;const r=rect();if(!r)return;const a=TV.at||{};
     if(Math.abs(a.x-r.x)>2||Math.abs(a.y-r.y)>2||Math.abs(a.w-r.w)>2||Math.abs(a.h-r.h)>2){try{TV.win.moveTo(r.x,r.y);TV.win.resizeTo(r.w,r.h);TV.at=r;}catch(e){}}},1200);
   SL.onCleanup(()=>clearInterval(follow));
   render();
