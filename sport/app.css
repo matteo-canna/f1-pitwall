@@ -1302,3 +1302,25 @@ html[data-couch="1"] .top .ver{font-size:14px}
 body:not([data-sport="home"]) #btnTicker{display:none}
 .top .tbtn.icobtn{font-size:20px;line-height:1;padding:0 12px;min-width:44px;justify-content:center}
 html[data-couch="1"] .top .tbtn.icobtn{font-size:24px;min-width:52px}
+
+/* ---------- Oggi: sport ancora in arrivo o non raggiunti ---------- */
+.dpending{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.05);color:var(--muted);font-size:12.5px}
+.dpending.err{background:rgba(229,56,59,.14);color:#ffb3b3}
+.dpending .spin{width:12px;height:12px;border-radius:50%;border:2px solid rgba(255,255,255,.2);border-top-color:var(--red);animation:spin .8s linear infinite;flex:none}
+
+/* ---------- browser vecchi (Smart TV, tablet) senza color-mix(): colori fissi di riserva,
+   altrimenti i riquadri diventano trasparenti e le scritte finiscono sopra le foto ---------- */
+@supports not (color: color-mix(in srgb, red 50%, blue)){
+  :root,body{--panel:#101624;--panel2:#161d2d}
+  html[data-style="regia"] body{--panel:rgba(16,22,36,.92);--panel2:rgba(22,29,45,.95)}
+  .card,html[data-frame] .card,html[data-style="regia"] .card{background:rgba(12,16,27,.9)}
+  html[data-frame] .card{--ring:#2c3650}
+  html[data-frame] .card:not(.full):hover{--ring:#3b4766}
+  .chip,.mtile,.mrow,.htile,.tmatch,.tabs{background-color:rgba(16,22,36,.92)}
+  .htile{background:linear-gradient(180deg,#121a2b,#0b0f19)}
+  .ht-band{background:var(--sa)}
+  .sptile{border-color:var(--sa)}
+  .dcol,.dtoday{border-color:#232c40}
+  .dstage .dtoday{border-color:#e5383b}
+  .grid>.subbar.ingrid,body:not([data-sport="home"]) .subbar:not(.ingrid){background:rgba(8,11,20,.85)}
+}

@@ -13,7 +13,7 @@ EU.comps=COMPS;
 EU.season=k=>{const d=new Date(),y=d.getMonth()>=7?d.getFullYear():d.getFullYear()-1;return COMPS[k].code+y;};
 const ITA=/milan|olimpia|armani|bologna|virtus|trento|trentino|venezia|venice|reyer|brescia|germani|sassari|dinamo|tortona|derthona|trieste|reggio|napoli|varese|pistoia|treviso|cremona|scafati/i;
 const favKey=code=>SL.fav.key("basket","team","eu:"+code);
-const nice=n=>String(n||"").split(",").map(s=>s.trim()).reverse().join(" ").toLowerCase().replace(/(^|[\s\-'])(\p{L})/gu,(m,a,b)=>a+b.toUpperCase());
+const nice=n=>String(n||"").split(",").map(s=>s.trim()).reverse().join(" ").toLowerCase().replace(/(^|[\s\-'])([^\s\-'])/g,(m,a,b)=>a+b.toUpperCase()); /* "ALLMAN, KYLE" → "Kyle Allman" (senza \p{L}: va anche sui browser vecchi) */
 const dk=s=>String(s||"").slice(0,10).replace(/-/g,"");
 
 /* ---------- dati ---------- */
