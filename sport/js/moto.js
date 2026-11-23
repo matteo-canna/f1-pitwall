@@ -154,13 +154,15 @@ async function mountLive(ctx){
     const cards=UI.mount(ctx.main,[{k:"tv",n:"Diretta TV",sz:2,fixed:true},{k:"nolive",n:"Live ora",sz:2}]);UI.tv(cards.tv,"moto");
     note.innerHTML='<span class="muted">Nessuna sessione in pista in questo momento. Controllo di nuovo ogni minuto.</span>';
     /* prossima sessione: nel GP di questo weekend, altrimenti in quello successivo */
-    let nx="";try{const evs=await events(),cur=currentEvent(evs),i=evs.indexOf(cur);
+    let nx="";if(ext)try{const evs=await events(),cur=currentEvent(evs),i=evs.indexOf(cur); /* MotoGP solo con l'estensione: senza, il sito rifiuta la richiesta */
       for(const ev of [cur,evs[i+1]].filter(Boolean)){const cat=await gpCat(ev.id),S=await gpSessions(ev.id,cat.id);const n=S.filter(s=>new Date(s.date)>Date.now()).sort((x,y)=>new Date(x.date)-new Date(y.date))[0];
         if(n){nx="La prossima MotoGP: <b>"+h(sesName(n))+"</b> "+h(SL.when(n.date))+" · "+h(ev.sponsored_name||ev.name)+".";break;}}
       const ne=evs.find(e=>new Date(e.date_start)>Date.now());if(!nx&&ne)nx="Prossimo GP: <b>"+h(ne.sponsored_name||ne.name)+"</b>, dal "+h(SL.fmtDay(ne.date_start))+" (orari non ancora pubblicati).";}catch(e){}
     if(rid!==SL.routeId)return;
     cards.nolive.body.innerHTML='<div class="nolive">'+SL.ico("flag")+'<div>Nessuna sessione di Formula 1, MotoGP, WorldSBK o IndyCar in pista adesso.<br>'+(nx||"")+(ext?"":"<br><span class=\"muted\">Per MotoGP e Superbike serve l'estensione per PC (⚙).</span>")+'</div></div>';
-    SL.every(async()=>{const d=await SL.tryGet(GP+"timing-gateway/livetiming-lite",{ttl:5000});if(d&&ltToday(d)&&ltState(d)==="in"&&rid===SL.routeId)SL.route();},60000,{delay:60000});
+    /* ogni minuto: se parte una sessione (F1 sempre, MotoGP solo con l'estensione) la pagina si apre da sola */
+    SL.every(async()=>{const d=ext?await SL.tryGet(GP+"timing-gateway/livetiming-lite",{ttl:5000}):null;const f=(await SL.f1.sessions(60000).catch(()=>[])).some(x=>SL.f1.state(x)==="in");
+      if(rid===SL.routeId&&(f||(d&&ltToday(d)&&ltState(d)==="in")))SL.route();},60000,{delay:60000});
   }
   UI.dock(ctx.sub,ctx.main);
 }

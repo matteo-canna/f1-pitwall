@@ -1257,3 +1257,70 @@ html[data-couch="1"] .dtoday .dgrid{grid-template-columns:repeat(auto-fill,minma
 .dtoday .dgrid{align-items:stretch}
 .htile.big{height:100%}
 .htile.big .ht-ft{margin-top:auto}
+
+/* =====================================================================
+   HOME: quattro colonne verticali. Oggi al centro, più larga e in primo piano;
+   Ieri a sinistra, Domani e Dopodomani a destra, in secondo piano.
+   (sostituisce la disposizione "Oggi a tutta larghezza")
+   ===================================================================== */
+.dcols.dstage{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.75fr) minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
+.dstage .dtoday{position:relative;z-index:2;max-height:calc(100vh - 120px);min-height:420px;
+  border:2px solid color-mix(in srgb,var(--red) 70%,var(--line));background:rgba(8,11,20,.78);
+  box-shadow:0 26px 50px -20px #000,0 0 0 1px rgba(0,0,0,.6),0 0 34px -8px color-mix(in srgb,var(--red) 45%,transparent)}
+.dstage .dtoday>.dch{padding:14px 16px 12px}
+.dstage .dtoday>.dch .dn{font-size:32px}
+.dstage .dtoday>.dbody{overflow-y:auto;padding:12px;gap:10px}
+.dstage .dtoday .dgrid{display:flex;flex-direction:column;gap:10px}
+.dstage .htile.big{height:auto}
+/* secondo piano: più strette, un po' più in basso, attenuate (tornano piene passandoci sopra) */
+.dstage .dside{margin-top:26px;max-height:calc(100vh - 150px);opacity:.82;filter:saturate(.8);transition:opacity .2s,filter .2s}
+.dstage .dside:hover,.dstage .dside:focus-within{opacity:1;filter:none}
+.dstage .dside .dch .dn{font-size:18px}
+.dstage .dside .dch{padding:10px 12px 8px}
+.dstage .dside .dch .dd{font-size:11.5px}
+html[data-couch="1"] .dstage .dtoday>.dch .dn{font-size:40px}
+html[data-couch="1"] .dstage .dside{opacity:.9}
+/* tablet: scorrono di lato, Oggi più larga */
+@media (max-width:1279px){
+  .dcols.dstage{display:flex}
+  .dstage .dcol{flex:0 0 calc(44% - 7px)}
+  .dstage .dtoday{flex-basis:calc(62% - 7px)}
+  .dstage .dside{margin-top:18px}
+}
+/* telefono: una colonna alla volta, Oggi per prima */
+@media (max-width:760px){
+  .dstage .dcol,.dstage .dtoday{flex:0 0 100%;max-height:none}
+  .dstage .dside{margin-top:0;opacity:1;filter:none}
+  .dstage .dtoday>.dbody{overflow:visible}
+}
+
+/* ---------- versione della pagina, accanto a data e ora ---------- */
+.top .ver{flex:none;padding:6px 9px;border-radius:8px;border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--muted);font-size:11.5px;letter-spacing:.04em;white-space:nowrap}
+html[data-couch="1"] .top .ver{font-size:14px}
+
+/* pulsante NOTIZIE solo in home; IMPOSTAZIONI solo con l'icona, un po' più grande */
+body:not([data-sport="home"]) #btnTicker{display:none}
+.top .tbtn.icobtn{font-size:20px;line-height:1;padding:0 12px;min-width:44px;justify-content:center}
+html[data-couch="1"] .top .tbtn.icobtn{font-size:24px;min-width:52px}
+
+/* ---------- Oggi: sport ancora in arrivo o non raggiunti ---------- */
+.dpending{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.05);color:var(--muted);font-size:12.5px}
+.dpending.err{background:rgba(229,56,59,.14);color:#ffb3b3}
+.dpending .spin{width:12px;height:12px;border-radius:50%;border:2px solid rgba(255,255,255,.2);border-top-color:var(--red);animation:spin .8s linear infinite;flex:none}
+
+/* ---------- browser vecchi (Smart TV, tablet) senza color-mix(): colori fissi di riserva,
+   altrimenti i riquadri diventano trasparenti e le scritte finiscono sopra le foto ---------- */
+@supports not (color: color-mix(in srgb, red 50%, blue)){
+  :root,body{--panel:#101624;--panel2:#161d2d}
+  html[data-style="regia"] body{--panel:rgba(16,22,36,.92);--panel2:rgba(22,29,45,.95)}
+  .card,html[data-frame] .card,html[data-style="regia"] .card{background:rgba(12,16,27,.9)}
+  html[data-frame] .card{--ring:#2c3650}
+  html[data-frame] .card:not(.full):hover{--ring:#3b4766}
+  .chip,.mtile,.mrow,.htile,.tmatch,.tabs{background-color:rgba(16,22,36,.92)}
+  .htile{background:linear-gradient(180deg,#121a2b,#0b0f19)}
+  .ht-band{background:var(--sa)}
+  .sptile{border-color:var(--sa)}
+  .dcol,.dtoday{border-color:#232c40}
+  .dstage .dtoday{border-color:#e5383b}
+  .grid>.subbar.ingrid,body:not([data-sport="home"]) .subbar:not(.ingrid){background:rgba(8,11,20,.85)}
+}
