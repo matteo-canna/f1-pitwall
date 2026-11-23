@@ -116,12 +116,9 @@ function mount(ctx){
     '<nav class="sportsel" id="hSports" aria-label="Apri uno sport"></nav>'+
     '<div class="dtools"><h2 class="dt-h">Giorno per giorno</h2><div id="hFilter"></div><div class="chips onlyf" id="hOnly" role="group" aria-label="Mostra solo"><button type="button" class="chip itachip" data-only="ita" aria-pressed="'+(S.only==="ita")+'" title="Solo Nazionale, campionati italiani, club e atleti italiani">'+SL.ico("ita")+'Italia</button><button type="button" class="chip favchip" data-only="fav" aria-pressed="'+(S.only==="fav")+'" title="Solo squadre e atleti che hai segnato con ★">★ Preferiti</button></div>'+
       (!SL.extData()&&!SL.isTVLike()?'<span class="muted dt-note">MotoGP e Superbike: con l\'estensione per PC (⚙)</span>':"")+'</div>'+
-    /* Oggi: scheda principale, a tutta larghezza, caselle grandi */
-    '<section class="dtoday" data-day="0" aria-label="Oggi"><header class="dch"><span class="dn">Oggi</span><span class="dd">'+h(SL.fmtDayLong(Date.now()))+'</span><span class="dc"></span></header><div class="dbody"><div class="loading">Carico</div></div></section>'+
-    /* gli altri giorni: in secondo piano, sotto */
-    '<h2 class="dt-h dothers">Gli altri giorni</h2>'+
-    '<div class="dswitch" id="hSwitch">'+OTHER.map(d=>'<button type="button" data-day="'+d+'" aria-pressed="'+(d===1)+'">'+dayName(d)+'</button>').join("")+'</div>'+
-    '<div class="dcols dsec" id="hCols">'+OTHER.map(d=>'<section class="dcol'+(d<0?" past":"")+'" data-day="'+d+'" aria-label="'+dayName(d)+'"><header class="dch"><span class="dn">'+dayName(d)+'</span><span class="dd">'+h(SL.fmtDayLong(SL.addDays(Date.now(),d)))+'</span><span class="dc"></span></header><div class="dbody"><div class="loading">Carico</div></div></section>').join("")+'</div>'+
+    /* quattro colonne verticali: Ieri a sinistra, Oggi al centro (più grande e in primo piano), Domani e Dopodomani a destra */
+    '<div class="dswitch" id="hSwitch">'+DAYS.map(d=>'<button type="button" data-day="'+d+'" aria-pressed="'+(d===0)+'">'+dayName(d)+'</button>').join("")+'</div>'+
+    '<div class="dcols dstage" id="hCols">'+DAYS.map(d=>'<section class="dcol'+(d===0?" dtoday today":" dside"+(d<0?" past":""))+'" data-day="'+d+'" aria-label="'+dayName(d)+'"><header class="dch"><span class="dn">'+dayName(d)+'</span><span class="dd">'+h(SL.fmtDayLong(SL.addDays(Date.now(),d)))+'</span><span class="dc"></span></header><div class="dbody"><div class="loading">Carico</div></div></section>').join("")+'</div>'+
   '</div>';
   const $=id=>main.querySelector("#"+id);
   /* filtro per sport */
@@ -169,7 +166,7 @@ function mount(ctx){
     const sortP=(a,b)=>(firstAll(a)-firstAll(b))||byTime(a,b);
     let html="";
     if(d===0){const live=all.filter(x=>x.live).sort((a,b)=>(imp(b)-imp(a))||byTime(a,b)),pre=all.filter(x=>x.state==="pre"&&!x.live).sort(sortP),done=all.filter(x=>x.done&&!x.live).sort((a,b)=>(imp(b)-imp(a))||(new Date(b.date)-new Date(a.date)));
-      html=group("live",'<i class="dot"></i> In diretta ora',live,{cls:"g-live",big:true})+group("pre","Prossime",pre,{max:24,big:true})+group("done","Finite oggi",done,{max:6,big:true});}
+      html=group("live",'<i class="dot"></i> In diretta ora',live,{cls:"g-live",big:true})+group("pre","Prossime",pre,{slots:true,max:30,big:true})+group("done","Finite oggi",done,{max:8,big:true});}
     else if(d<0){const done=all.slice().sort(sortP);html=group("y","Risultati",done,{slots:true,max:30});}
     else{const pre=all.slice().sort(sortP);html=group("d"+d,"In programma",pre,{slots:true,max:30});}
     body.innerHTML=html||'<div class="dempty">'+SL.ico(S.f==="all"?"home":S.f)+'<span>'+(S.only==="ita"?"Nessun evento con squadre o atleti italiani "+(d===0?"oggi":d<0?"ieri":d===1?"domani":"dopodomani")+".":S.only==="fav"?"Nessun evento dei tuoi preferiti "+(d===0?"oggi":d<0?"ieri":d===1?"domani":"dopodomani")+". Tocca ★ accanto a squadre e atleti per aggiungerli.":"Nessun evento "+(d===0?"oggi":d<0?"ieri":d===1?"domani":"dopodomani")+(S.f!=="all"?" per "+SL.sports[S.f].name:"")+".")+'</span></div>';}
@@ -189,7 +186,7 @@ function mount(ctx){
   sw.addEventListener("click",e=>{const b=e.target.closest("button[data-day]");if(!b)return;const c=cols.querySelector('.dcol[data-day="'+b.dataset.day+'"]');if(c)cols.scrollTo({left:c.offsetLeft-cols.offsetLeft,behavior:"smooth"});});
   let raf=0;cols.addEventListener("scroll",()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{let best=null,bd=1e9;cols.querySelectorAll(".dcol").forEach(c=>{const d=Math.abs(c.offsetLeft-cols.offsetLeft-cols.scrollLeft);if(d<bd){bd=d;best=c.dataset.day;}});
     sw.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",String(x.dataset.day===best)));});},{passive:true});
-  requestAnimationFrame(()=>{const t=cols.querySelector('.dcol[data-day="1"]');if(t&&cols.scrollWidth>cols.clientWidth+4)cols.scrollLeft=t.offsetLeft-cols.offsetLeft;});
+  requestAnimationFrame(()=>{const t=cols.querySelector('.dcol[data-day="0"]');if(t&&cols.scrollWidth>cols.clientWidth+4)cols.scrollLeft=t.offsetLeft-cols.offsetLeft;});
   SL.onPage("live",()=>{if(SL.state.sport==="home")draw();});
   SL.onPage("flash",id=>{const t=document.querySelector('.htile[data-id="'+CSS.escape(id)+'"]');if(t){t.classList.remove("flash");void t.offsetWidth;t.classList.add("flash");}});
   SL.onPage("fav",()=>drawCols());
