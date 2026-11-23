@@ -78,6 +78,7 @@ function floatLayer(){
 
 /* ---------- pagina ---------- */
 const DAYC={}; /* giorni diversi da oggi: {giorno: {t, res}} */
+LIVE.days=DAYC;LIVE.collect=collect; /* servono anche alla finestra dei preferiti */
 const DAYS=[-1,0,1,2];
 const dayName=d=>d===0?"Oggi":d===-1?"Ieri":d===1?"Domani":"Dopodomani";
 const ONLYK="home.only"; /* "" tutti, "ita" solo Italia, "fav" solo preferiti */

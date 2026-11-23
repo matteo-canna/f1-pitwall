@@ -6,7 +6,7 @@
 "use strict";
 const h=SL.h,TK=SL.ticker={};
 const SPORTS=["calcio","basket","tennis","rugby","moto","golf"];
-const NAMES={calcio:"Calcio",basket:"Basket",tennis:"Tennis",rugby:"Rugby",moto:"Motori",golf:"Golf"};
+const NAMES={calcio:"Calcio",basket:"Basket",tennis:"Tennis",rugby:"Rugby",moto:"F1 e MotorSport",golf:"Golf"};
 
 /* ---------- "fatti" di ogni sport (capolista, ultimo risultato, prossimo evento…) ---------- */
 const fcache={};

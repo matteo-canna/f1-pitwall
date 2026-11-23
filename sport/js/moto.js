@@ -4,7 +4,7 @@
 (function(){
 "use strict";
 const h=SL.h,UI=SL.ui;
-const M=SL.sports.moto={name:"Motori",tab:"Motori",icon:"🏍",color:"#e5383b"};
+const M=SL.sports.moto={name:"F1 e MotorSport",tab:"F1 e MotorSport",icon:"🏍",color:"#e5383b"};
 const GP="https://api.motogp.pulselive.com/motogp/v1/",SBK="https://api.pulselive.worldsbk.com/";
 const SES={FP:"Libere",PR:"Practice",Q:"Qualifica",SPR:"Sprint",WUP:"Warm up",RAC:"Gara"};
 const sesName=s=>(SES[s.type]||s.type)+(s.number?" "+s.number:"");
@@ -43,6 +43,7 @@ async function indyStandings(){const d=await SL.tryGet(SL.ESPN2+"racing/irl/stan
 /* ---------- home e avvisi ---------- */
 M.homeFeed=async function(day,ttl){
   const out=[],tgt=SL.dayKey(SL.addDays(Date.now(),day));
+  try{(await SL.f1.items(day,ttl)).forEach(x=>out.push(x));}catch(e){} /* Formula 1: sessioni, risultati */
   try{const evs=await indySeason(ttl);evs.filter(e=>SL.dayKey(e.date)===tgt||(day===0&&indyState(e)==="in")).forEach(e=>{const st=indyState(e),R=indyRows(e);
     out.push({id:"moto:indy:"+e.id,sport:"moto",comp:"IndyCar · "+e.name,date:e.date,state:st,live:st==="in",done:st==="post",status:st==="pre"?SL.when(e.date):st==="in"?"IN GARA":"FINALE",important:R.slice(0,1).some(r=>r.ita||favR(r.name)),
       sig:(R[0]&&R[0].id)+"|"+st,indy:R,lines:st==="pre"||!R.length?[{n:"Gara",ico:"flag",v:SL.fmtTime(e.date)}]:R.slice(0,3).map(r=>({pos:r.pos,n:r.name,img:r.flag,ita:r.ita,v:r.win?"vince":""})),foot:"IndyCar",go:{sport:"moto",s:"indy"}});});}catch(e){}
@@ -59,6 +60,7 @@ M.homeFeed=async function(day,ttl){
   }catch(e){}
   return out;};
 M.onChange=function(p,it){
+  if(it.f1)return SL.f1.onChange(p,it);
   if(it.indy){const w=it.indy[0];if(w&&p.state!=="post"&&it.state==="post")return{id:"w:"+it.id,big:"VINCE",icon:w.ita?"ita":"flag",title:w.name,text:it.comp,color:"var(--red)"};
     if(w&&p.indy&&p.indy[0]&&p.indy[0].id!==w.id&&it.state==="in")return{id:"l:"+it.id+":"+w.id,big:"IN TESTA",title:w.name,text:it.comp,color:"var(--yellow)"};return null;}
   if(!it.R)return null;const a=p.R&&p.R[0],b=it.R[0];if(!b)return null;const nm=b.rider_name+" "+b.rider_surname;
@@ -73,7 +75,13 @@ async function indyFacts(n){const out=[];try{const evs=await indySeason(),now=Da
     const S=await indyStandings();if(S[0])out.push({l:(evs.some(e=>indyState(e)!=="post")?"Leader":"Campione")+" IndyCar",v:S[0].name+" · "+S[0].pts+" pt",go:{sport:"moto",s:"indy"}});
     const nx=evs.find(e=>new Date(e.date).getTime()>now);if(nx)out.push({l:"Prossima IndyCar",v:nx.name+" · "+SL.when(nx.date),go:{sport:"moto",s:"indy"}});}catch(e){}
   return out.slice(0,n);}
-M.facts=async function(){
+/* fatti per scheda: F1 in apertura (e in home), MotoGP/SBK sulle loro schede, IndyCar sulla sua */
+M.facts=async function(st){const s=(st&&st.s)||"";
+  if(s==="indy")return indyFacts(3);
+  if(s==="gp"||s==="sbk")return motoFacts();
+  const [f,m]=await Promise.all([SL.f1.facts().catch(()=>[]),motoFacts().catch(()=>[])]);
+  return f.concat(m.slice(0,2));};
+async function motoFacts(){
   if(!SL.extData())return[{l:"MotoGP e Superbike",v:"risultati e classifiche con l'estensione per PC"}].concat(await indyFacts(3));
   const out=[];
   try{
@@ -109,16 +117,17 @@ const DEFS_SBK=[
   {k:"cal",n:"Calendario",sz:2,couch:false}
 ];
 M.mount=function(ctx){
-  const st=ctx.st,ser=["sbk","live","indy"].indexOf(st.s)>=0?st.s:"gp";
+  const st=ctx.st,ser=["gp","sbk","live","indy"].indexOf(st.s)>=0?st.s:"f1";
   const r=document.createElement("div");r.className="row";
-  r.appendChild(UI.chips([UI.liveChip("moto"),{k:"gp",n:"MotoGP"},{k:"sbk",n:"WorldSBK"},{k:"indy",n:"IndyCar"}],ser,v=>SL.go({s:v==="gp"?"":v})));
+  r.appendChild(UI.chips([UI.liveChip("moto"),{k:"f1",n:"Formula 1"},{k:"gp",n:"MotoGP"},{k:"sbk",n:"WorldSBK"},{k:"indy",n:"IndyCar"}],ser,v=>SL.go({s:v==="f1"?"":v})));
   ctx.sub.appendChild(r);
+  if(ser==="f1"){mountF1(ctx);return;}      /* l'app F1 Pit Wall, dentro la pagina */
   if(ser==="indy"){mountIndy(ctx);return;} /* IndyCar non ha bisogno dell'estensione */
   if(!SL.extData()&&ser!=="live"){
     const cards=UI.mount(ctx.main,[{k:"tv",n:"Diretta TV",sz:2,fixed:true},{k:"need",n:"Dati moto",sz:2}]);UI.tv(cards.tv,"moto");
     const tvLike=SL.isTVLike();
     cards.need.body.innerHTML='<div class="empty" style="text-align:left;line-height:1.6"><b>MotoGP e Superbike non permettono ad altri siti di leggere i loro dati.</b><br>'+
-      'L\'<b>IndyCar</b> invece funziona ovunque: tocca IndyCar qui sopra.<br><br>'+(tvLike?"Su Smart TV e tablet MotoGP e Superbike non si possono mostrare. Aprile da un PC con Chrome o Edge e l'estensione dell'app.":"Installa (o aggiorna) l'estensione per Chrome/Edge da <b>Impostazioni ⚙</b>: sblocca live timing, risultati e classifiche. È la stessa estensione della Diretta TV dell'app F1.")+
+      '<b>Formula 1</b> e <b>IndyCar</b> invece funzionano ovunque: toccale qui sopra.<br><br>'+(tvLike?"Su Smart TV e tablet MotoGP e Superbike non si possono mostrare. Aprile da un PC con Chrome o Edge e l'estensione dell'app.":"Installa (o aggiorna) l'estensione per Chrome/Edge da <b>Impostazioni ⚙</b>: sblocca live timing, risultati e classifiche. È la stessa estensione della Diretta TV dell'app F1.")+
       '<br><br>'+(SL.ext()?'<span class="tag big">Hai la versione '+h(SL.ext())+': aggiornala con lo zip nuovo.</span>':"")+(!tvLike?' <button type="button" class="btn pri" id="motoSet">⚙ APRI IMPOSTAZIONI</button>':"")+'</div>';
     const b=cards.need.body.querySelector("#motoSet");if(b)b.onclick=()=>UI.openSettings();
     return;}
@@ -132,10 +141,12 @@ async function mountLive(ctx){
   const ext=!!SL.extData();
   const [lt,sb,ie]=await Promise.all([ext?SL.tryGet(GP+"timing-gateway/livetiming-lite",{ttl:5000}):null,ext?SL.tryGet(SBK+"wsbk-results/v1/sessions/latest",{ttl:20000}):null,indySeason(30000).catch(()=>[])]);
   const indyLive=(ie||[]).find(e=>indyState(e)==="in");
+  const f1Live=(await SL.f1.sessions(30000).catch(()=>[])).find(s=>SL.f1.state(s)==="in");
   if(rid!==SL.routeId)return; /* nel frattempo hai cambiato pagina */
   const gpLive=lt&&ltToday(lt)&&ltState(lt)==="in";
   const a=sb&&sb.data&&sb.data.attributes||{},sbkLive=!!(a.effective_start_date&&!a.effective_end_date);
   note.innerHTML="";
+  if(f1Live){note.appendChild(UI.liveNote("In pista adesso: Formula 1 · "+SL.f1.sesName(f1Live)+" · "+(f1Live.location||"")));mountF1(ctx);return;}
   if(gpLive){note.appendChild(UI.liveNote("In pista adesso: "+(lt.head.category||"MotoGP")+" · "+lt.head.session_name+" · "+lt.head.event_tv_name));mountGP(ctx);}
   else if(sbkLive){note.appendChild(UI.liveNote("In pista adesso: WorldSBK · "+(SBKN[a.short_name]||a.short_name||"")));mountSBK(ctx);}
   else if(indyLive){note.appendChild(UI.liveNote("In pista adesso: IndyCar · "+indyLive.name));mountIndy(ctx,true);return;}
@@ -148,7 +159,7 @@ async function mountLive(ctx){
         if(n){nx="La prossima MotoGP: <b>"+h(sesName(n))+"</b> "+h(SL.when(n.date))+" · "+h(ev.sponsored_name||ev.name)+".";break;}}
       const ne=evs.find(e=>new Date(e.date_start)>Date.now());if(!nx&&ne)nx="Prossimo GP: <b>"+h(ne.sponsored_name||ne.name)+"</b>, dal "+h(SL.fmtDay(ne.date_start))+" (orari non ancora pubblicati).";}catch(e){}
     if(rid!==SL.routeId)return;
-    cards.nolive.body.innerHTML='<div class="nolive">'+SL.ico("flag")+'<div>Nessuna sessione MotoGP, WorldSBK o IndyCar in pista adesso.<br>'+(nx||"")+(ext?"":"<br><span class=\"muted\">Per MotoGP e Superbike serve l'estensione per PC (⚙).</span>")+'</div></div>';
+    cards.nolive.body.innerHTML='<div class="nolive">'+SL.ico("flag")+'<div>Nessuna sessione di Formula 1, MotoGP, WorldSBK o IndyCar in pista adesso.<br>'+(nx||"")+(ext?"":"<br><span class=\"muted\">Per MotoGP e Superbike serve l'estensione per PC (⚙).</span>")+'</div></div>';
     SL.every(async()=>{const d=await SL.tryGet(GP+"timing-gateway/livetiming-lite",{ttl:5000});if(d&&ltToday(d)&&ltState(d)==="in"&&rid===SL.routeId)SL.route();},60000,{delay:60000});
   }
   UI.dock(ctx.sub,ctx.main);
@@ -286,5 +297,16 @@ function mountIndy(ctx,docked){
   SL.every(loadStand,600000,{delay:600});
   SL.every(()=>{const el=cards.next.body.querySelector("[data-cd]");if(el)el.textContent=SL.countdown(new Date(el.dataset.cd)-Date.now());},1000,{delay:1000});
   if(docked)UI.dock(ctx.sub,ctx.main);
+}
+
+/* ---------- Formula 1: l'app F1 Pit Wall dentro la pagina ----------
+   È la stessa app del sito principale (pit wall, telemetria, 3D, replay, multi-schermo, Diretta TV):
+   qui si apre a tutta larghezza sotto la barra, senza il suo collegamento a Sport LIVE. */
+function mountF1(ctx){
+  const w=document.createElement("section");w.className="f1wrap";
+  w.innerHTML='<div class="f1bar"><span class="f1logo">F1</span><span class="f1txt"><b>App F1 completa</b> · pit wall, telemetria, 3D, replay e Diretta TV. Gran Premio e sessione si scelgono dalla sua barra.</span>'+
+    '<a class="btn" href="../" target="_blank" rel="noopener" title="Apri l\'app F1 da sola, a tutto schermo">APRI A TUTTO SCHERMO ↗</a></div>'+
+    '<iframe class="f1frame" src="../?embed=1" title="F1 Pit Wall" allow="fullscreen; autoplay; encrypted-media; picture-in-picture; clipboard-write" allowfullscreen></iframe>';
+  ctx.main.appendChild(w);
 }
 })();

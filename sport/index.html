@@ -14,13 +14,13 @@
 <body>
 <header class="top" id="top">
   <a class="logo" href="#/home" aria-label="Sport LIVE APP, adesso in diretta"><span>SPORT</span><b>LIVE</b></a>
+  <span class="clock mono" id="clock" aria-live="off"></span>
   <nav class="tabs" id="tabs" aria-label="Sport"></nav>
   <div class="topr">
-    <span class="clock mono" id="clock" aria-live="off"></span>
+ <button class="tbtn favbtn" id="btnFav" title="Gestisci i preferiti" aria-haspopup="dialog">★ <span>PREFERITI</span><b class="fbadge" id="favBadge" hidden></b></button>
     <button class="tbtn" id="btnTicker" title="Mostra o nascondi la striscia delle notizie" aria-pressed="true">≡ <span>NOTIZIE</span></button>
     <button class="tbtn" id="btnScreens" title="Più schermi">⧉ <span>SCHERMI</span></button>
     <button class="tbtn" id="btnSettings" title="Impostazioni">⚙ <span>IMPOSTAZIONI</span></button>
-    <a class="tbtn f1" id="toF1" href="../" title="Apri F1 Pit Wall">F1 <span>PIT WALL</span> ↗</a>
   </div>
 </header>
 <div class="ticker" id="ticker" hidden>
@@ -73,8 +73,8 @@
         </div>
         <label class="chk"><input type="checkbox" id="setSound"> Suono quando arriva un avviso</label>
         <h3>Preferiti <small id="favCount"></small></h3>
-        <p class="hint">Tocca la ★ accanto a una squadra, un tennista o un pilota. Sono salvati solo su questo dispositivo.</p>
-        <ul class="favlist" id="favList"></ul>
+        <p class="hint">Tocca la ★ accanto a una squadra, un tennista o un pilota, oppure usa il pulsante ★ PREFERITI in alto. Sono salvati solo su questo dispositivo.</p>
+        <p><button type="button" class="btn" id="setFav">★ GESTISCI PREFERITI</button></p>
       </section>
       <section>
         <h3>Estensione per PC</h3>
@@ -96,6 +96,18 @@
         <p class="hint">Dati: ESPN (calcio, NBA, tennis ATP e WTA, rugby, IndyCar, golf), siti ufficiali EuroLega / EuroCup e MotoGP / WorldSBK. Fonti gratuite non ufficiali: a volte possono mancare dati o arrivare in ritardo.</p>
       </section>
     </div>
+  </form>
+</dialog>
+
+<dialog id="dlgFav" aria-labelledby="favH">
+  <form method="dialog" class="dlg favdlg">
+    <div class="dlgh"><h2 id="favH" class="disp">★ I tuoi preferiti</h2><button class="x" value="close" aria-label="Chiudi">✕</button></div>
+    <p class="hint">Squadre, giocatori e piloti che segui: in home hanno il bordo oro e la ★, si mostrano da soli col filtro "★ Preferiti" e ricevono gli avvisi. Sono salvati solo su questo dispositivo.</p>
+    <section class="favsec"><h3>Che segui <small id="favN"></small></h3><div class="favmine" id="favMine"></div></section>
+    <section class="favsec"><h3>Aggiungi</h3>
+      <input type="search" class="favq" id="favQ" placeholder="Cerca una squadra, un tennista, un pilota…" autocomplete="off" aria-label="Cerca da aggiungere ai preferiti">
+      <div class="favsug" id="favSug"></div>
+      <p class="hint">Trovi chi gioca o corre tra ieri e dopodomani. Per tutti gli altri tocca la ★ accanto al nome nelle pagine degli sport (classifiche, ranking, tabelloni).</p></section>
   </form>
 </dialog>
 
@@ -124,11 +136,13 @@
 <script src="js/data.js"></script>
 <script src="js/ticker.js"></script>
 <script src="js/home.js"></script>
+<script src="js/favs.js"></script>
 <script src="js/calcio.js"></script>
 <script src="js/eurolega.js"></script>
 <script src="js/basket.js"></script>
 <script src="js/tennis.js"></script>
 <script src="js/rugby.js"></script>
+<script src="js/f1.js"></script>
 <script src="js/moto.js"></script>
 <script src="js/golf.js"></script>
 <script>SL.start();</script>
