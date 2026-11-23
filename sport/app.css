@@ -1289,6 +1289,10 @@ html[data-couch="1"] .dstage .dside{opacity:.9}
 /* ---------- versione della pagina, accanto a data e ora ---------- */
 .top .ver{flex:none;padding:6px 9px;border-radius:8px;border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--muted);font-size:11.5px;letter-spacing:.04em;white-space:nowrap}
 html[data-couch="1"] .top .ver{font-size:14px}
+.dlgh .ver{flex:none;padding:4px 8px;border-radius:7px;border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--muted);font-size:11.5px;letter-spacing:.04em;white-space:nowrap}
+.dlgh .ver:empty{display:none}
+/* sul telefono la versione non sta nella barra in alto: si vede nelle Impostazioni */
+@media (max-width:760px){.top .ver{display:none}}
 
 /* pulsante NOTIZIE solo in home; IMPOSTAZIONI solo con l'icona, un po' più grande */
 body:not([data-sport="home"]) #btnTicker{display:none}
