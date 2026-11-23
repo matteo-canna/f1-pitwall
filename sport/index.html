@@ -5,18 +5,73 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#090d16">
 <title>Sport LIVE APP</title>
+<style id="introCss">
+/* Sigla d'apertura (come l'inizio di una diretta TV): sta qui dentro così compare subito, prima di tutto il resto */
+.intro{position:fixed;top:0;right:0;bottom:0;left:0;z-index:2147483000;overflow:hidden;display:grid;place-items:center;font-family:"Archivo","Arial Narrow",system-ui,sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.intro .ib{position:absolute;top:0;right:0;bottom:0;left:0;background:#090d16;animation:in-hide 0s linear .72s forwards}
+.intro .bd{position:absolute;top:-20%;bottom:-20%;left:-30%;right:-30%;transform:skewX(-18deg) translateX(-135%);animation:in-bd .42s cubic-bezier(.7,0,.25,1) forwards;animation-delay:var(--d)}
+.intro .bd.k{background:linear-gradient(115deg,#0b1020,#090d16 60%)}
+.intro .iflash{position:absolute;top:0;right:0;bottom:0;left:0;z-index:1;background:radial-gradient(40% 35% at 50% 50%,rgba(255,255,255,.55),transparent 70%);opacity:0;animation:in-flash .5s ease-out .32s}
+.intro .mid{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:3vmin;padding:0 16px;transition:transform .38s cubic-bezier(.7,0,.25,1),opacity .2s}
+.intro .lgw{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:2.4vmin;animation:in-slam .45s cubic-bezier(.2,1.6,.4,1) .3s both}
+.intro .ilg{display:inline-flex;border-radius:.13em;overflow:hidden;font-weight:900;font-size:8.4vmin;font-size:clamp(34px,8.4vmin,124px);line-height:1;font-stretch:114%;letter-spacing:.01em;white-space:nowrap;box-shadow:0 1.4vmin 4vmin rgba(0,0,0,.45)}
+.intro .ilg span{background:#fff;color:#0b0f19;padding:.19em .2em .19em .26em}
+.intro .ilg b{background:#e5383b;color:#fff;padding:.19em .26em .19em .2em;font-weight:900}
+.intro .ilive{display:flex;align-items:center;gap:.5em;font:800 13px/1 "JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;font-size:clamp(11px,2.6vmin,30px);letter-spacing:.14em;color:#fff;background:rgba(229,56,59,.16);border:2px solid #e5383b;border-radius:99px;padding:.45em .7em;white-space:nowrap}
+.intro .ilive i{width:.62em;height:.62em;border-radius:50%;background:#e5383b;animation:in-pulse 1s ease-out infinite}
+.intro .istrip{display:flex;flex-wrap:wrap;justify-content:center;gap:.7em 1.3em;font:800 11px/1 "JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;font-size:clamp(10px,1.9vmin,22px);letter-spacing:.12em;color:#c8d0e0;animation:in-strip .4s ease-out .48s both}
+.intro .istrip span{display:flex;align-items:center;gap:.5em;white-space:nowrap}
+.intro .istrip span::before{content:"";width:.6em;height:.6em;border-radius:.15em;background:var(--c)}
+.intro.out{pointer-events:none}
+.intro.out .bd{animation:in-bdout .38s cubic-bezier(.7,0,.25,1) forwards;animation-delay:var(--o)}
+.intro.out .mid{transform:translateX(120vw);opacity:0}
+.intro.out .iflash,.intro.out .ib{display:none}
+@keyframes in-hide{to{visibility:hidden}}
+@keyframes in-bd{to{transform:skewX(-18deg) translateX(0)}}
+@keyframes in-bdout{from{transform:skewX(-18deg) translateX(0)}to{transform:skewX(-18deg) translateX(135%)}}
+@keyframes in-slam{from{transform:scale(1.9);opacity:0;filter:blur(8px)}}
+@keyframes in-flash{30%{opacity:1}}
+@keyframes in-strip{from{transform:translateY(14px);opacity:0}}
+@keyframes in-pulse{from{box-shadow:0 0 0 0 rgba(229,56,59,.7)}to{box-shadow:0 0 0 .9em rgba(229,56,59,0)}}
+@media (prefers-reduced-motion:reduce){
+  .intro .bd,.intro .iflash{display:none}
+  .intro *{animation:none!important}
+  .intro .ib{visibility:visible}
+  .intro{transition:opacity .25s}.intro.out{opacity:0}.intro.out .ib{display:block}.intro.out .mid{transform:none}
+}
+</style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=JetBrains+Mono:wght@400;500;700;800&family=Teko:wght@500;600;700&family=Bungee&family=Fraunces:ital,opsz,wght@1,9..144,800;1,9..144,900&family=Alfa+Slab+One&family=Racing+Sans+One&family=Orbitron:wght@700;900&family=Cinzel:wght@600;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="app.css?v=1.25">
-<link rel="stylesheet" href="screens.css?v=1.25">
+<link rel="stylesheet" href="app.css?v=1.26">
+<link rel="stylesheet" href="screens.css?v=1.26">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23e5383b'/%3E%3Ccircle cx='32' cy='32' r='13' fill='none' stroke='white' stroke-width='6'/%3E%3Ccircle cx='32' cy='32' r='4' fill='white'/%3E%3C/svg%3E">
 </head>
 <body>
+<!-- sigla d'apertura: si chiude appena l'app è pronta (tocca per saltarla) -->
+<div class="intro" id="intro" aria-hidden="true"><div class="ib"></div><div class="bd" style="background:#2fbf71;--d:0ms;--o:210ms"></div><div class="bd" style="background:#f5803e;--d:45ms;--o:180ms"></div><div class="bd" style="background:#c9dc3c;--d:90ms;--o:150ms"></div><div class="bd" style="background:#3fa7d6;--d:135ms;--o:90ms"></div><div class="bd" style="background:#e5383b;--d:180ms;--o:120ms"></div><div class="bd" style="background:#d8b45a;--d:225ms;--o:60ms"></div><div class="bd k" style="--d:270ms;--o:0ms"></div><div class="iflash"></div><div class="mid"><div class="lgw"><div class="ilg"><span>SPORT</span><b>LIVE</b></div><div class="ilive"><i></i>IN DIRETTA</div></div><div class="istrip"><span style="--c:#2fbf71">CALCIO</span><span style="--c:#f5803e">BASKET</span><span style="--c:#c9dc3c">TENNIS</span><span style="--c:#3fa7d6">RUGBY</span><span style="--c:#e5383b">F1 E MOTORSPORT</span><span style="--c:#d8b45a">GOLF</span></div></div></div>
+<script>
+(function(){
+  var el=document.getElementById("intro"),skip=false;
+  try{var q=new URLSearchParams(location.search);skip=q.get("follow")==="1"||q.has("solo")||q.has("nointro");}catch(e){}
+  try{if(window.self!==window.top)skip=true;}catch(e){skip=true;}
+  try{if(JSON.parse(localStorage.getItem("sl.settings")||"{}").intro===false)skip=true;}catch(e){}
+  if(skip){el.parentNode.removeChild(el);window.SLintro={ready:function(){}};return;}
+  var calm=false,done=false,ready=false,shown=false;
+  try{calm=matchMedia("(prefers-reduced-motion: reduce)").matches;}catch(e){}
+  function out(){if(done)return;done=true;removeEventListener("keydown",out);el.className+=" out";setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},calm?300:640);}
+  function seen(){shown=true;if(ready)out();}
+  /* si chiude quando l'app è pronta e il logo si è visto davvero (sui dispositivi lenti l'animazione può partire in ritardo) */
+  if(calm)setTimeout(seen,400);else el.querySelector(".lgw").addEventListener("animationend",function(){setTimeout(seen,200);});
+  window.SLintro={ready:function(){ready=true;if(shown)out();},skip:out};
+  el.addEventListener("click",out);addEventListener("keydown",out);
+  setTimeout(out,4000); /* se qualcosa non parte, la sigla non resta lì */
+})();
+</script>
 <header class="top" id="top">
   <a class="logo" href="#/home" aria-label="Sport LIVE APP, adesso in diretta"><span>SPORT</span><b>LIVE</b></a>
   <span class="clock mono" id="clock" aria-live="off"></span>
-  <span class="ver mono" id="appVer" title="Versione della pagina che stai guardando: 1.25 del 23/11/2026">v1.25</span>
+  <span class="ver mono" id="appVer" title="Versione della pagina che stai guardando: 1.26 del 23/11/2026">v1.26</span>
   <nav class="tabs" id="tabs" aria-label="Sport"></nav>
   <div class="topr">
  <button class="tbtn favbtn" id="btnFav" title="Gestisci i preferiti" aria-haspopup="dialog">★ <span>PREFERITI</span><b class="fbadge" id="favBadge" hidden></b></button>
@@ -70,6 +125,12 @@
           <button type="button" data-v="off">MAI</button>
         </div>
         <p class="hint">Testi più grandi e solo le sezioni principali, comoda su Smart TV e tablet. Automatica: si attiva da sola su TV, tablet e schermi lontani. <span id="couchNow"></span></p>
+        <h3>Sigla d'apertura</h3>
+        <div class="seg" id="setIntro" role="group" aria-label="Sigla d'apertura">
+          <button type="button" data-v="on">SÌ</button>
+          <button type="button" data-v="off">NO</button>
+        </div>
+        <p class="hint">L'animazione con il logo quando apri l'app: dura poco più di un secondo e si salta toccando lo schermo.</p>
       </section>
       <section>
         <h3>Avvisi a schermo</h3>
@@ -178,24 +239,24 @@
   </form>
 </dialog>
 
-<script src="js/core.js?v=1.25"></script>
-<script src="js/theme.js?v=1.25"></script>
-<script src="js/translate.js?v=1.25"></script>
-<script src="js/ui.js?v=1.25"></script>
-<script src="js/screens.js?v=1.25"></script>
-<script src="js/viz.js?v=1.25"></script>
-<script src="js/data.js?v=1.25"></script>
-<script src="js/ticker.js?v=1.25"></script>
-<script src="js/home.js?v=1.25"></script>
-<script src="js/favs.js?v=1.25"></script>
-<script src="js/calcio.js?v=1.25"></script>
-<script src="js/eurolega.js?v=1.25"></script>
-<script src="js/basket.js?v=1.25"></script>
-<script src="js/tennis.js?v=1.25"></script>
-<script src="js/rugby.js?v=1.25"></script>
-<script src="js/f1.js?v=1.25"></script>
-<script src="js/moto.js?v=1.25"></script>
-<script src="js/golf.js?v=1.25"></script>
+<script src="js/core.js?v=1.26"></script>
+<script src="js/theme.js?v=1.26"></script>
+<script src="js/translate.js?v=1.26"></script>
+<script src="js/ui.js?v=1.26"></script>
+<script src="js/screens.js?v=1.26"></script>
+<script src="js/viz.js?v=1.26"></script>
+<script src="js/data.js?v=1.26"></script>
+<script src="js/ticker.js?v=1.26"></script>
+<script src="js/home.js?v=1.26"></script>
+<script src="js/favs.js?v=1.26"></script>
+<script src="js/calcio.js?v=1.26"></script>
+<script src="js/eurolega.js?v=1.26"></script>
+<script src="js/basket.js?v=1.26"></script>
+<script src="js/tennis.js?v=1.26"></script>
+<script src="js/rugby.js?v=1.26"></script>
+<script src="js/f1.js?v=1.26"></script>
+<script src="js/moto.js?v=1.26"></script>
+<script src="js/golf.js?v=1.26"></script>
 <script>SL.start();</script>
 </body>
 </html>
