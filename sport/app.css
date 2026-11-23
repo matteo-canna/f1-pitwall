@@ -1137,4 +1137,11 @@ html[data-couch="1"] .dcol{backdrop-filter:none;background:rgba(7,10,18,.9)}
 .dcol{background:rgba(7,10,18,.42);backdrop-filter:blur(3px)}
 .dch{background:rgba(7,10,18,.5)}
 html[data-couch="1"] .dcol{background:rgba(7,10,18,.6)}
+/* filtri Italia e Preferiti separati */
+.onlyf{display:flex;gap:6px}
+.chip.itachip .ico{width:18px;height:18px}
+.chip.itachip[aria-pressed="true"]{background:linear-gradient(90deg,#009246 0 33.3%,#f1f2f1 33.3% 66.6%,#ce2b37 66.6%) bottom/100% 4px no-repeat,#123a22;border-color:#009246;color:#fff}
+.chip.favchip[aria-pressed="true"]{background:var(--yellow);border-color:var(--yellow);color:#1a1400}
+.ht-ita{display:inline-flex;flex:none}
+.ht-ita .ico{width:17px;height:17px}
 
