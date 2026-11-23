@@ -49,6 +49,27 @@ SL.homeTile=function(it){
     (it.foot?'<span class="ht-ft">'+h(it.foot)+'</span>':"")+'</button>';
 };
 
+/* ---------- sfondo della home: icone degli sport che fluttuano piano e puntini di luce che salgono ----------
+   Disposizione casuale ma sempre uguale (seme fisso); su TV meno elementi; ferme se il sistema chiede meno movimento. */
+const FLOAT=[["calcio","#2fbf71"],["basket","#f5803e"],["tennis","#c9dc3c"],["rugby","#3fa7d6"],["moto","#e5383b"],["golf","#d8b45a"],
+  ["golfball","#d8b45a"],["trophy","#ffd166"],["racket","#c9dc3c"],["wheel","#e5383b"],["whistle","#2fbf71"],["star","#ffd166"]];
+function floatLayer(){
+  const old=document.getElementById("hfloat");if(old)old.remove();
+  const ICONS=SL.icons.list,tv=SL.couch()||SL.isTVLike();
+  let seed=20261123;const rnd=()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
+  const N=tv?12:22,D=tv?8:16;let html="";
+  for(let i=0;i<N;i++){const [n,c]=FLOAT[i%FLOAT.length],big=rnd(),s=Math.round(36+big*120),sw=(1.8*44/s).toFixed(2);
+    /* posizioni a griglia "mescolata": coprono tutto lo schermo senza ammassarsi */
+    const col=i%6,row=Math.floor(i/6)%4,x=(col+.15+rnd()*.7)*100/6,y=(row+.1+rnd()*.8)*100/Math.ceil(N/6);
+    const dur=(34+rnd()*40).toFixed(1);
+    html+='<span class="hf" style="left:'+x.toFixed(1)+'%;top:'+y.toFixed(1)+'%;--s:'+s+'px;--o:'+(0.46-big*0.2).toFixed(2)+';--dx:'+((rnd()-.5)*14).toFixed(1)+'vw;--dy:'+((rnd()-.5)*16).toFixed(1)+'vh;--r:'+Math.round((rnd()-.5)*220)+'deg;color:'+c+';animation-duration:'+dur+'s;animation-delay:-'+(rnd()*dur).toFixed(1)+'s">'+
+      '<svg viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="'+sw+'" stroke-linecap="round" stroke-linejoin="round">'+ICONS[n]+'</g></svg></span>';}
+  for(let i=0;i<D;i++){const c=FLOAT[i%6][1],dur=(26+rnd()*34).toFixed(1);
+    html+='<i class="hdot" style="left:'+(rnd()*100).toFixed(1)+'%;--s:'+(3+rnd()*5).toFixed(1)+'px;--c:'+c+';--dx:'+((rnd()-.5)*10).toFixed(1)+'vw;animation-duration:'+dur+'s;animation-delay:-'+(rnd()*dur).toFixed(1)+'s"></i>';}
+  const el=document.createElement("div");el.id="hfloat";el.className="hfloat";el.setAttribute("aria-hidden","true");el.innerHTML=html;
+  document.body.appendChild(el);SL.onCleanup(()=>el.remove());
+}
+
 /* ---------- pagina ---------- */
 const DAYC={}; /* giorni diversi da oggi: {giorno: {t, res}} */
 const DAYS=[-1,0,1,2];
@@ -56,6 +77,7 @@ const dayName=d=>d===0?"Oggi":d===-1?"Ieri":d===1?"Domani":"Dopodomani";
 const FAVF="home.onlyfav";
 function mount(ctx){
   const st=ctx.st,main=ctx.main;
+  floatLayer();
   const S={f:SPORTS.indexOf(st.f)>=0?st.f:"all",fav:!!SL.store.get(FAVF,false),open:{}};
   main.innerHTML='<div class="home">'+
     '<div class="hhero"><div><h1><em>●</em> Adesso in diretta</h1><p id="hSub">Carico partite e sessioni di tutti gli sport…</p></div><div class="hstats" id="hStats"></div></div>'+

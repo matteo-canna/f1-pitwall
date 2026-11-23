@@ -510,7 +510,15 @@ body::after{display:none}
 body[data-sport]{--bgl:var(--veil),var(--photo) var(--ppos,center)/cover no-repeat}
 :root{--veil:linear-gradient(180deg,rgba(6,9,16,.50) 0%,rgba(6,9,16,.70) 38%,rgba(6,9,16,.86) 75%,rgba(6,9,16,.93) 100%)}
 html[data-style="regia"]{--veil:linear-gradient(180deg,rgba(4,6,12,.58) 0%,rgba(4,6,12,.76) 40%,rgba(4,6,12,.9) 100%)}
-body[data-sport="home"]{--photo:url("img/bg-home.jpg");--ppos:center 70%}
+/* home: niente foto. Fondo scuro con aloni nei colori degli sport; sopra, gli elementi che fluttuano (home.js) */
+body[data-sport="home"]{--photo:none;--bgl:
+  radial-gradient(900px 620px at 6% 10%,rgba(47,191,113,.17),transparent 70%),
+  radial-gradient(820px 600px at 94% 14%,rgba(245,128,62,.15),transparent 70%),
+  radial-gradient(900px 700px at 84% 96%,rgba(63,167,214,.15),transparent 70%),
+  radial-gradient(760px 620px at 12% 92%,rgba(216,180,90,.13),transparent 70%),
+  radial-gradient(1200px 820px at 50% 46%,rgba(229,56,59,.09),transparent 72%),
+  linear-gradient(180deg,#080b15,#05070d)}
+body[data-sport="home"]::after{display:none}
 body[data-sport="calcio"]{--photo:url("img/bg-calcio.jpg");--ppos:center 62%}
 body[data-sport="basket"]{--photo:url("img/bg-basket.jpg");--ppos:center 55%}
 body[data-sport="tennis"]{--photo:url("img/bg-tennis.jpg");--ppos:center 40%}
@@ -518,7 +526,6 @@ body[data-sport="rugby"]{--photo:url("img/bg-rugby.jpg");--ppos:center 58%}
 body[data-sport="moto"]{--photo:url("img/bg-moto.jpg");--ppos:center 35%}
 body[data-sport="golf"]{--photo:url("img/bg-golf.jpg");--ppos:center 45%}
 @media (max-width:900px){
-  body[data-sport="home"]{--photo:url("img/bg-home-sm.jpg")}
   body[data-sport="calcio"]{--photo:url("img/bg-calcio-sm.jpg")}
   body[data-sport="basket"]{--photo:url("img/bg-basket-sm.jpg")}
   body[data-sport="tennis"]{--photo:url("img/bg-tennis-sm.jpg")}
@@ -1108,3 +1115,26 @@ html[data-couch="1"] .chip.et-c{min-height:40px;font-size:14px}
 .unforce:hover{color:var(--text);border-color:var(--muted)}
 .card.is-empty>.body{opacity:.75}
 .card.flash{animation:flash 1.2s ease 2}
+
+/* ---------- home: elementi che fluttuano nello sfondo ---------- */
+.hfloat{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.hf{position:absolute;width:var(--s);height:var(--s);margin:calc(var(--s) / -2) 0 0 calc(var(--s) / -2);opacity:var(--o);
+  animation:hf-drift ease-in-out infinite;will-change:transform;filter:drop-shadow(0 0 14px currentColor)}
+.hf svg{display:block;width:100%;height:100%}
+.hdot{position:absolute;bottom:-12px;width:var(--s);height:var(--s);border-radius:50%;background:var(--c);box-shadow:0 0 10px 2px var(--c);opacity:0;
+  animation:hf-rise linear infinite;will-change:transform,opacity}
+@keyframes hf-drift{
+  0%{transform:translate3d(0,0,0) rotate(0deg)}
+  33%{transform:translate3d(var(--dx),calc(var(--dy) * -.6),0) rotate(calc(var(--r) * .45))}
+  66%{transform:translate3d(calc(var(--dx) * -.5),var(--dy),0) rotate(var(--r))}
+  100%{transform:translate3d(0,0,0) rotate(0deg)}}
+@keyframes hf-rise{0%{transform:translate3d(0,0,0);opacity:0}10%{opacity:.55}85%{opacity:.4}100%{transform:translate3d(var(--dx),-112vh,0);opacity:0}}
+/* TV e tablet: niente bagliore sulle icone (pesa sulla grafica) e colonne senza sfocatura dietro */
+html[data-couch="1"] .hf{filter:none}
+html[data-couch="1"] .dcol{backdrop-filter:none;background:rgba(7,10,18,.9)}
+@media (prefers-reduced-motion:reduce){.hf,.hdot{animation:none}.hdot{display:none}}
+/* colonne dei giorni più trasparenti: gli elementi dello sfondo passano dietro in trasparenza (le caselle restano piene e leggibili) */
+.dcol{background:rgba(7,10,18,.42);backdrop-filter:blur(3px)}
+.dch{background:rgba(7,10,18,.5)}
+html[data-couch="1"] .dcol{background:rgba(7,10,18,.6)}
+

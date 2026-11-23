@@ -72,9 +72,9 @@ I.head=function(sport){if(sport==="home"||window.isFollower())return null;const 
   el.addEventListener("click",e=>{const b=e.target.closest(".fact[data-go]");if(b)try{SL.go(JSON.parse(b.dataset.go));}catch(x){}});
   return el;};
 /* ---------- credito della foto di sfondo ---------- */
-const CRED={calcio:["Foto: Unsplash","https://unsplash.com/license"],basket:["Foto: Unsplash","https://unsplash.com/license"],tennis:["Foto: Unsplash","https://unsplash.com/license"],home:["Foto: Unsplash","https://unsplash.com/license"],
+const CRED={calcio:["Foto: Unsplash","https://unsplash.com/license"],basket:["Foto: Unsplash","https://unsplash.com/license"],tennis:["Foto: Unsplash","https://unsplash.com/license"],
   rugby:["Foto: David Roberts · CC BY 2.0","https://commons.wikimedia.org/wiki/File:2015_Rugby_World_Cup,_France_vs._Romania_(21048401024).jpg"],
   golf:["Foto: Unsplash","https://unsplash.com/license"],
   moto:["Foto: TeamEG00 · pubblico dominio","https://commons.wikimedia.org/wiki/File:Marc_M%C3%A1rquez_leading_the_pack_during_the_2025_Aragon_motorcycle_Grand_Prix.jpg"]};
-I.credit=function(sport){const a=document.getElementById("photoCredit");if(!a)return;const c=CRED[sport]||CRED.home;a.textContent=c[0];a.href=c[1];a.hidden=window.isFollower();};
+I.credit=function(sport){const a=document.getElementById("photoCredit");if(!a)return;const c=CRED[sport];if(!c){a.hidden=true;return;}a.textContent=c[0];a.href=c[1];a.hidden=window.isFollower();}; /* la home non ha foto */
 })();
