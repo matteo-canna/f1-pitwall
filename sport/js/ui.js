@@ -97,7 +97,7 @@ UI.openSettings=function(){
   segInit("setStyle",S.style,v=>{S.style=v;SL.saveSettings();SL.applyLook();bcLook();SL.emit("resize");});
   segInit("setCouch",S.couch,v=>{S.couch=v;SL.saveSettings();SL.applyLook();bcLook();couchNow();SL.route();});
   segInit("setAlerts",S.alerts,v=>{S.alerts=v;SL.saveSettings();});
-  segInit("setFrame",S.frame||"",v=>{S.frame=v;SL.saveSettings();SL.applyLook();bcLook();});
+  segInit("setTilt",S.tilt===false?"off":"on",v=>{S.tilt=v==="on";SL.saveSettings();if(!S.tilt)document.querySelectorAll(".card.tilting").forEach(c=>{c.classList.remove("tilting");c.style.cssText="";});});
   $("setSound").checked=!!S.sound;$("setSound").onchange=e=>{S.sound=e.target.checked;SL.saveSettings();};
   couchNow();favRender();
   const ext=SL.ext(),dat=SL.extData();
@@ -105,7 +105,7 @@ UI.openSettings=function(){
   $("dlgSettings").showModal();
 };
 function couchNow(){$("couchNow").textContent=SL.couch()?"Ora è attiva.":"Ora non è attiva.";}
-function bcLook(){try{SL.chan&&SL.chan.postMessage({type:"look",settings:{style:SL.settings.style,couch:SL.settings.couch,frame:SL.settings.frame}});}catch(e){}}
+function bcLook(){try{SL.chan&&SL.chan.postMessage({type:"look",settings:{style:SL.settings.style,couch:SL.settings.couch,tilt:SL.settings.tilt}});}catch(e){}}
 function favRender(){const L=SL.fav.list;$("favCount").textContent=L.length?"("+L.length+")":"";
   $("favList").innerHTML=L.length?L.map((x,i)=>'<li class="sp-'+h(x.s)+'">'+(x.s?SL.ico(x.s):"")+" "+h(x.n)+'<button type="button" data-i="'+i+'" aria-label="Togli '+h(x.n)+'">✕</button></li>').join(""):'<li class="muted">Nessun preferito.</li>';}
 $("favList")&&$("favList").addEventListener("click",e=>{const b=e.target.closest("button[data-i]");if(!b)return;const it=SL.fav.list[+b.dataset.i];if(it)SL.fav.toggle(it);favRender();});
@@ -244,12 +244,12 @@ UI.tv=function(c,sport){
   render();
 };
 
-/* ---------- riquadri "tessere 3D": inclinazione e riflesso seguono il mouse (solo con mouse, non su TV/touch) ---------- */
+/* ---------- riquadri 3D: inclinazione e riflesso seguono il mouse (solo con mouse, non su TV/touch) ---------- */
 UI.tilt=function(){
   let cur=null,raf=0,ev=null;
   const reset=c=>{if(!c)return;c.classList.remove("tilting");c.style.removeProperty("--rx");c.style.removeProperty("--ry");c.style.removeProperty("--gx");c.style.removeProperty("--gy");};
   document.addEventListener("pointermove",e=>{
-    if(document.documentElement.dataset.frame!=="tessere"||e.pointerType!=="mouse"||SL.couch()||matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+    if(SL.settings.tilt===false||e.pointerType!=="mouse"||SL.couch()||matchMedia("(prefers-reduced-motion: reduce)").matches)return;
     const c=e.target.closest&&e.target.closest(".card:not(.full)");
     if(c!==cur){reset(cur);cur=c;}
     if(!c)return;ev=e;if(raf)return;

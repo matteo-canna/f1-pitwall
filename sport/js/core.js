@@ -135,8 +135,7 @@ SL.isTVLike=()=>{const ua=navigator.userAgent||"";
   return false;};
 SL.couch=()=>SL.settings.couch==="on"||(SL.settings.couch==="auto"&&SL.isTVLike());
 SL.applyLook=()=>{const r=document.documentElement;r.dataset.style=SL.settings.style;r.dataset.couch=SL.couch()?"1":"0";
-  if(SL.qs.get("frame")!=null)SL.settings.frame=SL.qs.get("frame");
-  if(SL.settings.frame)r.dataset.frame=SL.settings.frame;else delete r.dataset.frame;
+  r.dataset.frame="stadio3d"; /* riquadri: cornice da tabellone + spessore e inclinazione 3D */
   const mt=document.querySelector('meta[name="theme-color"]');if(mt)mt.content=SL.settings.style==="regia"?"#04060c":"#090d16";};
 
 /* ---------- estensione per PC ---------- */

@@ -618,72 +618,56 @@ html[data-couch="1"] .grid>.subbar.ingrid{background:rgba(8,11,20,.82);backdrop-
 .hero{text-shadow:0 2px 12px rgba(0,0,0,.6)}
 
 /* =====================================================================
-   PROPOSTE DI RIQUADRO (html[data-frame]): A vetro · B tabellone · C tessere 3D
+   RIQUADRI "STADIO 3D" (scelta: mix tra Tabellone e Tessere 3D)
+   - cornice spessa nel colore dello sport, con bulloni agli angoli
+   - contenuto incassato come uno schermo, titolo su fascia da regia TV
+   - spessore visibile sotto la cornice, inclinazione e riflesso che seguono il mouse
    ===================================================================== */
-
-/* ---------- A · VETRO IN RILIEVO: lastra di vetro con bordo di luce e ombre a strati ---------- */
-html[data-frame="vetro"] .card{
-  border:1px solid transparent;border-radius:18px;
-  background:
-    linear-gradient(180deg,rgba(255,255,255,.075),rgba(255,255,255,.012) 38%) padding-box,
-    linear-gradient(color-mix(in srgb,var(--panel) 82%,transparent),color-mix(in srgb,var(--panel) 82%,transparent)) padding-box,
-    linear-gradient(150deg,rgba(255,255,255,.45),rgba(255,255,255,.08) 28%,rgba(255,255,255,.02) 55%,color-mix(in srgb,var(--sa) 60%,transparent)) border-box;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.14),inset 0 -1px 0 rgba(0,0,0,.45),
-    0 1px 2px rgba(0,0,0,.4),0 8px 18px rgba(0,0,0,.35),0 28px 56px -14px rgba(0,0,0,.65);
-  transition:transform .25s cubic-bezier(.2,.8,.2,1),box-shadow .25s}
-html[data-frame="vetro"] .card:not(.full):hover{transform:translateY(-4px);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.18),inset 0 -1px 0 rgba(0,0,0,.45),0 2px 4px rgba(0,0,0,.4),0 14px 28px rgba(0,0,0,.4),0 40px 70px -16px rgba(0,0,0,.7),0 0 0 1px color-mix(in srgb,var(--sa) 35%,transparent),0 0 36px -8px color-mix(in srgb,var(--sa) 45%,transparent)}
-html[data-frame="vetro"] .card>header{background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,0));border-bottom-color:rgba(255,255,255,.07);border-radius:17px 17px 0 0}
-html[data-frame="vetro"] .card::before{left:22px;right:22px;top:-1px;height:2px;border-radius:0 0 2px 2px;opacity:1;box-shadow:0 0 14px 1px color-mix(in srgb,var(--sa) 70%,transparent)}
-
-/* ---------- B · TABELLONE DA STADIO: cornice spessa nel colore dello sport, schermo incassato, fascia da regia ---------- */
-html[data-frame="tabellone"] .grid{gap:20px}
-html[data-frame="tabellone"] .card{
-  border:0;border-radius:14px;background:color-mix(in srgb,#05080f 86%,transparent);
+html[data-frame] .grid{gap:28px 26px;padding-top:18px;perspective:1600px}
+html[data-frame] .card{
+  border:0;border-radius:14px;background:color-mix(in srgb,#05080f 84%,transparent);
+  --ring:color-mix(in srgb,var(--sa) 55%,#151b2b);
+  transform:perspective(1100px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateZ(0);
+  transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s;
   box-shadow:
-    0 0 0 1px rgba(0,0,0,.7),
-    0 0 0 5px color-mix(in srgb,var(--sa) 52%,#151b2b),
-    0 0 0 6px rgba(255,255,255,.18),
+    0 0 0 1px rgba(0,0,0,.75),
+    0 0 0 5px var(--ring),
+    0 0 0 6px rgba(255,255,255,.22),
     0 0 0 7px rgba(0,0,0,.6),
+    0 3px 0 7px color-mix(in srgb,var(--sa) 34%,#080b13),
+    0 6px 0 7px color-mix(in srgb,var(--sa) 24%,#06080f),
+    0 9px 0 7px color-mix(in srgb,var(--sa) 14%,#04060b),
+    0 10px 0 7px rgba(255,255,255,.07),
     inset 0 0 0 1px rgba(255,255,255,.07),
     inset 0 14px 34px rgba(0,0,0,.65),
-    0 22px 44px rgba(0,0,0,.6)}
-html[data-frame="tabellone"] .card::before{display:none}
+    0 36px 54px -14px rgba(0,0,0,.85),
+    0 0 64px -16px color-mix(in srgb,var(--sa) 55%,transparent)}
+html[data-frame] .card.tilting{transition:transform .08s linear,box-shadow .35s;will-change:transform}
+html[data-frame] .card:not(.full):hover{--ring:color-mix(in srgb,var(--sa) 75%,#151b2b)}
+/* riflesso di luce che segue il mouse */
+html[data-frame] .card::before{left:0;right:0;top:0;height:100%;border-radius:inherit;opacity:1;z-index:2;pointer-events:none;box-shadow:none;
+  background:radial-gradient(520px circle at var(--gx,30%) var(--gy,-25%),rgba(255,255,255,.11),rgba(255,255,255,.025) 35%,transparent 60%)}
 /* bulloni negli angoli della cornice */
-html[data-frame="tabellone"] .card::after{content:"";position:absolute;inset:-4px;pointer-events:none;border-radius:16px;
-  background:radial-gradient(circle,rgba(255,255,255,.75) 0 1.6px,rgba(0,0,0,.5) 2.2px,transparent 2.6px) 0 0/100% 100% no-repeat;
-  --b:radial-gradient(circle at center,#e9eef8 0 1.5px,#5b6478 1.6px 2.4px,transparent 2.6px);
+html[data-frame] .card::after{content:"";position:absolute;inset:-4px;pointer-events:none;border-radius:16px;z-index:3;
+  --b:radial-gradient(circle at center,#eef2fa 0 1.5px,#5b6478 1.6px 2.4px,transparent 2.6px);
   background:var(--b) top left/8px 8px no-repeat,var(--b) top right/8px 8px no-repeat,var(--b) bottom left/8px 8px no-repeat,var(--b) bottom right/8px 8px no-repeat}
-html[data-frame="tabellone"] .card>header{border-bottom:0;padding:0;margin:10px 10px 4px;border-radius:8px;overflow:hidden;
+/* titolo su fascia da regia TV */
+html[data-frame] .card>header{border-bottom:0;padding:0;margin:10px 10px 4px;border-radius:8px;overflow:hidden;
   background:linear-gradient(90deg,color-mix(in srgb,var(--sa) 30%,#0b0f19),rgba(11,15,25,.6) 65%,transparent)}
-html[data-frame="tabellone"] .card>header h2{background:var(--sa);color:#0b0f19;padding:8px 22px 8px 12px;clip-path:polygon(0 0,100% 0,calc(100% - 12px) 100%,0 100%);text-shadow:none}
-html[data-frame="tabellone"] .card>header h2::before{background:#0b0f19}
-html[data-frame="tabellone"] .card>header .sub{color:var(--text);opacity:.85}
-html[data-frame="tabellone"] .card>header .tools{padding-right:6px}
-html[data-frame="tabellone"] .card .body{padding-top:10px}
-html[data-frame="tabellone"] .card.full{box-shadow:inset 0 0 0 6px color-mix(in srgb,var(--sa) 52%,#151b2b)}
-
-/* ---------- C · TESSERE 3D: spessore visibile, si inclinano col mouse, riflesso di luce ---------- */
-html[data-frame="tessere"] .grid{gap:22px;perspective:1600px}
-html[data-frame="tessere"] .card{
-  border:1px solid rgba(255,255,255,.13);border-radius:16px;
-  transform:perspective(1100px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateZ(0);
-  transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s;will-change:transform;
-  box-shadow:
-    0 2px 0 -1px color-mix(in srgb,var(--sa) 45%,#0a0e18),
-    0 4px 0 -1px color-mix(in srgb,var(--sa) 38%,#080b13),
-    0 6px 0 -1px color-mix(in srgb,var(--sa) 30%,#06080f),
-    0 8px 0 -1px color-mix(in srgb,var(--sa) 22%,#05070c),
-    0 9px 0 -1px rgba(255,255,255,.08),
-    0 30px 50px -18px rgba(0,0,0,.85),
-    0 0 50px -16px color-mix(in srgb,var(--sa) 55%,transparent)}
-html[data-frame="tessere"] .card.tilting{transition:transform .08s linear,box-shadow .35s}
-html[data-frame="tessere"] .card::before{left:0;right:0;top:0;height:100%;border-radius:inherit;opacity:1;z-index:2;pointer-events:none;
-  background:radial-gradient(520px circle at var(--gx,30%) var(--gy,-20%),rgba(255,255,255,.13),rgba(255,255,255,.03) 35%,transparent 60%)}
-html[data-frame="tessere"] .card>header{box-shadow:inset 0 3px 0 var(--sa);border-radius:15px 15px 0 0;background:linear-gradient(180deg,rgba(255,255,255,.05),transparent)}
-html[data-frame="tessere"] .card.full{transform:none}
-
-/* su TV e tablet niente effetti pesanti: restano i bordi marcati */
-html[data-couch="1"][data-frame] .card{backdrop-filter:none;transition:none}
-html[data-couch="1"][data-frame="tessere"] .card{transform:none}
+html[data-frame] .card>header h2{background:var(--sa);color:#0b0f19;padding:8px 22px 8px 12px;clip-path:polygon(0 0,100% 0,calc(100% - 12px) 100%,0 100%);text-shadow:none}
+html[data-frame] .card>header h2::before{background:#0b0f19}
+html[data-frame] .card>header .sub{color:var(--text);opacity:.85}
+html[data-frame] .card>header .tools{padding-right:6px}
+html[data-frame] .card .body{padding-top:10px}
+/* schermo intero: niente inclinazione, cornice dentro lo schermo */
+html[data-frame] .card.full{transform:none;box-shadow:inset 0 0 0 6px var(--ring)}
+html[data-frame] .card.full::after{display:none}
+/* la barra di testata e filtri accanto alla Diretta TV: cornice sottile coordinata */
+html[data-frame] .grid>.subbar.ingrid{border:0;box-shadow:0 0 0 1px rgba(0,0,0,.6),0 0 0 3px color-mix(in srgb,var(--sa) 35%,#151b2b),0 18px 36px -12px rgba(0,0,0,.7)}
+/* TV, tablet e "riduci movimento": niente inclinazione, resta la cornice con lo spessore */
+html[data-couch="1"][data-frame] .card{backdrop-filter:none;transition:none;transform:none}
+html[data-couch="1"][data-frame] .card::before{display:none}
+@media (max-width:760px){html[data-frame] .grid{gap:24px}}
 @media (prefers-reduced-motion:reduce){html[data-frame] .card{transform:none!important}}
+/* con una scheda a schermo intero la prospettiva della griglia va tolta, altrimenti la scheda non copre tutto lo schermo */
+body.has-full .grid{perspective:none}
