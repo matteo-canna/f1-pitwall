@@ -34,7 +34,7 @@ async function week(key,ttl,tour){const d=await SL.tryGet(BASE_OF(tour)+"scorebo
   return{evs:d.events||[],matches};}
 const setsStr=m=>m.p.map(p=>p.sets.map(s=>s.v).join(" ")).join(" | ");
 function item(m){const lose=i=>m.done&&!m.p[i].winner&&m.p[1-i]&&m.p[1-i].winner;
-  return{id:"tennis:"+m.id,sport:"tennis",comp:(m.tour==="wta"?"WTA · ":"")+m.tourn+(m.round?" · "+m.round:""),date:m.date,state:m.state,live:m.live,done:m.done,status:m.live?"LIVE":m.status,important:m.important,m,
+  return{id:"tennis:"+m.id,sport:"tennis",comp:(m.tour==="wta"?"WTA · ":"")+m.tourn+(m.round?" · "+m.round:""),date:m.date,state:m.state,live:m.live,done:m.done,status:m.live?"LIVE":m.status,tbd:m.state==="pre"&&!m.timeValid,important:m.important,m,
     sig:setsStr(m)+"|"+m.state,
     lines:m.p.map((p,i)=>({n:(p.seed?"("+p.seed+") ":"")+p.name,img:p.flag,ita:p.ita,v:p.sets.map(s=>s.v).join(" "),lose:lose(i)})),
     foot:[m.cat.n,m.court].filter(Boolean).join(" · "),go:{sport:"tennis",tour:m.tour==="wta"?"wta":"",t:m.tid,e:m.id}};}

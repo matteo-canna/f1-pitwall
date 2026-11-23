@@ -45,13 +45,13 @@ M.homeFeed=async function(day,ttl){
   const out=[],tgt=SL.dayKey(SL.addDays(Date.now(),day));
   try{const evs=await indySeason(ttl);evs.filter(e=>SL.dayKey(e.date)===tgt||(day===0&&indyState(e)==="in")).forEach(e=>{const st=indyState(e),R=indyRows(e);
     out.push({id:"moto:indy:"+e.id,sport:"moto",comp:"IndyCar · "+e.name,date:e.date,state:st,live:st==="in",done:st==="post",status:st==="pre"?SL.when(e.date):st==="in"?"IN GARA":"FINALE",important:R.slice(0,1).some(r=>r.ita||favR(r.name)),
-      sig:(R[0]&&R[0].id)+"|"+st,indy:R,lines:st==="pre"||!R.length?[{n:"Gara",ico:"flag",v:SL.fmtTime(e.date)}]:R.slice(0,3).map(r=>({n:r.pos+". "+r.name,ita:r.ita,v:""})),foot:"IndyCar",go:{sport:"moto",s:"indy"}});});}catch(e){}
+      sig:(R[0]&&R[0].id)+"|"+st,indy:R,lines:st==="pre"||!R.length?[{n:"Gara",ico:"flag",v:SL.fmtTime(e.date)}]:R.slice(0,3).map(r=>({pos:r.pos,n:r.name,img:r.flag,ita:r.ita,v:r.win?"vince":""})),foot:"IndyCar",go:{sport:"moto",s:"indy"}});});}catch(e){}
   if(!SL.extData())return out;
   try{
     if(day===0){const d=await live(ttl<20000?5000:60000);if(d&&d.head&&ltToday(d)){const R=ltRiders(d),st=ltState(d),hd=d.head;
       out.push({id:"moto:gp:"+hd.event_id+":"+hd.session_id,sport:"moto",comp:"MotoGP · "+hd.event_tv_name,date:Date.now(),state:st,live:st==="in",done:st==="post",
         status:st==="in"?hd.session_name:st==="post"?"FINITA":hd.session_name,important:R.slice(0,1).some(r=>ITA(r.rider_nation)||favR(r.rider_name+" "+r.rider_surname)),R,head:hd,
-        sig:(R[0]&&R[0].rider_number)+"|"+st,lines:R.slice(0,3).map(r=>({n:r.pos+". "+r.rider_name+" "+r.rider_surname,ita:ITA(r.rider_nation),v:r.pos===1?(st==="in"?"Giro "+r.num_lap+"/"+hd.num_laps:""):"+"+r.gap_first})),
+        sig:(R[0]&&R[0].rider_number)+"|"+st,lines:R.slice(0,3).map(r=>({pos:r.pos,n:r.rider_name+" "+r.rider_surname,ita:ITA(r.rider_nation),v:r.pos===1?(st==="in"?"Giro "+r.num_lap+"/"+hd.num_laps:""):"+"+r.gap_first})),
         foot:hd.session_name+" · "+hd.circuit_name,go:{sport:"moto",s:"gp"}});}}
     const evs=await events(),ev=currentEvent(evs);if(ev){const cat=await gpCat(ev.id),S=await gpSessions(ev.id,cat.id);
       S.filter(s=>SL.dayKey(s.date)===tgt&&new Date(s.date)>Date.now()&&/SPR|RAC|Q/.test(s.type)).forEach(s=>out.push({id:"moto:gps:"+s.id,sport:"moto",comp:"MotoGP · "+(ev.sponsored_name||ev.name),date:s.date,state:"pre",live:false,done:false,status:SL.when(s.date),important:s.type==="RAC",

@@ -192,26 +192,6 @@ body.has-full{overflow:hidden}
 .grp-h::after{content:"";flex:1;height:1px;background:var(--line)}
 
 /* ---------- home ---------- */
-.hero{grid-column:1/-1;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.hero h1{font:900 34px/1 var(--f-display);font-stretch:118%;text-transform:uppercase;letter-spacing:.01em}
-.hero h1 em{font-style:normal;color:var(--red)}
-.hero p{color:var(--muted);margin-top:6px}
-.hsec{grid-column:1/-1}
-.hsec>h2{display:flex;align-items:center;gap:10px;font:800 14px/1 var(--f-display);font-stretch:118%;letter-spacing:.06em;text-transform:uppercase;margin:18px 0 10px}
-.hsec>h2 .c{color:var(--muted);font-family:var(--f-mono);font-size:12px;letter-spacing:0}
-.hgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:10px}
-.htile{display:flex;flex-direction:column;gap:8px;background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--tc,var(--line));border-radius:12px;padding:12px;text-align:left;color:var(--text);min-width:0}
-.htile .hd{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:11px;font-weight:700;letter-spacing:.04em;min-width:0}
-.htile .hd .cmp{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.htile .hd .tag{margin-left:auto}
-.htile .ln{display:grid;grid-template-columns:22px 1fr auto;gap:8px;align-items:center}
-.htile .ln .n{font-weight:800;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.htile .ln .v{font:900 20px/1 var(--f-display)}
-.htile .ln.l .n,.htile .ln.l .v{color:var(--muted)}
-.htile .ft{color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.htile.fav{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--yellow) 50%,transparent)}
-.htile.flash{animation:flash 1.2s ease 3}
-.sportpill{display:inline-flex;align-items:center;gap:5px;padding:3px 7px;border-radius:6px;background:color-mix(in srgb,var(--tc) 22%,transparent);color:var(--text);font-weight:800;font-size:10.5px;letter-spacing:.05em;flex:none}
 
 /* ---------- avvisi ---------- */
 .alerts{position:fixed;right:16px;top:72px;z-index:80;display:flex;flex-direction:column;gap:10px;pointer-events:none;max-width:min(420px,calc(100vw - 32px))}
@@ -339,9 +319,6 @@ html[data-couch="1"] .stat .lab{font-size:12px}
 html[data-couch="1"] .stat .bar{height:11px}
 html[data-couch="1"] .mrow .s{font-size:22px}
 html[data-couch="1"] .mrow .tt{font-size:16px}
-html[data-couch="1"] .htile .ln .n{font-size:17px}
-html[data-couch="1"] .htile .ln .v{font-size:26px}
-html[data-couch="1"] .hero h1{font-size:44px}
 html[data-couch="1"] .trow{font-size:15px;grid-template-columns:38px 7px 42px 1fr 96px 88px 92px}
 html[data-couch="1"] .tmatch{font-size:15px}
 html[data-couch="1"] :focus-visible{outline-width:4px;outline-offset:3px}
@@ -366,12 +343,8 @@ html[data-style="regia"] .card>header h2::before{width:4px;height:16px;border-ra
 html[data-style="regia"] .card .body{padding:12px 16px 16px}
 html[data-style="regia"] .bug .score{font-size:64px;font-style:italic;font-weight:900}
 html[data-style="regia"] .bug .tm .nm{font-size:19px;font-style:italic;font-weight:900}
-html[data-style="regia"] .mtile,html[data-style="regia"] .mrow,html[data-style="regia"] .htile,html[data-style="regia"] .tmatch{border-radius:16px;font-family:var(--f-display)}
-html[data-style="regia"] .mtile .sc,html[data-style="regia"] .mrow .s,html[data-style="regia"] .htile .ln .v{font-style:italic;font-weight:900}
-html[data-style="regia"] .htile{background:linear-gradient(135deg,color-mix(in srgb,var(--tc) 30%,transparent),rgba(255,255,255,.04) 55%);border-left:0;padding:16px}
-html[data-style="regia"] .htile .ln .n{font-size:16px;font-weight:900;text-transform:uppercase;font-stretch:110%}
-html[data-style="regia"] .htile .ln .v{font-size:26px}
-html[data-style="regia"] .hero h1{font-style:italic;font-size:44px}
+html[data-style="regia"] .mtile,html[data-style="regia"] .mrow,html[data-style="regia"] .tmatch{border-radius:16px;font-family:var(--f-display)}
+html[data-style="regia"] .mtile .sc,html[data-style="regia"] .mrow .s{font-style:italic;font-weight:900}
 html[data-style="regia"] .tbl{font-family:var(--f-display);font-size:13.5px}
 html[data-style="regia"] .tbl td{border-bottom-color:rgba(255,255,255,.05)}
 html[data-style="regia"] .chip{font-family:var(--f-display);font-weight:800;text-transform:uppercase}
@@ -401,7 +374,6 @@ html[data-style="regia"] .logo{transform:skewX(-8deg)}
   .bug .tm img{width:40px;height:40px}
   .trow{grid-template-columns:24px 5px 30px 1fr 64px 62px;font-size:11.5px}
   .trow .lt2{display:none}
-  .hero h1{font-size:26px}
   .alerts{top:auto;bottom:16px;right:16px;left:16px;max-width:none}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
@@ -451,7 +423,7 @@ body[data-sport="moto"]::after{-webkit-mask-image:var(--ic-flag);mask-image:var(
 
 /* pannelli un filo trasparenti, così lo sfondo si intravede */
 .card{background:color-mix(in srgb,var(--panel) 88%,transparent);backdrop-filter:blur(3px)}
-.mtile,.mrow,.htile,.chip,.tabs,.tmatch{background-color:color-mix(in srgb,var(--panel) 90%,transparent)}
+.mtile,.mrow,.chip,.tabs,.tmatch{background-color:color-mix(in srgb,var(--panel) 90%,transparent)}
 html[data-couch="1"] .card,html[data-style="regia"][data-couch="1"] .card{backdrop-filter:none}
 
 /* --- striscia dello sport: in cima alla pagina e su ogni scheda --- */
@@ -467,13 +439,10 @@ html[data-style] body .bug .score{font-family:var(--f-score);font-weight:var(--f
 html[data-style] body .bug .tm .nm{font-family:var(--f-sport);font-weight:var(--fw);font-style:var(--fst);font-size:calc(var(--nmsize)*var(--fs));letter-spacing:var(--ls);font-synthesis:none}
 html[data-style] body .mtile .sc{font-family:var(--f-score);font-weight:var(--fw2);font-style:var(--fst);font-size:calc(var(--mtsc)*var(--fs2));font-synthesis:none}
 html[data-style] body .mrow .s{font-family:var(--f-score);font-weight:var(--fw2);font-style:var(--fst);font-size:calc(var(--mrs)*var(--fs2));font-synthesis:none}
-html[data-style] body .htile .ln .v{font-family:var(--f-score);font-weight:var(--fw2);font-style:var(--fst);font-size:calc(var(--hv)*var(--fs2));font-synthesis:none}
-html[data-style] body .htile .ln .n{font-family:var(--f-sport);font-weight:var(--fw);font-style:var(--fst);font-size:calc(var(--hn)*var(--fs));letter-spacing:var(--ls);font-stretch:var(--stretch);font-synthesis:none}
 html[data-style] body .tabs button{font-family:var(--f-sport);font-weight:var(--fw);font-style:var(--fst);font-size:calc(var(--tabsz)*var(--fs));letter-spacing:var(--ls);font-stretch:var(--stretch);font-synthesis:none;text-transform:uppercase}
 html[data-style] body .al .big{font-family:var(--f-score);font-weight:var(--fw2);font-style:var(--fst);font-size:calc(var(--alb)*var(--fs2));font-synthesis:none}
 html[data-style] body .al .tt{font-family:var(--f-sport);font-weight:var(--fw);font-style:var(--fst);letter-spacing:var(--ls);font-synthesis:none}
 html[data-style] body .trow .p,html[data-style] body .cd,html[data-style] body .tmatch .sets b,html[data-style] body .setnum{font-family:var(--f-score);font-weight:var(--fw2);font-style:var(--fst);font-synthesis:none}
-html[data-style] body .hsec>h2{font-family:var(--f-sport);font-weight:var(--fw);font-style:var(--fst);letter-spacing:var(--ls)}
 
 /* --- icone --- */
 .ico{width:1.2em;height:1.2em;display:inline-block;vertical-align:-.24em;flex:none;overflow:visible}
@@ -484,9 +453,7 @@ html[data-style] body .hsec>h2{font-family:var(--f-sport);font-weight:var(--fw);
 .feed li>span:nth-child(2){display:flex;justify-content:center}
 .feed li>span:nth-child(2) .ico{width:17px;height:17px;color:var(--sa)}
 .feed li>span:nth-child(2) .ico.ico-y{color:var(--yellow)}.feed li>span:nth-child(2) .ico.ico-r{color:var(--red)}.feed li>span:nth-child(2) .ico.ico-sub{color:var(--cyan)}.feed li>span:nth-child(2) .ico.ico-g{color:var(--green)}
-.sportpill .ico{width:15px;height:15px;color:var(--tc)}
 .chip .ico{width:15px;height:15px}
-.htile:hover .sportpill .ico,.htile:focus-visible .sportpill .ico{animation:var(--load);animation-iteration-count:2}
 
 /* --- caricamento: la palla dello sport rimbalza, il casco… la ruota gira --- */
 html[data-style] body .loading::after{width:20px;height:20px;border:0;border-radius:0;background:var(--sa);-webkit-mask:var(--icload) center/contain no-repeat;mask:var(--icload) center/contain no-repeat;animation:var(--load);vertical-align:-5px;margin-left:10px}
@@ -561,7 +528,7 @@ body[data-sport="golf"]{--photo:url("img/bg-golf.jpg");--ppos:center 45%}
 }
 /* in stile regia i pannelli sono molto trasparenti: sopra una foto servono un po' più pieni */
 html[data-style="regia"] .card{background:rgba(10,14,24,.72)}
-html[data-style="regia"] .mtile,html[data-style="regia"] .mrow,html[data-style="regia"] .htile,html[data-style="regia"] .tmatch,html[data-style="regia"] .chip{background-color:rgba(12,16,28,.78)}
+html[data-style="regia"] .mtile,html[data-style="regia"] .mrow,html[data-style="regia"] .tmatch,html[data-style="regia"] .chip{background-color:rgba(12,16,28,.78)}
 /* credito della foto */
 .photocredit{position:fixed;right:10px;bottom:6px;z-index:5;font-size:10px;color:rgba(255,255,255,.42);text-decoration:none;text-shadow:0 1px 2px #000}
 .photocredit:hover{color:#fff}
@@ -620,7 +587,6 @@ html[data-couch="1"] .card{background:color-mix(in srgb,var(--panel) 92%,transpa
 body:not([data-sport="home"]) .subbar:not(.ingrid){margin:12px 16px 0}
 html[data-couch="1"] .grid>.subbar.ingrid{background:rgba(8,11,20,.82);backdrop-filter:none}
 .fact small{color:rgba(233,238,248,.72)}
-.hero{text-shadow:0 2px 12px rgba(0,0,0,.6)}
 
 /* =====================================================================
    RIQUADRI "STADIO 3D" (scelta: mix tra Tabellone e Tessere 3D)
@@ -699,7 +665,7 @@ body{font:500 14px/1.45 var(--f-text);font-stretch:100%}
 .feed li{font-size:13.5px}
 .note,.legend,.hint{font-size:12.5px;line-height:1.5}
 .stat .lab{font-size:11.5px}
-.mtile .st,.tmatch .hd,.htile .hd,.htile .ft,.mrow .last,.trow.h{font-size:12px}
+.mtile .st,.tmatch .hd,.mrow .last,.trow.h{font-size:12px}
 .mtile .tn{font-size:13.5px}
 .bench,.scorers{font-size:12.5px}
 .fact small{font-size:11px}.fact b{font-size:14px}
@@ -707,7 +673,7 @@ body{font:500 14px/1.45 var(--f-text);font-stretch:100%}
 .empty{font-size:14px}
 html[data-couch="1"] body{font-size:17px}
 html[data-couch="1"] .tag{font-size:13px}
-html[data-couch="1"] .mtile .st,html[data-couch="1"] .htile .hd,html[data-couch="1"] .htile .ft,html[data-couch="1"] .mrow .last{font-size:14px}
+html[data-couch="1"] .mtile .st,html[data-couch="1"] .mrow .last{font-size:14px}
 html[data-couch="1"] .note,html[data-couch="1"] .legend{font-size:14.5px}
 
 /* ---------- 2. pelle di ogni sport: font dei pulsanti, colori, forma ---------- */
@@ -891,4 +857,219 @@ html[data-couch="1"] .gboard .rr{display:none}
   .card>header:has(.tools>*) .tools{order:5;flex:1 1 100%;margin-left:0;justify-content:flex-start;flex-wrap:wrap;padding:4px 0 2px}
   .card>header:has(.tools>*) .mbtn{margin-left:auto}
   .card>header:has(.tools>*) .sub{flex:1 1 0}
+}
+
+/* =====================================================================
+   HOME: riquadri degli sport, colonne dei giorni, caselle per sport
+   ===================================================================== */
+/* in home il selettore degli sport sta più in basso, grande: in alto resta solo la barra degli strumenti */
+body[data-sport="home"] .top .tabs{display:none}
+body[data-sport="home"] .top .topr{margin-left:auto}
+.home{grid-column:1/-1;display:flex;flex-direction:column;gap:16px;min-width:0}
+.hhero{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;text-shadow:0 2px 12px rgba(0,0,0,.6)}
+.hhero h1{font:900 34px/1 var(--f-display);font-stretch:118%;text-transform:uppercase;letter-spacing:.01em}
+.hhero h1 em{font-style:normal;color:var(--red);animation:pulse 1.6s infinite}
+.hhero p{color:var(--muted);margin-top:6px;font-size:14px}
+.hhero p::first-letter{text-transform:uppercase}
+.hstats{display:flex;gap:8px}
+.hs{display:flex;flex-direction:column;align-items:center;min-width:78px;padding:8px 12px;border-radius:12px;background:rgba(8,11,19,.6);border:1px solid var(--line)}
+.hs b{font:900 26px/1 var(--f-display);font-stretch:110%}
+.hs small{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;margin-top:3px}
+.hs.live b{color:var(--red)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--red);animation:pulse 1.4s infinite;vertical-align:1px}
+
+/* ---------- riquadri grandi degli sport ---------- */
+.sportsel{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+.sptile{position:relative;isolation:isolate;display:flex;flex-direction:column;justify-content:flex-end;gap:6px;min-height:178px;padding:14px 14px 12px;text-align:left;color:#fff;overflow:hidden;cursor:pointer;
+  border:1px solid color-mix(in srgb,var(--sa) 55%,transparent);border-top:5px solid var(--sa);border-radius:var(--btn-r,12px);
+  background:linear-gradient(180deg,rgba(6,9,16,.15) 0%,rgba(6,9,16,.72) 48%,rgba(6,9,16,.94) 100%),var(--sp-photo) center/cover no-repeat,#0b0f19;
+  box-shadow:0 10px 24px -14px #000,0 0 0 0 var(--sa);transition:transform .18s,box-shadow .18s}
+.sptile::after{content:"";position:absolute;right:-14px;top:-14px;width:96px;height:96px;background:var(--sa);opacity:.22;-webkit-mask:var(--ic) center/contain no-repeat;mask:var(--ic) center/contain no-repeat;transform:rotate(-14deg);z-index:-1;transition:opacity .18s,transform .3s}
+.sptile:hover,.sptile:focus-visible{transform:translateY(-3px);box-shadow:0 16px 30px -14px #000,0 0 0 2px var(--sa)}
+.sptile:hover::after,.sptile:focus-visible::after{opacity:.4;transform:rotate(0) scale(1.08)}
+.sptile:hover .spt-ic{animation:var(--load);animation-iteration-count:2}
+.sp-calcio.sptile{--sp-photo:url("img/bg-calcio-sm.jpg")}
+.sp-basket.sptile{--sp-photo:url("img/bg-basket-sm.jpg")}
+.sp-tennis.sptile{--sp-photo:url("img/bg-tennis-sm.jpg")}
+.sp-rugby.sptile{--sp-photo:url("img/bg-rugby-sm.jpg")}
+.sp-moto.sptile{--sp-photo:url("img/bg-moto-sm.jpg")}
+.sp-golf.sptile{--sp-photo:url("img/bg-golf-sm.jpg")}
+.spt-top{display:flex;align-items:center;gap:8px;margin-bottom:auto;min-width:0}
+.spt-ic{width:30px;height:30px;color:var(--sa);flex:none;filter:drop-shadow(0 2px 4px rgba(0,0,0,.6))}
+.spt-name{font-family:var(--f-sport);font-weight:var(--fw);font-style:var(--fst);font-stretch:var(--stretch);letter-spacing:var(--ls);font-size:calc(24px*var(--fs));line-height:1;text-transform:uppercase;font-synthesis:none;text-shadow:0 2px 8px rgba(0,0,0,.7);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.spt-live{margin-left:auto;display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:99px;background:var(--red);font:800 11px/1 var(--f-mono);letter-spacing:.04em;flex:none}
+.spt-live .dot{background:#fff;width:6px;height:6px}
+.spt-count{font:800 12px/1 var(--f-mono);letter-spacing:.05em;text-transform:uppercase;color:var(--sa)}
+.spt-info{display:flex;flex-direction:column;gap:1px;min-width:0;padding-left:8px;border-left:2px solid color-mix(in srgb,var(--sa) 70%,transparent)}
+.spt-info small{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.66)}
+.spt-info b{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.spt-go{position:absolute;right:12px;bottom:10px;font-family:var(--f-ui);font-weight:var(--ui-w);font-style:var(--ui-st);letter-spacing:var(--ui-ls);font-size:10.5px;color:var(--sa);opacity:0;transform:translateX(-6px);transition:.18s}
+.sptile:hover .spt-go,.sptile:focus-visible .spt-go{opacity:1;transform:none}
+
+/* ---------- barra sopra le colonne ---------- */
+.dtools{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap}
+.dt-h{font:900 16px/1 var(--f-display);font-stretch:118%;text-transform:uppercase;letter-spacing:.05em;margin-right:4px}
+.dfilter{flex-wrap:wrap}
+.favchip[aria-pressed="true"]{background:var(--yellow);border-color:var(--yellow);color:#1a1400}
+.dt-note{font-size:12px;margin-left:auto}
+.dswitch{display:none}
+
+/* ---------- colonne dei giorni ---------- */
+.dcols{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;align-items:start}
+.dcol{display:flex;flex-direction:column;min-width:0;max-height:calc(100vh - 150px);min-height:320px;border-radius:16px;
+  background:rgba(7,10,18,.72);border:1px solid var(--line);backdrop-filter:blur(6px);box-shadow:0 14px 30px -18px #000}
+.dcol.today{border-color:color-mix(in srgb,var(--red) 60%,var(--line));box-shadow:0 14px 30px -18px #000,0 0 0 1px color-mix(in srgb,var(--red) 40%,transparent)}
+.dch{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px;padding:12px 14px 10px;border-bottom:1px solid var(--line);border-radius:16px 16px 0 0;background:rgba(255,255,255,.03)}
+.dcol.today .dch{background:linear-gradient(90deg,color-mix(in srgb,var(--red) 30%,transparent),transparent 80%)}
+.dch .dn{font:900 22px/1 var(--f-display);font-stretch:118%;text-transform:uppercase;letter-spacing:.02em}
+.dcol.today .dch .dn{color:#fff}
+.dcol.past .dch .dn{color:var(--muted)}
+.dch .dd{color:var(--muted);font-size:12.5px}
+.dch .dd::first-letter{text-transform:uppercase}
+.dch .dc{margin-left:auto;font:700 11.5px/1 var(--f-mono);color:var(--muted)}
+.dch .dc .live{color:var(--red)}
+.dbody{overflow-y:auto;overscroll-behavior:contain;padding:10px;display:flex;flex-direction:column;gap:8px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.18) transparent}
+.dgroup{display:flex;flex-direction:column;gap:8px}
+.dgroup+.dgroup{margin-top:8px}
+.dgh{display:flex;align-items:center;gap:8px;font:800 12px/1 var(--f-display);font-stretch:118%;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:2px 2px 0}
+.dgh .c{font-family:var(--f-mono);letter-spacing:0;margin-left:auto}
+.g-live .dgh{color:var(--red)}
+.dslot{display:flex;align-items:center;gap:8px;font:800 12px/1 var(--f-mono);color:var(--text);margin-top:4px}
+.dslot::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+.dmore{align-self:stretch;padding:9px;border-radius:10px;border:1px dashed var(--line);background:transparent;color:var(--muted);font:700 12px/1 var(--f-ui)}
+.dmore:hover{color:var(--text);border-color:var(--muted)}
+.dempty{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;color:var(--muted);padding:28px 12px;font-size:13.5px}
+.dempty .ico{width:34px;height:34px;opacity:.5}
+
+/* ---------- casella evento: base comune ---------- */
+.htile{--ht-r:12px;--ht-tex:none;position:relative;isolation:isolate;display:flex;flex-direction:column;width:100%;padding:0;text-align:left;color:var(--text);cursor:pointer;overflow:hidden;
+  border-radius:var(--ht-r);border:1px solid color-mix(in srgb,var(--sa) 38%,var(--line));
+  background:var(--ht-tex),linear-gradient(180deg,color-mix(in srgb,var(--sa) 9%,#0d1220),#0b0f19);transition:transform .14s,box-shadow .14s,border-color .14s}
+.htile:hover,.htile:focus-visible{transform:translateY(-2px);border-color:var(--sa);box-shadow:0 10px 22px -14px #000}
+.htile::after{content:"";position:absolute;right:-10px;bottom:-12px;width:66px;height:66px;background:var(--sa);opacity:.07;-webkit-mask:var(--ic) center/contain no-repeat;mask:var(--ic) center/contain no-repeat;transform:rotate(-14deg);z-index:-1}
+.ht-band{display:flex;align-items:center;gap:7px;padding:6px 10px;min-width:0;background:linear-gradient(90deg,var(--sa),color-mix(in srgb,var(--sa) 62%,#0b0f19));color:var(--sa-ink)}
+.ht-band .ico{width:15px;height:15px;flex:none;color:var(--sa-ink)}
+.ht-band .cmp{font-family:var(--f-ui);font-weight:var(--ui-w);font-style:var(--ui-st);text-transform:var(--ui-tt);letter-spacing:var(--ui-ls);font-stretch:var(--ui-stretch);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-synthesis:none}
+.ht-star{color:#1a1400;background:var(--yellow);border-radius:4px;font-size:10px;line-height:1;padding:2px 4px;flex:none}
+.ht-st{margin-left:auto;flex:none;display:inline-flex;align-items:center;gap:5px;font:800 12px/1 var(--f-mono);letter-spacing:.02em;padding:3px 7px;border-radius:6px;background:rgba(0,0,0,.28);color:#fff;text-transform:uppercase}
+.is-live .ht-st{background:var(--red)}
+.is-live .ht-st .dot{background:#fff;width:6px;height:6px}
+.is-live{border-color:color-mix(in srgb,var(--red) 70%,transparent);box-shadow:0 0 0 1px color-mix(in srgb,var(--red) 35%,transparent)}
+.is-done .ht-band{filter:saturate(.55) brightness(.85)}
+.htile.fav{box-shadow:0 0 0 2px color-mix(in srgb,var(--yellow) 65%,transparent)}
+.htile.is-live.fav{box-shadow:0 0 0 2px var(--yellow),0 0 0 4px color-mix(in srgb,var(--red) 50%,transparent)}
+.htile.flash{animation:flash 1.2s ease 3}
+.ht-body{display:flex;flex-direction:column;gap:5px;padding:9px 10px 8px}
+.ht-body .ln{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:8px;align-items:center;min-width:0}
+.ht-body .lg{width:22px;height:22px;object-fit:contain;color:var(--sa)}
+.ht-body .n{font-family:var(--f-sport);font-weight:var(--fw);font-style:var(--fst);font-stretch:var(--stretch);letter-spacing:var(--ls);font-size:calc(14.5px*var(--fs));font-synthesis:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ht-body .n .ico{width:14px;height:14px;vertical-align:-2px}
+.ht-body .v{font-family:var(--f-score);font-weight:var(--fw2);font-style:var(--fst);font-size:calc(21px*var(--fs2));line-height:1;font-synthesis:none;font-variant-numeric:tabular-nums}
+.ht-body .ln.l .n,.ht-body .ln.l .v,.ht-body .ln.l .sets b{color:var(--muted)}
+.ht-ft{padding:0 10px 8px;color:var(--muted);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* tennis: set in caselline come sul tabellone */
+.k-tn .sets{display:flex;gap:3px}
+.k-tn .sets b{min-width:20px;padding:3px 0;text-align:center;border-radius:4px;background:rgba(255,255,255,.07);font:800 13px/1 var(--f-mono)}
+.k-tn .ln:not(.l) .sets b{background:color-mix(in srgb,var(--sa) 22%,transparent)}
+.k-tn .lg{width:20px;height:14px;object-fit:cover;border-radius:2px}
+/* motori e golf: mini classifica con la posizione */
+.k-lb .ln{grid-template-columns:28px auto minmax(0,1fr) auto}
+.k-lb .ln:not(:has(.fl)){grid-template-columns:28px minmax(0,1fr) auto}
+.k-lb .pos{display:grid;place-items:center;height:20px;border-radius:5px;background:rgba(255,255,255,.08);font:800 11.5px/1 var(--f-mono)}
+.k-lb .first .pos{background:var(--sa);color:var(--sa-ink)}
+.k-lb .fl{width:18px;height:12px;object-fit:cover;border-radius:2px}
+.k-lb .n{font-size:calc(13.5px*var(--fs))}
+.k-lb .v{font-size:calc(15px*var(--fs2))}
+
+/* ---------- casella evento: personalità di ogni sport ---------- */
+/* calcio: angoli vivi, fascia tagliata come una toppa, prato rigato */
+.htile.sp-calcio{--ht-r:4px;--ht-tex:repeating-linear-gradient(90deg,rgba(47,191,113,.085) 0 22px,rgba(47,191,113,.02) 22px 44px)}
+.sp-calcio .ht-band{clip-path:polygon(0 0,100% 0,100% 100%,14px 100%,0 calc(100% - 10px))}
+/* basket: tutto tondo, parquet a doghe */
+.htile.sp-basket{--ht-r:22px;--ht-tex:repeating-linear-gradient(90deg,rgba(196,136,79,.09) 0 12px,rgba(150,95,50,.03) 12px 24px)}
+.sp-basket .ht-band{border-radius:0 0 18px 18px;margin:0 6px;padding:6px 12px}
+/* tennis: angoli alternati, cemento blu con la riga di metà campo */
+.htile.sp-tennis{--ht-r:18px 4px 18px 4px;--ht-tex:linear-gradient(180deg,transparent calc(50% + 14px),rgba(255,255,255,.09) calc(50% + 14px) calc(50% + 15px),transparent calc(50% + 15px)),linear-gradient(180deg,rgba(36,92,170,.22),rgba(36,92,170,.08))}
+/* rugby: squadrato, bordo spesso, maglia a righe orizzontali */
+.htile.sp-rugby{--ht-r:3px;border-width:2px;--ht-tex:repeating-linear-gradient(180deg,rgba(63,167,214,.09) 0 14px,transparent 14px 28px)}
+.sp-rugby .ht-band{border-bottom:3px solid #f1f2f1}
+/* motori: fascia inclinata con bandiera a scacchi, linee di velocità */
+.htile.sp-moto{--ht-r:4px 18px 4px 4px;--ht-tex:repeating-linear-gradient(115deg,transparent 0 26px,rgba(229,56,59,.07) 26px 30px)}
+.sp-moto .ht-band{clip-path:polygon(0 0,100% 0,calc(100% - 12px) 100%,0 100%);padding-right:22px;
+  background:linear-gradient(90deg,var(--sa),color-mix(in srgb,var(--sa) 70%,#0b0f19) 70%),#0b0f19}
+.sp-moto .ht-band::after{content:"";width:26px;height:16px;flex:none;margin-right:-8px;background:conic-gradient(#fff 25%,#111 0 50%,#fff 0 75%,#111 0) 0 0/8px 8px;opacity:.9;border-radius:2px}
+/* golf: cartellino con doppio filo, pallina a fossette */
+.htile.sp-golf{--ht-r:10px;--ht-tex:radial-gradient(circle at 3px 3px,rgba(216,180,90,.12) 1.2px,transparent 1.6px) 0 0/9px 9px;box-shadow:inset 0 0 0 3px #0b0f19,inset 0 0 0 4px color-mix(in srgb,var(--sa) 45%,transparent)}
+.sp-golf .ht-band{background:linear-gradient(90deg,#1f6b3a,#2e8a52);color:var(--sa)}
+.sp-golf .ht-band .ico,.sp-golf .ht-band .cmp{color:var(--sa)}
+.htile.sp-golf.fav{box-shadow:inset 0 0 0 3px #0b0f19,inset 0 0 0 4px color-mix(in srgb,var(--sa) 45%,transparent),0 0 0 2px color-mix(in srgb,var(--yellow) 65%,transparent)}
+
+/* ---------- stile regia: caselle più "televisive" ---------- */
+html[data-style="regia"] .ht-body .n{text-transform:uppercase}
+html[data-style="regia"] .ht-body .v{font-size:calc(25px*var(--fs2))}
+html[data-style="regia"] .hhero h1{font-style:italic;font-size:42px}
+html[data-style="regia"] .dcol{background:rgba(5,7,13,.8)}
+
+/* ---------- divano (TV): tutto più grande ---------- */
+html[data-couch="1"] .hhero h1{font-size:44px}
+html[data-couch="1"] .sptile{min-height:200px}
+html[data-couch="1"] .spt-name{font-size:calc(30px*var(--fs))}
+html[data-couch="1"] .spt-info b{font-size:15.5px}
+html[data-couch="1"] .spt-info small,html[data-couch="1"] .spt-count{font-size:13px}
+html[data-couch="1"] .dch .dn{font-size:28px}
+html[data-couch="1"] .dch .dd,html[data-couch="1"] .dch .dc{font-size:14px}
+html[data-couch="1"] .ht-band .cmp{font-size:13px}
+html[data-couch="1"] .ht-st{font-size:14px}
+html[data-couch="1"] .ht-body .n{font-size:calc(18px*var(--fs))}
+html[data-couch="1"] .ht-body .v{font-size:calc(26px*var(--fs2))}
+html[data-couch="1"] .k-tm .lg{width:28px;height:28px}
+html[data-couch="1"] .k-tm .ln{grid-template-columns:28px minmax(0,1fr) auto}
+html[data-couch="1"] .k-lb .ln{grid-template-columns:34px auto minmax(0,1fr) auto}
+html[data-couch="1"] .k-lb .ln:not(:has(.fl)){grid-template-columns:34px minmax(0,1fr) auto}
+html[data-couch="1"] .k-lb .pos{height:24px;font-size:13.5px}
+html[data-couch="1"] .ht-ft,html[data-couch="1"] .dslot{font-size:14px}
+html[data-couch="1"] .dcol{max-height:calc(100vh - 170px)}
+
+/* ---------- schermi medi: 3 sport per riga, colonne che scorrono di lato ---------- */
+@media (max-width:1279px){
+  .sportsel{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .sptile{min-height:150px}
+  .dswitch{display:flex;gap:6px;position:sticky;top:0;z-index:5}
+  .dswitch button{flex:1;min-height:40px;border-radius:var(--btn-r,10px);border:1px solid var(--line);background:rgba(8,11,19,.85);color:var(--muted);font-family:var(--f-ui);font-weight:var(--ui-w);text-transform:uppercase;letter-spacing:.05em;font-size:12.5px}
+  .dswitch button[aria-pressed="true"]{background:var(--red);border-color:var(--red);color:#fff}
+  .dcols{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;gap:12px;padding-bottom:4px}
+  .dcols::-webkit-scrollbar{display:none}
+  .dcol{flex:0 0 calc(50% - 6px);scroll-snap-align:start}
+}
+/* telefono: sport in una fila che scorre, una colonna-giorno alla volta e scorrimento della pagina */
+@media (max-width:760px){
+  .hhero h1{font-size:26px}
+  .hstats .hs{min-width:62px;padding:6px 8px}
+  .hs b{font-size:20px}
+  .sportsel{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;margin:0 -16px;padding:0 16px 4px;scroll-padding:0 16px}
+  .sportsel::-webkit-scrollbar{display:none}
+  .sptile{flex:0 0 72%;min-height:150px;scroll-snap-align:start}
+  .dcol{flex:0 0 100%;max-height:none}
+  .dbody{overflow:visible}
+  .dt-note{margin-left:0}
+  .dswitch{top:var(--toph,0px)}
+}
+/* riquadri sport: forma propria (non quella dei pulsanti, che per il basket è una pillola) e LIVE nell'angolo */
+.sptile{border-radius:14px}
+.sptile.sp-calcio{border-radius:4px}
+.sptile.sp-basket{border-radius:28px}
+.sptile.sp-tennis{border-radius:24px 4px 24px 4px}
+.sptile.sp-rugby{border-radius:3px;border-width:2px;border-top-width:5px}
+.sptile.sp-moto{border-radius:4px 26px 4px 4px}
+.sptile.sp-golf{border-radius:12px;box-shadow:0 10px 24px -14px #000,inset 0 0 0 3px rgba(6,9,16,.9),inset 0 0 0 4px color-mix(in srgb,var(--sa) 55%,transparent)}
+.spt-live{position:absolute;top:12px;right:12px;margin:0}
+.spt-top{padding-right:4px}
+.sptile:has(.spt-live) .spt-top{padding-right:70px}
+.sptile:has(.spt-live) .spt-top .spt-name{max-width:100%}
+@media (max-width:760px){
+  #hFilter{flex:1 1 100%;min-width:0;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 16px}
+  #hFilter::-webkit-scrollbar{display:none}
+  .dfilter{flex-wrap:nowrap}
+  .dfilter .chip{flex:none}
+  .dt-h{flex:1 1 100%}
 }

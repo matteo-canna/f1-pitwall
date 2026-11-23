@@ -50,21 +50,28 @@ async function board(tour,dateKey,ttl){const d=await SL.tryGet(BASE(tour)+"score
 const inRange=(T,key)=>SL.dayKey(T.date)<=key&&key<=SL.dayKey(T.end);
 
 /* ---------- home e avvisi ---------- */
-function item(T,day){const top=T.P.filter(p=>!p.out).slice(0,3),ib=T.ita.filter(p=>!p.out)[0];
-  const lines=top.map(p=>({n:p.pos+"  "+p.name,ita:p.ita,v:fmtPar(p.score)+(T.live&&p.thru&&p.thru!=="F"?" ("+p.thru+")":"")}));
-  if(ib&&top.indexOf(ib)<0)lines.push({n:ib.pos+"  "+ib.name,ita:true,v:fmtPar(ib.score)});
-  const between=!T.live&&!T.done&&T.rnd>0;
-  const st=T.live?"in":T.done||between?"post":"pre";
-  return{id:"golf:"+T.tour+":"+T.id,sport:"golf",comp:TS(T.tour)+" · "+T.name,date:T.live||T.done||between?new Date(Date.now()-36e5).toISOString():T.date,
-    state:day===1?"pre":st,live:day===0&&T.live,done:day===0&&(T.done||between),
-    status:day===1?(T.rnd&&T.cstate==="post"?"DOMANI · "+(T.rnd+1)+"° GIRO":"DOMANI"):T.live?T.rnd+"° GIRO":T.done?"FINALE":between?"DOPO IL "+T.rnd+"° GIRO":"OGGI · 1° GIRO",
+/* un torneo dura più giorni: per ogni giorno dico che giro si gioca. Ieri solo se è finito quel giorno */
+const kd=k=>new Date(+k.slice(0,4),+k.slice(4,6)-1,+k.slice(6,8),12);
+function item(T,day){const key=SL.dayKey(SL.addDays(Date.now(),day)),top=T.P.filter(p=>!p.out).slice(0,3),ib=T.ita.filter(p=>!p.out)[0];
+  const lines=top.map(p=>({pos:p.pos,n:p.name,img:p.flag,ita:p.ita,v:fmtPar(p.score)+(T.live&&p.thru&&p.thru!=="F"?" ("+p.thru+")":"")}));
+  if(ib&&top.indexOf(ib)<0)lines.push({pos:ib.pos,n:ib.name,img:ib.flag,ita:true,v:fmtPar(ib.score)});
+  const between=!T.live&&!T.done&&T.rnd>0,rn=Math.round((kd(key)-kd(SL.dayKey(T.date)))/864e5)+1;
+  let state,status,live=false,done=false;
+  if(day===0){state=T.live?"in":T.done||between?"post":"pre";live=T.live;done=T.done||between;status=T.live?T.rnd+"° GIRO":T.done?"FINALE":between?"DOPO IL "+T.rnd+"° GIRO":Math.max(1,rn)+"° GIRO";}
+  else if(day<0){state="post";done=true;status="FINALE";}
+  else{state="pre";status=Math.max(1,rn)+"° GIRO";}
+  return{id:"golf:"+T.tour+":"+T.id,sport:"golf",comp:TS(T.tour)+" · "+T.name,date:live||done?new Date(Date.now()-36e5).toISOString():kd(key).toISOString(),
+    state,live,done,status,allDay:!live,
     tk:day===0&&!T.live?(T.done?"FINALE":between?"DOPO IL "+T.rnd+"° GIRO":"OGGI"):"",
     important:T.P.some(p=>p.fav)||T.ita.some(p=>p.rank<=10)||!!(T.cat&&T.cat.k==="major"),
     sig:(top[0]&&top[0].id)+"|"+(top[0]&&top[0].score)+"|"+T.cstate+"|"+T.est+"|"+T.rnd,T,
-    lines:lines.length?lines:[{n:"Inizio del torneo",ico:"golf",v:""}],foot:T.cat?T.cat.n:TN(T.tour),go:{sport:"golf",c:T.tour,e:T.id}};}
+    lines:lines.length?lines:[{n:"Inizio del torneo",ico:"golf",v:""}],foot:(T.cat?T.cat.n+" · ":"")+(day>0&&lines.length?"classifica attuale":TN(T.tour)),go:{sport:"golf",c:T.tour,e:T.id}};}
 M.homeFeed=async function(day,ttl){const key=SL.dayKey(SL.addDays(Date.now(),day)),out=[];
   await Promise.all(TOURS.map(async t=>{const b=await board(t.k,key,ttl);
-    b.evs.forEach(T=>{if(!(inRange(T,key)||(day===0&&T.live)))return;if(day===1&&T.done)return;out.push(item(T,day));});}));
+    b.evs.forEach(T=>{if(!(inRange(T,key)||(day===0&&T.live)))return;
+      if(day>0&&T.done)return;
+      if(day<0&&!(T.done&&SL.dayKey(T.end)===key))return;
+      out.push(item(T,day));});}));
   return out;};
 M.onChange=function(p,it){const a=p.T,b=it.T;if(!a||!b)return null;const la=a.P[0],lb=b.P[0];if(!lb)return null;
   if(!a.done&&b.done)return{id:"w:"+it.id,big:"VINCE",icon:lb.ita?"ita":"trophy",title:lb.name+" "+fmtPar(lb.score),text:it.comp,color:"var(--sa,#d8b45a)"};
