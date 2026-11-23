@@ -67,8 +67,9 @@ function sglWanted(){return!isF()&&sglOnStored()&&innerWidth>=900&&!leadPlan()&&
 /* elenco delle sezioni da mostrare: lo usa UI.mount per nascondere le altre */
 UI.soloList=function(){
   const defs=UI.defs||[],has=k=>k==="sub"||defs.some(d=>d.k===k);SC.mismatch=false;
-  if(isF()){if(SC.homeOn)return null;const L=(SL.solo||[]).filter(has);
-    if(!L.filter(k=>k!=="sub").length){SC.mismatch=!!(SL.solo&&SL.solo.length&&defs.length);return null;}return L;}
+  if(isF()){if(SC.homeOn)return null;const all=SL.solo||[],L=all.filter(has),spec=all.filter(k=>k!=="sub"&&k!=="tv");
+    /* la TV e i filtri ci sono in ogni sport: se le sezioni proprie di questo schermo mancano (altro sport), pagina intera */
+    if(!L.filter(k=>k!=="sub").length||(spec.length&&!L.some(k=>spec.indexOf(k)>=0))){SC.mismatch=!!(all.length&&defs.length);return null;}return L;}
   const lp=leadPlan();if(lp){const L=lp.list.filter(has);return L.length?L:null;}
   if(sglWanted())return sglList(sglCfg());
   return null;};
@@ -153,7 +154,7 @@ let rfT=0;SC.refreshSoon=()=>{cancelAnimationFrame(rfT);rfT=requestAnimationFram
    ===================================================================== */
 const Z4=["T","L","R","B"],ZNAME={T:"Sopra",L:"Sinistra",R:"Destra",B:"Sotto"},WN=["","S","M","L"];
 const TALL=["table","standings","rank","board","timing","cal","pbp","cronaca","events","box","lineup","pitch","draw","matches","today"];
-const MINW=k=>k==="sub"?320:TALL.indexOf(k)>=0?320:280,MINH=k=>k==="sub"?120:TALL.indexOf(k)>=0?230:150;
+const MINW=k=>k==="sub"?320:TALL.indexOf(k)>=0?320:280,MINH=k=>k==="sub"?Math.max(120,SG.subH||0):TALL.indexOf(k)>=0?230:150;
 /* preset costruiti sulle sezioni della pagina: la principale, poi le altre in ordine di importanza */
 function presets(){
   const L=UNITS.filter(u=>u.k!=="tv"&&u.k!=="sub").sort((a,b)=>rank(a.k)-rank(b.k)).map(u=>u.k),o=i=>L[i]?[L[i]]:[];
@@ -176,17 +177,26 @@ const sglClone=c=>sglNorm(JSON.parse(JSON.stringify(c)));
 const cfgKey=()=>"sgl2."+UI.sport;
 function sglCfg(){units();let c=sglNorm(SL.store.get(cfgKey(),null));if(!Z4.some(z=>c.Z[z].length))c=fromPreset(presets()[0]);return c;}
 const sglList=c=>["tv"].concat(...Z4.map(z=>c.Z[z]));
-const SG={chrome:66,padW:22,it:0,itT:0,draft:null,armed:null,drag:null,geom:null};
+const SG=SC._sg={chrome:66,padW:22,it:0,itT:0,draft:null,armed:null,drag:null,geom:null};
 /* geometria: la TV resta 16:9, centrata, la più grande possibile; le sezioni attorno hanno spazio minimo */
 function sglGeom(W,H,c,chrome,padW){
   const g=10,Z=c.Z,lr=Z.L.length+Z.R.length>0,tb=Z.T.length+Z.B.length>0;
   const sideMin=lr?Math.round(Math.min(Math.max(clamp(W*.17,250,340),...Z.L.concat(Z.R).map(MINW)),W*.25)):0;
-  const stripMin=tb?Math.round(Math.max(Z.T.concat(Z.B).indexOf("sub")>=0?MINH("sub"):112,Math.min(Math.max(...Z.T.concat(Z.B).map(MINH)),H*.19))):0;
+  /* fasce sopra e sotto: quella con "Partite e filtri" è alta quanto serve, l'altra ha il suo minimo */
+  const zmin=z=>Z[z].length?Math.round(Math.max(Z[z].indexOf("sub")>=0?MINH("sub"):112,Math.min(Math.max(...Z[z].map(MINH)),H*.19))):0;
+  const tMin=zmin("T"),bMin=zmin("B");
   let w=Math.min(c.tv*W,W-(lr?2*(sideMin+g):0)),ch=(w-padW)*9/16+chrome;
-  const maxH=H-(tb?2*(stripMin+g):0);
-  if(ch>maxH){ch=maxH;w=(ch-chrome)*16/9+padW;}
+  /* misura S: anche quando l'altezza limita la TV resta visibilmente più piccola della M */
+  const k=c.tv<.53?.8:1,maxSym=(H-(tb?2*(Math.max(tMin,bMin)+g):0))*k;
+  let tRow=0;
+  if(ch>maxSym){
+    if(tMin===bMin)ch=maxSym;
+    else{/* centrata non ci sta: la TV usa anche lo spazio che la fascia più bassa non usa */
+      ch=Math.min(ch,(H-tMin-bMin-4*g)*k);const extra=Math.max(0,H-ch-4*g-tMin-bMin);tRow=Math.round(tMin+(bMin?extra/2:extra));}
+    w=(ch-chrome)*16/9+padW;}
   w=Math.max(240,Math.round(w));ch=Math.max(160,Math.round(ch));
-  return{w,h:ch,vw:Math.max(0,Math.round(w-padW)),vh:Math.max(0,Math.round(ch-chrome)),side:Math.max(0,(W-w)/2-g),strip:Math.max(0,(H-ch)/2-g)};}
+  const st=tRow||Math.max(0,(H-ch)/2-2*g),sb=Math.max(0,H-ch-4*g-st);
+  return{w,h:ch,vw:Math.max(0,Math.round(w-padW)),vh:Math.max(0,Math.round(ch-chrome)),side:Math.max(0,(W-w)/2-g),strip:Math.max(st,sb),st,sb,tRow};}
 function sglArea(hd,preview){
   const top=$("top"),sb=$("soloBar");
   const topH=top&&top.offsetHeight&&!top.hidden?top.offsetHeight:SL.store.get("sglHdH",64);
@@ -208,23 +218,38 @@ function sglApply(){
   const tv=el("tv");if(tv){tv.style.gridArea="V";tv.hidden=false;
     /* TV accesa o spenta cambia forma al riquadro: ricalcolo */
     if(SG.mo)SG.mo.disconnect();SG.mo=new MutationObserver(()=>{SG.it=0;sglLayout();});SG.mo.observe(tv,{attributes:true,attributeFilter:["class"]});SL.onCleanup(()=>{if(SG.mo){SG.mo.disconnect();SG.mo=null;}});}
+  /* le partite arrivano dopo: quando cambia l'altezza di "Partite e filtri" ricalcolo la fascia */
+  if(SG.ro){SG.ro.disconnect();SG.ro=null;}if(SG.mo2){SG.mo2.disconnect();SG.mo2=null;}
+  if(sub&&sub.parentElement&&sub.parentElement.classList.contains("zrow")&&window.ResizeObserver){
+    let t=0;const kick=()=>{cancelAnimationFrame(t);t=requestAnimationFrame(()=>{const n=subNat(sglArea(c.hd!==false,false).H);if(n&&Math.abs(n-(SG.subH||0))>6){SG.it=0;sglLayout();}});};
+    SG.ro=new ResizeObserver(kick);const obs=()=>[...sub.children].forEach(x=>SG.ro.observe(x));obs();
+    SG.mo2=new MutationObserver(()=>{obs();kick();});SG.mo2.observe(sub,{childList:true});
+    SL.onCleanup(()=>{if(SG.ro){SG.ro.disconnect();SG.ro=null;}if(SG.mo2){SG.mo2.disconnect();SG.mo2=null;}});}
   bar("sgl");SG.it=0;sglLayout();
 }
+/* altezza naturale di "Partite e filtri" in una fascia sopra/sotto (righe che vanno a capo) */
+function subNat(H){
+  const sb=document.querySelector("#main .sglz.zrow>.subbar");if(!sb)return 0;
+  let t=1e9,bt=-1e9;[...sb.children].forEach(x=>{const r=x.getBoundingClientRect();if(!r.height)return;t=Math.min(t,r.top);bt=Math.max(bt,r.bottom);});
+  return bt>t?Math.min(Math.round(H*.25),Math.round(bt-t+22)):0;}
 function sglLayout(){
   if(!document.body.classList.contains("sgl"))return;
   const c=sglCfg(),main=$("main"),hd=c.hd!==false;
   $("top").hidden=!hd;
   const a=sglArea(hd,false),g=sglGeom(a.W,a.H,c,SG.chrome,SG.padW);SG.geom=g;
   main.style.gridTemplateAreas='"L T R" "L V R" "L B R"';
-  main.style.gridTemplateRows="minmax(0,1fr) "+g.h+"px minmax(0,1fr)";
+  main.style.gridTemplateRows=(g.tRow?g.tRow+"px ":"minmax(0,1fr) ")+g.h+"px minmax(0,1fr)";
   main.style.gridTemplateColumns="minmax(0,1fr) "+g.w+"px minmax(0,1fr)";
   main.style.height=a.H+"px";
   /* misura i bordi reali del riquadro TV e ricalcola se servono (come l'app F1) */
   requestAnimationFrame(()=>{
+    if(Date.now()-SG.itT>1500)SG.it=0;
+    /* "Partite e filtri" sopra o sotto la TV: la fascia è alta quanto serve (es. modalità divano, testi più grandi) */
+    const nat=subNat(a.H);
+    if(nat&&Math.abs(nat-(SG.subH||0))>6&&SG.it<4){SG.it++;SG.itT=Date.now();SG.subH=nat;sglLayout();return;}
     const tv=main.querySelector('.card[data-k="tv"]'),st=tv&&tv.querySelector(".tvstage");
     if(tv&&st&&tv.classList.contains("tv-on")){const tp=tv.getBoundingClientRect(),sr=st.getBoundingClientRect();
       if(tp.height&&sr.height){const ch=Math.round(tp.height-sr.height),pw=Math.round(tp.width-sr.width);
-        if(Date.now()-SG.itT>1500)SG.it=0;
         if((Math.abs(ch-SG.chrome)>2||Math.abs(pw-SG.padW)>2)&&SG.it<4){SG.it++;SG.itT=Date.now();SG.chrome=ch;SG.padW=pw;sglLayout();return;}}}
     SL.emit("resize");});
 }
@@ -241,8 +266,8 @@ SC.sglCardSet=(k,v)=>{const c=sglCfg();if(k==="tv")c.tv=TVSZ[v];else{if(v===2)de
 /* ---------- editor dello schermo singolo ---------- */
 function previewDims(c){const hd=c.hd!==false,a=sglArea(hd,true),ar=Math.max(1.2,Math.min(2.6,(a.W+20)/innerHeight));return{a,ar,g:sglGeom(a.W,a.H,c,SG.chrome,SG.padW)};}
 function gridHTML(c,mini){
-  const{g,ar}=previewDims(c),sd=Math.max(.01,g.side),sp=Math.max(.01,g.strip);
-  let s='<div class="sgl-grid" style="--ar:'+ar.toFixed(3)+';grid-template-columns:minmax(0,'+sd.toFixed(1)+'fr) minmax(0,'+g.w+'fr) minmax(0,'+sd.toFixed(1)+'fr);grid-template-rows:minmax(0,'+sp.toFixed(1)+'fr) minmax(0,'+g.h+'fr) minmax(0,'+sp.toFixed(1)+'fr)">';
+  const{g,ar}=previewDims(c),sd=Math.max(.01,g.side),st=Math.max(.01,g.st,g.sb*.5),sbt=Math.max(.01,g.sb,g.st*.5);
+  let s='<div class="sgl-grid" style="--ar:'+ar.toFixed(3)+';grid-template-columns:minmax(0,'+sd.toFixed(1)+'fr) minmax(0,'+g.w+'fr) minmax(0,'+sd.toFixed(1)+'fr);grid-template-rows:minmax(0,'+st.toFixed(1)+'fr) minmax(0,'+g.h+'fr) minmax(0,'+sbt.toFixed(1)+'fr)">';
   Z4.forEach(z=>{const L=c.Z[z];
     s+='<div class="sgl-z z'+z+(L.length?'':' empty')+'" data-z="'+z+'"'+(mini?'':' tabindex="0" role="button" aria-label="Zona '+ZNAME[z].toLowerCase()+': '+(L.length?L.map(k=>UK[k].s).join(", "):"vuota")+'"')+'>';
     if(!L.length&&!mini)s+='<span class="sgl-zl">'+ZNAME[z]+'</span>';
