@@ -214,6 +214,7 @@ SL.route=function(){
   try{mod.mount({st,sub,main});}catch(e){console.error(e);main.innerHTML='<div class="empty" style="grid-column:1/-1">Qualcosa è andato storto in questa sezione. <b>Ricarica la pagina.</b></div>';}
   /* Diretta TV in alto a sinistra: la barra di competizioni e partite le si affianca a destra */
   SL.ui.dock(sub,main);
+  if(SL.screens)SL.screens.refresh(); /* schermo singolo, finestra principale o secondaria con più schermi */
   SL.syncOut();
   if(SL.ticker)SL.ticker.page(st.sport);
   document.title=(st.sport==="home"?"Live ora":mod.name)+" · Sport LIVE APP";
@@ -239,8 +240,8 @@ SL.start=function(){
   const tick=()=>{const c=$("clock");if(c)c.textContent=SL.fmtDay(Date.now())+" · "+fT.format(new Date());};tick();setInterval(tick,15000);
   SL.ui.init();
   SL.ticker.init();
-  if(window.isFollower()){$("top").hidden=true;$("followBar").hidden=false;$("followHome").href=location.pathname+location.hash;
-    try{SL.chan&&SL.chan.postMessage({type:"ping"});}catch(e){}}
+  if(SL.screens)SL.screens.boot();
+  if(window.isFollower()){$("top").hidden=true;try{SL.chan&&SL.chan.postMessage({type:"ping"});}catch(e){}}
   SL.route();
   SL.sports.home.background&&SL.sports.home.background();
 };

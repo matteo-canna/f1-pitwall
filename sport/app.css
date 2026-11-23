@@ -223,14 +223,6 @@ dialog::backdrop{background:#000b}
 .favlist{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
 .favlist li{display:inline-flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--line);border-radius:99px;padding:4px 6px 4px 10px;font-size:12px}
 .favlist li button{background:transparent;border:0;color:var(--muted)}
-.scrtools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.scrtools select{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:6px}
-.scrmap{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
-.scr{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px;min-height:150px;display:flex;flex-direction:column;gap:6px}
-.scr h4{margin:0;font:800 12px/1 var(--f-display);font-stretch:118%;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between}
-.scr.drop{border-color:var(--sa);background:color-mix(in srgb,var(--sa) 8%,var(--bg))}
-.unit{display:flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:12px;cursor:grab}
-.unit select{margin-left:auto;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:2px 4px;font-size:11px}
 
 /* ---------- Diretta TV ---------- */
 .tvstage{position:relative;aspect-ratio:16/9;background:#000;border-radius:10px;overflow:hidden}
