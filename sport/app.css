@@ -1145,3 +1145,21 @@ html[data-couch="1"] .dcol{background:rgba(7,10,18,.6)}
 .ht-ita{display:inline-flex;flex:none}
 .ht-ita .ico{width:17px;height:17px}
 
+
+/* ---------- Formula 1 dentro "F1 e MotorSport" ---------- */
+.f1wrap{grid-column:1/-1;display:flex;flex-direction:column;gap:10px;min-width:0}
+.f1bar{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap;padding:10px 14px;border-radius:var(--r);background:rgba(8,11,20,.72);border:1px solid var(--line)}
+.f1logo{display:inline-block;padding:5px 12px;border-radius:6px;background:#e10600;color:#fff;font:italic 900 22px/1 var(--f-display);letter-spacing:.02em;transform:skewX(-10deg)}
+.f1txt{color:var(--muted);font-size:13.5px;flex:1 1 320px}
+.f1txt b{color:var(--text)}
+.f1frame{display:block;width:100%;height:calc(100vh - 110px);min-height:640px;border:0;border-radius:var(--r);background:#05070d;
+  box-shadow:0 0 0 1px rgba(0,0,0,.6),0 0 0 3px color-mix(in srgb,#e10600 45%,#151b2b),0 18px 36px -12px rgba(0,0,0,.7)}
+@media (max-width:760px){.f1frame{height:82vh;min-height:520px}}
+
+/* ---------- data e ora: a sinistra, accanto al logo ---------- */
+.top .clock{order:0;flex:none;padding:7px 11px;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--text);font-size:13px}
+@media (min-width:1101px){.top .clock{display:inline-block}}
+html[data-couch="1"] .top .clock{display:inline-block;font-size:16px}
+@media (max-width:1100px){.top .clock,html[data-couch="1"] .top .clock{display:none}}
+/* nomi lunghi nei riquadri della home ("F1 e MotorSport"): vanno a capo invece di essere tagliati */
+.spt-name{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:.98}

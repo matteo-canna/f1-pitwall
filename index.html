@@ -674,7 +674,10 @@ body.sgl .top .gp{max-width:262px}
 body.sgl .top .tv input{width:84px}
 body.sgl .top .seg button{padding-left:10px;padding-right:10px}
 body.sgl .top .logo{padding:6px 10px;font-size:18px}
+/* aperta dentro Sport LIVE (sezione F1 e MotorSport): niente collegamento a Sport LIVE, ci sei già */
+html.embed .sportlink{display:none!important}
 </style>
+<script>try{if(/[?&]embed=1\b/.test(location.search))document.documentElement.classList.add("embed");}catch(e){}</script>
 </head>
 <body data-view="pista" data-mode="pit">
 <div class="app" id="app">
