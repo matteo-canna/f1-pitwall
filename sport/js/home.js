@@ -82,8 +82,8 @@ function mount(ctx){
       const next=lv?{l:"In diretta",v:evTxt(lv)+(lv.status?" · "+lv.status:"")}:nx?{l:nx===pre[0]?"Prossimo oggi":"Domani",v:evTxt(nx)+(nx.allDay||nx.tbd?"":" · "+SL.fmtTime(nx.date))}:null;
       const f=(facts[s]||[])[0];
       return'<button type="button" class="sptile sp-'+s+'" data-go=\'{"sport":"'+s+'"}\' style="--tc:'+COL[s]+'">'+
-        '<span class="spt-top">'+SL.ico(s,"spt-ic")+'<span class="spt-name">'+h(m.name)+'</span>'+(nl?'<span class="spt-live"><i class="dot"></i>'+nl+' LIVE</span>':"")+'</span>'+
-        '<span class="spt-count">'+(L.length?L.length+(L.length===1?" evento":" eventi")+" oggi":"Niente oggi")+'</span>'+
+        '<span class="spt-top">'+SL.ico(s,"spt-ic")+'<span class="spt-name">'+h(m.name)+'</span></span>'+
+        '<span class="spt-count">'+(nl?'<span class="spt-live"><i class="dot"></i>'+nl+' LIVE</span>':"")+(L.length?L.length+(L.length===1?" evento":" eventi")+" oggi":"Niente oggi")+'</span>'+
         (next?'<span class="spt-info"><small>'+h(next.l)+'</small><b>'+h(next.v)+'</b></span>':"")+
         (f?'<span class="spt-info"><small>'+h(f.l)+'</small><b>'+h(f.v)+'</b></span>':"")+
         '<span class="spt-go" aria-hidden="true">APRI →</span></button>';}).join("");}
