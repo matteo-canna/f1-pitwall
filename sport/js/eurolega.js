@@ -74,13 +74,13 @@ EU.facts=async function(k){const out=[],R=await EU.rounds(k),cur=EU.curRound(R);
 /* ---------- pagina ---------- */
 const DEFS=[
   {k:"tv",n:"Diretta TV",sz:2,fixed:true},
-  {k:"match",n:"Partita",sz:2},
-  {k:"games",n:"Partite della giornata",sz:3},
+  {k:"match",n:"Partita",sz:2,hero:true},
+  {k:"leaders",n:"Migliori in campo",sz:2},
+  {k:"box",n:"Box score",sz:2},
   {k:"shots",n:"Mappa tiri",sz:2},
-  {k:"leaders",n:"Migliori in campo",sz:1},
-  {k:"box",n:"Box score",sz:3},
+  {k:"table",n:"Classifica",sz:2},
   {k:"pbp",n:"Play-by-play",sz:2,couch:false},
-  {k:"table",n:"Classifica",sz:2}
+  {k:"games",n:"Partite della giornata",sz:2}
 ];
 const PT={"2FGM":"Canestro da 2","2FGA":"Errore da 2","3FGM":"Tripla","3FGA":"Tripla sbagliata","FTM":"Tiro libero a segno","FTA":"Tiro libero sbagliato",D:"Rimbalzo difensivo",O:"Rimbalzo offensivo",AS:"Assist",TO:"Palla persa",ST:"Palla recuperata",
   CM:"Fallo",RV:"Fallo subito",FV:"Stoppata",AG:"Tiro stoppato",TOUT:"Timeout",TOUT_TV:"Timeout TV",IN:"Entra",OUT:"Esce",BP:"Inizio quarto",EP:"Fine quarto",EG:"Fine partita",JB:"Palla a due",OF:"Fallo in attacco",C:"Fallo tecnico",CMT:"Fallo tecnico",CMU:"Fallo antisportivo",CMU_FL:"Fallo antisportivo",CMD:"Espulsione",CCH:"Cambio di possesso"};

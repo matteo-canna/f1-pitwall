@@ -1073,3 +1073,30 @@ html[data-couch="1"] .dcol{max-height:calc(100vh - 170px)}
   .dfilter .chip{flex:none}
   .dt-h{flex:1 1 100%}
 }
+
+/* =====================================================================
+   PAGINE DEGLI SPORT: disposizione "a muro" (niente buchi tra le sezioni)
+   La griglia ha righe da 4px; ogni riquadro ne occupa quante gliene servono (calcolo in ui.js).
+   Lo spazio verticale tra riquadri lo dà il margine, non lo spazio tra le righe.
+   ===================================================================== */
+.grid.masonry{grid-auto-rows:4px;row-gap:0;--gapy:var(--gap)}
+html[data-couch="1"] .grid.masonry{row-gap:0;--gapy:16px}
+html[data-frame] .grid.masonry{row-gap:0;--gapy:26px}
+.grid.masonry>*{margin-bottom:var(--gapy)}
+.grid.masonry>.card.full{margin:0}
+/* liste lunghe: scorrono dentro il loro riquadro invece di allungare la pagina */
+.grid.masonry>.card:is([data-k="events"],[data-k="cronaca"],[data-k="pbp"],[data-k="matches"],[data-k="draw"])>.body,
+.grid.masonry>.card[data-k="cal"]>.body{max-height:600px;overflow:auto;scrollbar-width:thin;overscroll-behavior:contain}
+html[data-couch="1"] .grid.masonry>.card:is([data-k="events"],[data-k="cal"],[data-k="matches"])>.body{max-height:70vh}
+.grid.masonry>.card.full>.body{max-height:none}
+
+/* sezione principale di ogni sport: più in evidenza e più grande */
+.card.hero{border-color:color-mix(in srgb,var(--sa) 55%,var(--line))}
+html[data-style] body .card.hero>header h2{font-size:calc(var(--h2size)*var(--fs)*1.3)}
+.card.hero>.body{font-size:1.07em}
+.card.hero .bug .score{font-size:calc(var(--scoresize)*1.25)}
+.card.hero .bug .tm img{width:72px;height:72px}
+.card.hero .bug .nm{font-size:calc(var(--nmsize)*1.15)}
+html[data-frame] .card.hero{box-shadow:0 0 0 1px rgba(0,0,0,.6),0 0 0 3px color-mix(in srgb,var(--sa) 75%,#151b2b),0 0 26px -4px color-mix(in srgb,var(--sa) 45%,transparent),0 18px 36px -12px rgba(0,0,0,.7)}
+/* nella sezione principale le tabelle mostrano più righe prima di scorrere */
+.card.hero .scroll{max-height:min(72vh,760px)}

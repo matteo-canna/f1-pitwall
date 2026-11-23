@@ -71,12 +71,12 @@ M.facts=async function(st){
 };
 const DEFS=[
   {k:"tv",n:"Diretta TV",sz:2,fixed:true},
-  {k:"match",n:"Partita",sz:2},
+  {k:"match",n:"Partita",sz:2,hero:true},
   {k:"today",n:"Partite",sz:2},
   {k:"ita",n:"Italiani",sz:2},
-  {k:"draw",n:"Tabellone",sz:3,couch:false},
   {k:"rank",n:"Ranking",sz:2},
-  {k:"cal",n:"Calendario tornei",sz:2}
+  {k:"cal",n:"Calendario tornei",sz:2},
+  {k:"draw",n:"Tabellone",sz:2,couch:false}
 ];
 M.mount=function(ctx){
   const st=ctx.st;const S={evs:[],matches:[],t:st.t||"",sel:st.e||"",f:st.f||"all",type:"S",rank:null};

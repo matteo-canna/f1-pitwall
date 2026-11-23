@@ -54,18 +54,21 @@ M.facts=async function(st){
 };
 
 /* ---------- pagina ---------- */
+/* ordine per importanza: risultato, momenti chiave, numeri, formazioni, classifica; poi i dettagli */
 const DEFS=[
   {k:"tv",n:"Diretta TV",sz:2,fixed:true},
-  {k:"match",n:"Partita",sz:2},
+  {k:"match",n:"Partita",sz:2,hero:true},
+  {k:"events",n:"Eventi",sz:2},
   {k:"stats",n:"Statistiche",sz:2},
-  {k:"multi",n:"Multi-partita live",sz:3},
   {k:"pitch",n:"Campo · formazioni",sz:2},
+  {k:"table",n:"Classifica live",sz:2},
   {k:"momentum",n:"Momentum",sz:2},
   {k:"shots",n:"Mappa tiri · xG stimato",sz:2,couch:false},
-  {k:"table",n:"Classifica live",sz:2},
-  {k:"events",n:"Eventi",sz:1},
-  {k:"cronaca",n:"Cronaca",sz:2,couch:false}
+  {k:"cronaca",n:"Cronaca",sz:2,couch:false},
+  {k:"multi",n:"Multi-partita live",sz:2}
 ];
+/* in "Live ora" le altre partite in corso sono importanti: subito dopo la partita scelta */
+const DEFS_LIVE=DEFS.slice(0,2).concat(DEFS.filter(d=>d.k==="multi"),DEFS.slice(2).filter(d=>d.k!=="multi"));
 M.defs=DEFS;
 M.mount=function(ctx){
   const st=ctx.st;let compK=st.c||"ita.1";if(compK!=="all"&&compK!=="live"&&!compOf(compK))compK="ita.1";
@@ -81,7 +84,7 @@ M.mount=function(ctx){
   const nextBox=document.createElement("span");nextBox.className="muted";r2.appendChild(nextBox);
   const strip=document.createElement("div");strip.className="strip";strip.setAttribute("aria-label","Partite");
   ctx.sub.append(r1,r2,strip);
-  const cards=UI.mount(ctx.main,DEFS);
+  const cards=UI.mount(ctx.main,liveMode?DEFS_LIVE:DEFS);
   UI.tv(cards.tv,"calcio");
 
   const S={evs:[],sel:st.e||"",sum:null,table:null,tableLg:null,timerM:null,pitchMode:SL.store.get("pitchMode","2d"),cron:"all",shotsT:"both"};

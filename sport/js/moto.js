@@ -94,16 +94,16 @@ M.facts=async function(){
 /* ---------- pagina ---------- */
 const DEFS_GP=[
   {k:"tv",n:"Diretta TV",sz:2,fixed:true},
-  {k:"timing",n:"Live timing",sz:2},
+  {k:"timing",n:"Live timing",sz:2,hero:true},
   {k:"gap",n:"Distacchi in pista",sz:2},
-  {k:"weekend",n:"Weekend",sz:1},
   {k:"results",n:"Risultati sessione",sz:2},
+  {k:"weekend",n:"Weekend",sz:2},
   {k:"standings",n:"Classifica mondiale",sz:2},
-  {k:"cal",n:"Calendario",sz:1,couch:false}
+  {k:"cal",n:"Calendario",sz:2,couch:false}
 ];
 const DEFS_SBK=[
   {k:"tv",n:"Diretta TV",sz:2,fixed:true},
-  {k:"latest",n:"Ultima sessione",sz:2},
+  {k:"latest",n:"Ultima sessione",sz:2,hero:true},
   {k:"round",n:"Round e sessioni",sz:2},
   {k:"standings",n:"Classifica mondiale",sz:2},
   {k:"cal",n:"Calendario",sz:2,couch:false}
@@ -262,7 +262,7 @@ function mountSBK(ctx){
 
 /* ---------- IndyCar ---------- */
 function mountIndy(ctx,docked){
-  const cards=UI.mount(ctx.main,[{k:"tv",n:"Diretta TV",sz:2,fixed:true},{k:"race",n:"Gara",sz:2},{k:"standings",n:"Classifica piloti",sz:2},{k:"next",n:"Prossima gara",sz:1},{k:"cal",n:"Calendario",sz:2,couch:false}]);
+  const cards=UI.mount(ctx.main,[{k:"tv",n:"Diretta TV",sz:2,fixed:true},{k:"race",n:"Gara",sz:2,hero:true},{k:"next",n:"Prossima gara",sz:2},{k:"standings",n:"Classifica piloti",sz:2},{k:"cal",n:"Calendario",sz:2,couch:false}]);
   UI.tv(cards.tv,"moto");
   const S={evs:[],sel:SL.state.e||""};
   const row=r=>'<tr class="'+(r.ita?"ita":"")+(favR(r.name)?" me":"")+'"><td>'+h(r.pos||"–")+'</td><td class="l"><span class="tn" style="max-width:none">'+(r.flag?'<img class="flag" src="'+h(r.flag)+'" alt="'+h(r.cc)+'">':"")+h(r.name)+(r.win?' <span class="tag ok">VINCE</span>':"")+SL.star("moto","rider",r.id,r.name)+'</span></td></tr>';

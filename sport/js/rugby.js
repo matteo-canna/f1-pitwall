@@ -45,11 +45,11 @@ M.facts=async function(){
 };
 const DEFS=[
   {k:"tv",n:"Diretta TV",sz:2,fixed:true},
-  {k:"match",n:"Partita",sz:2},
+  {k:"match",n:"Partita",sz:2,hero:true},
+  {k:"form",n:"Forma e precedenti",sz:2},
   {k:"lineup",n:"Formazioni in campo",sz:2},
-  {k:"matches",n:"Calendario e risultati",sz:3},
   {k:"table",n:"Classifica",sz:2},
-  {k:"form",n:"Forma e precedenti",sz:1}
+  {k:"matches",n:"Calendario e risultati",sz:2}
 ];
 M.mount=function(ctx){
   const st=ctx.st;let comp=st.c||"ita";if(comp!=="ita"&&comp!=="live"&&!L.find(x=>x.k===comp))comp="ita";

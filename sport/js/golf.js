@@ -101,10 +101,10 @@ M.facts=async function(st){const one=st&&st.sport==="golf"&&st.c!=="live"?TOURS.
 /* ---------- pagina ---------- */
 const DEFS=[
   {k:"tv",n:"Diretta TV",sz:2,fixed:true},
-  {k:"board",n:"Classifica del torneo",sz:3},
+  {k:"board",n:"Classifica del torneo",sz:2,hero:true},
   {k:"card",n:"Scorecard",sz:2},
-  {k:"ita",n:"Italiani in gara",sz:1},
-  {k:"next",n:"Prossimo torneo",sz:1},
+  {k:"ita",n:"Italiani in gara",sz:2},
+  {k:"next",n:"Prossimo torneo",sz:2},
   {k:"cal",n:"Calendario",sz:2,couch:false}
 ];
 M.mount=function(ctx){
