@@ -1348,3 +1348,14 @@ html[data-couch="1"] .top .tbtn.icobtn{font-size:24px;min-width:52px}
 .dcols.stacked>section.narrow .dch .dn{font-size:15px}
 .dcols.stacked>section.narrow .dch{padding:10px 10px 8px}
 .dcols.stacked>section.narrow .dgh{font-size:11px}
+/* scheda che passa in primo piano: scorre al suo posto */
+.dcols.stacked.anim>section{transition:left .42s cubic-bezier(.3,.75,.2,1),top .42s cubic-bezier(.3,.75,.2,1),opacity .3s,filter .3s}
+/* le schede dietro si possono portare davanti: col mouse sopra o con un tocco */
+.dcols.stacked>section[data-side="left"],.dcols.stacked>section[data-side="right"]{cursor:pointer}
+.dcols.stacked>section[data-side="left"]:hover,.dcols.stacked>section[data-side="right"]:hover{border-color:color-mix(in srgb,var(--red) 55%,#2a3348)}
+/* scheda molto lontana: solo il nome del giorno, in verticale */
+.dcols.stacked>section.slim>.dbody,.dcols.stacked>section.slim>.dch .dd,.dcols.stacked>section.slim>.dch .dc{display:none}
+.dcols.stacked>section.slim>.dch{flex:1 1 auto;align-items:center;justify-content:flex-start;padding:16px 0;border-radius:16px 0 0 16px}
+.dcols.stacked>section.slim[data-side="right"]>.dch{border-radius:0 16px 16px 0}
+.dcols.stacked>section.slim>.dch .dn{writing-mode:vertical-rl;font-size:15px;letter-spacing:.08em;margin:0 auto}
+@media (prefers-reduced-motion:reduce){.dcols.stacked.anim>section{transition:none}}
