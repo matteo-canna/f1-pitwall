@@ -47,16 +47,17 @@ M.facts=async function(st){
   if(!st||!st.sport||st.sport==="home")try{const f=await EU.facts("el");if(f[0])out.push(f[0]);}catch(e){}
   return out;
 };
+/* ordine per importanza: risultato e quarti, migliori, box score, andamento; liste e classifica in fondo */
 const DEFS=[
   {k:"tv",n:"Diretta TV",sz:2,fixed:true},
-  {k:"match",n:"Partita",sz:2},
+  {k:"match",n:"Partita",sz:2,hero:true},
+  {k:"leaders",n:"Migliori in campo",sz:2},
+  {k:"box",n:"Box score",sz:2},
   {k:"wp",n:"Probabilità di vittoria",sz:2},
-  {k:"games",n:"Tutte le partite",sz:3},
   {k:"shots",n:"Mappa tiri",sz:2},
-  {k:"leaders",n:"Migliori in campo",sz:1},
-  {k:"box",n:"Box score",sz:3},
   {k:"pbp",n:"Play-by-play",sz:2,couch:false},
-  {k:"table",n:"Classifica",sz:2}
+  {k:"table",n:"Classifica",sz:2},
+  {k:"games",n:"Tutte le partite",sz:2}
 ];
 M.mount=function(ctx){
   const st=ctx.st,liveMode=st.f==="live",comp=EU.comps[st.c]?st.c:"nba";

@@ -5,9 +5,9 @@ const $=SL.$,h=SL.h;
 const SZN={1:"S",2:"M",3:"L"};
 const UI=SL.ui={sport:null,defs:[],cards:{}};
 
-UI.reset=function(sport){UI.sport=sport;UI.defs=[];UI.cards={};document.body.classList.remove("has-full");};
-UI.sizes=()=>{const q=SL.qs.get("sz");if(q&&window.isFollower()){const o={};q.split(",").forEach(p=>{const [k,v]=p.split(":");o[k]=+v;});return o;}return SL.store.get("sz."+UI.sport,{});};
-UI.setSize=(k,v)=>{const s=SL.store.get("sz."+UI.sport,{});s[k]=v;SL.store.set("sz."+UI.sport,s);};
+UI.reset=function(sport){UI.sport=sport;UI.defs=[];UI.cards={};document.body.classList.remove("has-full");if(UI._ro){UI._ro.disconnect();UI._ro=null;}};
+UI.sizes=()=>{const q=SL.qs.get("sz");if(q&&window.isFollower()){const o={};q.split(",").forEach(p=>{const [k,v]=p.split(":");o[k]=+v;});return o;}return SL.store.get("sz2."+UI.sport,{});};
+UI.setSize=(k,v)=>{const s=SL.store.get("sz2."+UI.sport,{});s[k]=v;SL.store.set("sz2."+UI.sport,s);};
 UI.hidden=()=>SL.store.get("hid."+UI.sport,[]);
 UI.localSolo=()=>SL.store.sget("msolo."+UI.sport,null);
 
@@ -22,7 +22,7 @@ UI.mount=function(main,defs){
     else if(d.fixed)show=true; /* la Diretta TV si vede sempre */
     else if(hid.indexOf(d.k)>=0){show=false;hiddenUser.push(d);}
     else if(couch&&d.couch===false&&!all){show=false;hiddenCouch++;}
-    const el=document.createElement("article");el.className="card";el.dataset.k=d.k;el.dataset.sz=String(d.fixed?d.sz:(sz[d.k]||d.sz||2));if(d.fixed)el.classList.add("fixed");
+    const el=document.createElement("article");el.className="card";el.dataset.k=d.k;el.dataset.sz=String(d.fixed?d.sz:(sz[d.k]||d.sz||2));if(d.fixed)el.classList.add("fixed");if(d.hero)el.classList.add("hero");
     el.innerHTML='<header><h2>'+h(d.n)+'</h2><span class="sub"></span><div class="tools"></div><button type="button" class="mbtn" aria-label="Opzioni sezione '+h(d.n)+'" title="Misura e schermo intero">⋯</button></header><div class="body'+(d.flush?" flush":"")+'"><div class="loading">Carico</div></div>';
     if(!show)el.hidden=true;
     main.appendChild(el);
@@ -47,7 +47,24 @@ UI.mount=function(main,defs){
     if(b.id==="couchLess"){SL.store.set("couchAll",false);SL.route();}
     if(b.id==="unsolo"){SL.store.sset("msolo."+UI.sport,null);SL.route();}
     if(b.dataset.unhide){SL.store.set("hid."+UI.sport,UI.hidden().filter(k=>k!==b.dataset.unhide));SL.route();}});
+  UI.pack(main);
   return out;
+};
+/* disposizione "a muro": la griglia ha righe da 4px e ogni riquadro ne occupa quante ne servono alla sua altezza.
+   Così ogni sezione si appoggia subito sotto quella di sopra, senza i buchi delle righe rigide. Si ricalcola da solo quando un riquadro cambia altezza. */
+UI.pack=function(main){
+  if(UI._ro)UI._ro.disconnect();
+  if(!window.ResizeObserver)return;
+  main.classList.add("masonry");
+  const ROW=4,gy=()=>parseFloat(getComputedStyle(main).getPropertyValue("--gapy"))||12;
+  const fit=el=>{if(el.hidden||el.classList.contains("full"))return;const h=el.offsetHeight;if(!h)return;const n=Math.max(1,Math.ceil((h+gy())/ROW));
+    const one=getComputedStyle(main).gridTemplateColumns.split(" ").length<2;
+    /* Diretta TV e barra dei filtri stanno sempre in cima (riga 1), una accanto all'altra */
+    if(!one&&((el.dataset.k==="tv"&&el.classList.contains("fixed"))||el.classList.contains("ingrid")))el.style.gridRow="1 / span "+n;
+    else{el.style.gridRow="";el.style.gridRowEnd="span "+n;}};
+  const ro=new ResizeObserver(es=>es.forEach(e=>fit(e.target)));
+  [...main.children].forEach(el=>{ro.observe(el);fit(el);});
+  UI._ro=ro;
 };
 UI.menu=function(c){
   document.querySelectorAll(".menu").forEach(m=>m.remove());
@@ -83,7 +100,7 @@ UI.liveChip=sport=>({k:"live",n:"Live ora",hot:sport,c:UI.liveCount(sport)});
 UI.refreshLiveChips=()=>document.querySelectorAll(".chip.hot[data-sp]").forEach(b=>{const n=UI.liveCount(b.dataset.sp);const el=b.querySelector(".n");if(el)el.textContent=n;b.classList.toggle("zero",!n);});
 UI.liveNote=t=>{const s=document.createElement("span");s.className="muted";s.innerHTML='<span class="tag live">LIVE</span> '+h(t);return s;};
 /* con la Diretta TV in pagina, la barra di competizioni e partite le si affianca a destra */
-UI.dock=(sub,main)=>{if(!SL.solo&&main.querySelector('.card[data-k="tv"]:not([hidden])')){sub.classList.add("ingrid");main.prepend(sub);}};
+UI.dock=(sub,main)=>{if(!SL.solo&&main.querySelector('.card[data-k="tv"]:not([hidden])')){sub.classList.add("ingrid");main.prepend(sub);if(main.classList.contains("masonry"))UI.pack(main);}};
 UI.daynav=function(off,on){const w=document.createElement("div");w.className="daynav";const d=SL.addDays(Date.now(),off);
   w.innerHTML='<button type="button" data-d="-1" aria-label="Giorno precedente">‹</button><button type="button" class="cur" data-d="0">'+h(off===0?"Oggi · "+SL.fmtDay(d):SL.relDay(d)===SL.fmtDay(d)?SL.fmtDay(d):SL.relDay(d)+" · "+SL.fmtDay(d))+'</button><button type="button" data-d="1" aria-label="Giorno successivo">›</button>';
   w.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const v=+b.dataset.d;on(v===0?0:off+v);});return w;};
