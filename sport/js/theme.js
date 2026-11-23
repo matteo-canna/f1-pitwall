@@ -11,6 +11,9 @@ const ICONS={
   tennis:'<circle cx="12" cy="12" r="9.5" fill="currentColor" fill-opacity=".2"/><path d="M4.3 6.4c4 2.6 5.1 7.6 2.3 13.1M19.7 17.6c-4-2.6-5.1-7.6-2.3-13.1"/>',
   rugby:'<g transform="rotate(-38 12 12)"><ellipse cx="12" cy="12" rx="10" ry="6.2"/><path d="M7.5 12h9M9.3 10.4v3.2M12 10.4v3.2M14.7 10.4v3.2"/></g>',
   moto:'<path d="M3.5 15.5C3.5 9 7.6 4.5 13.2 4.5c4.7 0 7.8 3.5 7.8 8.1v3.6c0 1.3-1 2.3-2.3 2.3H6c-1.4 0-2.5-1.1-2.5-2.5z"/><path d="M12.4 9.2h8.4v4.1h-6.9c-.8 0-1.5-.7-1.5-1.5z" fill="currentColor"/><path d="M6 14.6h7"/>',
+  /* golf: bandierina sulla buca e pallina sul green */
+  golf:'<path d="M8.5 19.5V2.8"/><path d="M8.5 3.2l9.5 3.4-9.5 3.4z" fill="currentColor"/><ellipse cx="11" cy="19.6" rx="8.5" ry="2.1"/><circle cx="17.6" cy="16.2" r="1.7" fill="currentColor"/>',
+  golfball:'<circle cx="12" cy="12" r="9.5"/><g fill="currentColor" stroke="none"><circle cx="9" cy="8" r="1.1"/><circle cx="13.2" cy="7" r="1.1"/><circle cx="16.4" cy="10.6" r="1.1"/><circle cx="11.6" cy="11.4" r="1.1"/><circle cx="7.6" cy="12.6" r="1.1"/><circle cx="14.6" cy="15" r="1.1"/><circle cx="10" cy="16" r="1.1"/></g>',
   home:'<circle cx="12" cy="12" r="2.4" fill="currentColor"/><path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4"/>',
   flag:'<path d="M5 21.5V3M5 4h14v9H5z"/><path d="M5 4h3.5v3H5zM12 4h3.5v3H12zM8.5 7H12v3H8.5zM15.5 7H19v3h-3.5zM5 10h3.5v3H5zM12 10h3.5v3H12z" fill="currentColor" stroke="none"/>',
   card:'<rect x="7" y="3.5" width="10" height="17" rx="1.8" fill="currentColor" transform="rotate(8 12 12)"/>',
@@ -44,7 +47,7 @@ const BG={
   moto:'<svg '+X+' viewBox="0 0 220 220"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .06 0"/></filter><rect width="220" height="220" filter="url(#n)"/></svg>'
 };
 /* home: coriandoli di sport */
-function confetti(){const spots=[["calcio",30,30,1.5,-12],["basket",190,60,1.3,18],["tennis",110,150,1.1,0],["rugby",250,200,1.4,-20],["moto",40,230,1.3,8],["flag",180,250,1,12],["trophy",250,110,1,-8]];
+function confetti(){const spots=[["calcio",30,30,1.5,-12],["basket",190,60,1.3,18],["tennis",110,150,1.1,0],["rugby",250,200,1.4,-20],["moto",40,230,1.3,8],["golf",120,260,1.1,-6],["flag",180,250,1,12],["trophy",250,110,1,-8]];
   return'<svg '+X+' viewBox="0 0 300 300">'+spots.map(([n,x,y,s,r])=>'<g transform="translate('+x+' '+y+') scale('+s+') rotate('+r+' 12 12)" opacity=".06">'+wrap(ICONS[n],"#fff")+'</g>').join("")+'</svg>';}
 
 I.init=function(){
@@ -59,10 +62,19 @@ I.init=function(){
   st.setProperty("--art-home",svgUrl(confetti()));
 };
 
-/* ---------- testata di ogni sport ---------- */
-const MOTTO={calcio:"Novanta minuti (più recupero) di pura passione",basket:"Canestro dopo canestro, fino alla sirena",tennis:"Quindici, trenta, quaranta… gioco!",rugby:"Avanti si va, sostenendosi a vicenda",moto:"Gas aperto fino alla bandiera a scacchi"};
-I.head=function(sport){if(sport==="home"||window.isFollower())return null;const m=SL.sports[sport];
+/* ---------- testata di ogni sport: nome + informazioni utili che cambiano (capolista, ultimo vincitore, prossimo evento…) ---------- */
+I.head=function(sport){if(sport==="home"||window.isFollower())return null;const m=SL.sports[sport],h=SL.h;
   const el=document.createElement("div");el.className="sporthead";
-  el.innerHTML='<span class="shicon">'+SL.ico(sport)+'</span><div class="shtxt"><h1>'+SL.h(m.name)+'</h1><p>'+SL.h(MOTTO[sport]||"")+'</p></div>';
+  el.innerHTML='<span class="shicon">'+SL.ico(sport)+'</span><div class="shtxt"><h1>'+h(m.name)+'</h1><div class="facts" aria-live="polite"><span class="fact load"><small>Carico le ultime notizie…</small></span></div></div>';
+  const st=Object.assign({},SL.state),rid=SL.routeId;
+  SL.ticker.facts(sport,st).then(F=>{if(rid!==SL.routeId)return;const box=el.querySelector(".facts");
+    box.innerHTML=F.length?F.map(f=>f.go?'<button type="button" class="fact" data-go="'+h(JSON.stringify(f.go))+'"><small>'+h(f.l)+'</small><b>'+h(f.v)+'</b></button>':'<span class="fact"><small>'+h(f.l)+'</small><b>'+h(f.v)+'</b></span>').join(""):"";});
+  el.addEventListener("click",e=>{const b=e.target.closest(".fact[data-go]");if(b)try{SL.go(JSON.parse(b.dataset.go));}catch(x){}});
   return el;};
+/* ---------- credito della foto di sfondo ---------- */
+const CRED={calcio:["Foto: Unsplash","https://unsplash.com/license"],basket:["Foto: Unsplash","https://unsplash.com/license"],tennis:["Foto: Unsplash","https://unsplash.com/license"],home:["Foto: Unsplash","https://unsplash.com/license"],
+  rugby:["Foto: David Roberts · CC BY 2.0","https://commons.wikimedia.org/wiki/File:2015_Rugby_World_Cup,_France_vs._Romania_(21048401024).jpg"],
+  golf:["Foto: Unsplash","https://unsplash.com/license"],
+  moto:["Foto: TeamEG00 · pubblico dominio","https://commons.wikimedia.org/wiki/File:Marc_M%C3%A1rquez_leading_the_pack_during_the_2025_Aragon_motorcycle_Grand_Prix.jpg"]};
+I.credit=function(sport){const a=document.getElementById("photoCredit");if(!a)return;const c=CRED[sport]||CRED.home;a.textContent=c[0];a.href=c[1];a.hidden=window.isFollower();};
 })();

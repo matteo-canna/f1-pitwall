@@ -7,7 +7,7 @@
 <title>Sport LIVE APP</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=JetBrains+Mono:wght@400;500;700;800&family=Teko:wght@500;600;700&family=Bungee&family=Fraunces:ital,opsz,wght@1,9..144,800;1,9..144,900&family=Alfa+Slab+One&family=Racing+Sans+One&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=JetBrains+Mono:wght@400;500;700;800&family=Teko:wght@500;600;700&family=Bungee&family=Fraunces:ital,opsz,wght@1,9..144,800;1,9..144,900&family=Alfa+Slab+One&family=Racing+Sans+One&family=Orbitron:wght@700;900&family=Cinzel:wght@600;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="app.css">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23e5383b'/%3E%3Ccircle cx='32' cy='32' r='13' fill='none' stroke='white' stroke-width='6'/%3E%3Ccircle cx='32' cy='32' r='4' fill='white'/%3E%3C/svg%3E">
 </head>
@@ -17,11 +17,17 @@
   <nav class="tabs" id="tabs" aria-label="Sport"></nav>
   <div class="topr">
     <span class="clock mono" id="clock" aria-live="off"></span>
+    <button class="tbtn" id="btnTicker" title="Mostra o nascondi la striscia delle notizie" aria-pressed="true">≡ <span>NOTIZIE</span></button>
     <button class="tbtn" id="btnScreens" title="Più schermi">⧉ <span>SCHERMI</span></button>
     <button class="tbtn" id="btnSettings" title="Impostazioni">⚙ <span>IMPOSTAZIONI</span></button>
     <a class="tbtn f1" id="toF1" href="../" title="Apri F1 Pit Wall">F1 <span>PIT WALL</span> ↗</a>
   </div>
 </header>
+<div class="ticker" id="ticker" hidden>
+  <span class="tk-label" id="tkLabel">ULTIME</span>
+  <div class="tk-view"><div class="tk-track" id="tkTrack"></div></div>
+  <button type="button" class="tk-x" id="tkHide" aria-label="Nascondi la striscia delle notizie" title="Nascondi la striscia">✕</button>
+</div>
 <div class="follow" id="followBar" hidden>
   <span class="logo sm"><span>SPORT</span><b>LIVE</b></span>
   <span id="followTxt">Schermo secondario · segue la finestra principale</span>
@@ -31,6 +37,7 @@
 <main id="main" class="grid" tabindex="-1"></main>
 <div class="alerts" id="alerts" aria-live="polite"></div>
 <div class="toast" id="toast" role="status" hidden></div>
+<a class="photocredit" id="photoCredit" target="_blank" rel="noopener" hidden></a>
 
 <dialog id="dlgSettings" aria-labelledby="setH">
   <form method="dialog" class="dlg">
@@ -43,6 +50,12 @@
           <button type="button" data-v="regia">REGIA TV</button>
         </div>
         <p class="hint">Pit wall: scuro e denso come l'app F1. Regia TV: grafica da sovrimpressione, numeri grandi e colori delle squadre.</p>
+        <h3>Riquadri 3D</h3>
+        <div class="seg" id="setTilt" role="group" aria-label="Inclinazione dei riquadri">
+          <button type="button" data-v="on">SI INCLINANO COL MOUSE</button>
+          <button type="button" data-v="off">FERMI</button>
+        </div>
+        <p class="hint">La cornice e lo spessore restano sempre; su TV e tablet i riquadri sono sempre fermi.</p>
         <h3>Modalità divano</h3>
         <div class="seg" id="setCouch" role="group" aria-label="Modalità divano">
           <button type="button" data-v="auto">AUTOMATICA</button>
@@ -74,9 +87,13 @@
           <li>Se avevi già l'estensione F1, premi ↻ su di essa; altrimenti "Carica estensione non pacchettizzata" e scegli la cartella <b>f1pw-tv</b>.</li>
           <li>Ricarica questa pagina.</li>
         </ol>
+        <h3>Striscia notizie</h3>
+        <p class="hint">Scorre sotto il menu: in home tutti gli sport, nelle pagine solo quello sport. Si mostra o nasconde col pulsante ≡ NOTIZIE in alto o con la ✕ sulla striscia.</p>
+        <h3>Foto di sfondo</h3>
+        <p class="hint">Calcio, basket, tennis, golf e home: Unsplash. Rugby: David Roberts, CC BY 2.0 (Wikimedia Commons). Moto: TeamEG00, pubblico dominio (Wikimedia Commons).</p>
         <h3>Sezioni</h3>
         <p><button type="button" class="btn" id="setResetCards">↺ RIPRISTINA SEZIONI E MISURE</button></p>
-        <p class="hint">Dati: ESPN (calcio, NBA, tennis, rugby) e siti ufficiali MotoGP / WorldSBK. Fonti gratuite non ufficiali: a volte possono mancare dati o arrivare in ritardo.</p>
+        <p class="hint">Dati: ESPN (calcio, NBA, tennis ATP e WTA, rugby, IndyCar, golf), siti ufficiali EuroLega / EuroCup e MotoGP / WorldSBK. Fonti gratuite non ufficiali: a volte possono mancare dati o arrivare in ritardo.</p>
       </section>
     </div>
   </form>
@@ -105,12 +122,15 @@
 <script src="js/ui.js"></script>
 <script src="js/viz.js"></script>
 <script src="js/data.js"></script>
+<script src="js/ticker.js"></script>
 <script src="js/home.js"></script>
 <script src="js/calcio.js"></script>
+<script src="js/eurolega.js"></script>
 <script src="js/basket.js"></script>
 <script src="js/tennis.js"></script>
 <script src="js/rugby.js"></script>
 <script src="js/moto.js"></script>
+<script src="js/golf.js"></script>
 <script>SL.start();</script>
 </body>
 </html>

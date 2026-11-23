@@ -2,7 +2,7 @@
 (function(){
 "use strict";
 const h=SL.h;
-const SPORTS=["calcio","basket","tennis","rugby","moto"];
+const SPORTS=["calcio","basket","tennis","rugby","moto","golf"];
 const LIVE=SL.live={items:new Map(),bySport:{},tomorrow:{},updated:0,lastLive:{}};
 
 /* ---------- raccoglitore: ogni sport fornisce homeFeed(giorno, ttl) ---------- */
@@ -21,7 +21,7 @@ async function tickToday(){
       if(prev&&prev.sig!==it.sig&&m.onChange){const a=m.onChange(prev,it);if(a){a.important=a.important!=null?a.important:it.important;a.go=a.go||it.go;a.sport=s;SL.alert(a);SL.emit("flash",it.id);}}});});
   LIVE.updated=Date.now();
   SL.setLive("home",[...LIVE.items.values()].filter(x=>x.live).length);
-  SL.emit("live");
+  SL.emit("live");SL.ui.refreshLiveChips();
 }
 SL.sports.home={
   name:"Live ora",tab:"Live ora",icon:"●",color:"#e5383b",
@@ -30,8 +30,8 @@ SL.sports.home={
 };
 
 /* ---------- tessera di un evento ---------- */
-const COL={calcio:"#2fbf71",basket:"#f5803e",tennis:"#c9dc3c",rugby:"#3fa7d6",moto:"#e5383b"};
-const ICO={calcio:1,basket:1,tennis:1,rugby:1,moto:1};
+const COL={calcio:"#2fbf71",basket:"#f5803e",tennis:"#c9dc3c",rugby:"#3fa7d6",moto:"#e5383b",golf:"#d8b45a"};
+const ICO={calcio:1,basket:1,tennis:1,rugby:1,moto:1,golf:1};
 SL.homeTile=function(it){
   const tag=it.live?'<span class="tag live">'+h(it.status||"LIVE")+'</span>':it.done?'<span class="tag">'+h(it.status||"FINALE")+'</span>':'<span class="tag">'+h(it.status)+'</span>';
   const lines=(it.lines||[]).map(l=>'<div class="ln'+(l.lose?" l":"")+'">'+(l.img?'<img class="logo-t" src="'+h(l.img)+'" alt="" loading="lazy">':'<span>'+(l.ico?SL.ico(l.ico):"")+'</span>')+'<span class="n">'+h(l.n)+(l.ita?' '+SL.ico("ita"):"")+'</span><span class="v">'+h(l.v==null?"":l.v)+'</span></div>').join("");
@@ -50,7 +50,7 @@ function mount(ctx){
   const main=ctx.main;
   main.innerHTML='<div class="hero"><div><h1><em>●</em> Adesso in diretta</h1><p id="hSub">Carico partite e sessioni di tutti gli sport…</p></div><div class="row" id="hTools"></div></div><div class="hsec" id="hBody"><div class="loading">Carico</div></div>';
   const tools=main.querySelector("#hTools");
-  if(!SL.extData()&&!SL.isTVLike())tools.innerHTML='<span class="muted" style="font-size:11.5px">Moto: dati live con l\'estensione per PC (⚙)</span>';
+  if(!SL.extData()&&!SL.isTVLike())tools.innerHTML='<span class="muted" style="font-size:11.5px">MotoGP e Superbike: dati live con l\'estensione per PC (⚙)</span>';
   let tomorrow=null;
   const draw=()=>{
     const all=[];SPORTS.forEach(s=>{if(f!=="all"&&f!==s)return;(LIVE.bySport[s]||[]).forEach(x=>all.push(x));});

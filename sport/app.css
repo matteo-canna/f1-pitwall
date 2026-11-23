@@ -18,6 +18,7 @@ body[data-sport="basket"]{--sa:#f5803e}
 body[data-sport="tennis"]{--sa:#c9dc3c}
 body[data-sport="rugby"]{--sa:#3fa7d6}
 body[data-sport="moto"]{--sa:#e5383b}
+body[data-sport="golf"]{--sa:#d8b45a}
 
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--text)}
@@ -429,6 +430,8 @@ html[data-couch="1"][data-style="regia"]{--h2size:18px;--scoresize:76px;--nmsize
   --stripe:linear-gradient(90deg,#1b5fbf,#3fa7d6 45%,#f1f2f1 45% 55%,#3fa7d6 55%,#1b5fbf)}
 .sp-moto,body[data-sport="moto"]{--f-sport:"Racing Sans One",system-ui,sans-serif;--f-score:"Orbitron",var(--f-mono);--fw:400;--fw2:900;--fst:normal;--fs:1.14;--fs2:.82;--ls:.05em;--stretch:100%;--sa:#e5383b;--ic:var(--ic-moto);--icload:var(--ic-wheel);--load:spin .7s linear infinite;
   --stripe:repeating-linear-gradient(90deg,#e5383b 0 16px,#f6f6f6 16px 32px)}
+.sp-golf,body[data-sport="golf"]{--f-sport:"Cinzel",Georgia,serif;--f-score:"Cinzel",Georgia,serif;--fw:900;--fw2:700;--fst:normal;--fs:1.02;--fs2:.9;--ls:.06em;--stretch:100%;--sa:#d8b45a;--ic:var(--ic-golf);--icload:var(--ic-golfball);--load:spin 1.3s linear infinite;
+  --stripe:linear-gradient(90deg,#1f6b3a,#d8b45a 30% 70%,#1f6b3a)}
 
 /* --- sfondi illustrati --- */
 body{position:relative;z-index:0}
@@ -510,4 +513,382 @@ html[data-couch="1"] .sporthead p{font-size:15px}
 .card.fixed .tvstage{aspect-ratio:16/9}
 @media (max-width:760px){
   .grid>.card[data-k="tv"],.grid>.subbar.ingrid{grid-column:1/-1;grid-row:auto}
+}
+
+/* =====================================================================
+   FILTRO "LIVE ORA"
+   ===================================================================== */
+.chip.hot{color:var(--text);font-weight:800;border-color:color-mix(in srgb,var(--red) 60%,var(--line))}
+.chip.hot .lv{animation:pulse 1.4s infinite}
+.chip.hot .n{color:var(--red);font-weight:800}
+.chip.hot[aria-pressed="true"]{background:var(--red);border-color:var(--red);color:#fff}
+.chip.hot[aria-pressed="true"] .lv{background:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.3)}
+.chip.hot[aria-pressed="true"] .n{color:#fff}
+.chip.hot.zero{color:var(--muted);border-color:var(--line)}
+.chip.hot.zero .lv{background:var(--dim);box-shadow:none;animation:none}
+.chip.hot.zero .n{color:var(--dim)}
+.nolive{display:flex;flex-direction:column;align-items:center;gap:10px;padding:22px 10px;text-align:center;color:var(--muted)}
+.nolive .ico{width:42px;height:42px;color:var(--sa);opacity:.8}
+.nolive b{color:var(--text)}
+.chip.hot.zero[aria-pressed="true"],.chip.hot[aria-pressed="true"]{color:#fff;border-color:var(--red);background:var(--red)}
+.chip.hot.zero[aria-pressed="true"] .n,.chip.hot.zero[aria-pressed="true"] .lv{color:#fff;background:#fff}
+.chip.hot.zero[aria-pressed="true"] .n{background:none}
+@media (max-width:1500px){.clock{display:none}}
+
+/* =====================================================================
+   SFONDI FOTOGRAFICI (sostituiscono le illustrazioni)
+   Foto vera dello sport + velatura scura che si infittisce verso il basso, dove ci sono i dati.
+   ===================================================================== */
+body::after{display:none}
+body[data-sport]{--bgl:var(--veil),var(--photo) var(--ppos,center)/cover no-repeat}
+:root{--veil:linear-gradient(180deg,rgba(6,9,16,.50) 0%,rgba(6,9,16,.70) 38%,rgba(6,9,16,.86) 75%,rgba(6,9,16,.93) 100%)}
+html[data-style="regia"]{--veil:linear-gradient(180deg,rgba(4,6,12,.58) 0%,rgba(4,6,12,.76) 40%,rgba(4,6,12,.9) 100%)}
+body[data-sport="home"]{--photo:url("img/bg-home.jpg");--ppos:center 70%}
+body[data-sport="calcio"]{--photo:url("img/bg-calcio.jpg");--ppos:center 62%}
+body[data-sport="basket"]{--photo:url("img/bg-basket.jpg");--ppos:center 55%}
+body[data-sport="tennis"]{--photo:url("img/bg-tennis.jpg");--ppos:center 40%}
+body[data-sport="rugby"]{--photo:url("img/bg-rugby.jpg");--ppos:center 58%}
+body[data-sport="moto"]{--photo:url("img/bg-moto.jpg");--ppos:center 35%}
+body[data-sport="golf"]{--photo:url("img/bg-golf.jpg");--ppos:center 45%}
+@media (max-width:900px){
+  body[data-sport="home"]{--photo:url("img/bg-home-sm.jpg")}
+  body[data-sport="calcio"]{--photo:url("img/bg-calcio-sm.jpg")}
+  body[data-sport="basket"]{--photo:url("img/bg-basket-sm.jpg")}
+  body[data-sport="tennis"]{--photo:url("img/bg-tennis-sm.jpg")}
+  body[data-sport="rugby"]{--photo:url("img/bg-rugby-sm.jpg")}
+  body[data-sport="moto"]{--photo:url("img/bg-moto-sm.jpg")}
+  body[data-sport="golf"]{--photo:url("img/bg-golf-sm.jpg")}
+}
+/* in stile regia i pannelli sono molto trasparenti: sopra una foto servono un po' più pieni */
+html[data-style="regia"] .card{background:rgba(10,14,24,.72)}
+html[data-style="regia"] .mtile,html[data-style="regia"] .mrow,html[data-style="regia"] .htile,html[data-style="regia"] .tmatch,html[data-style="regia"] .chip{background-color:rgba(12,16,28,.78)}
+/* credito della foto */
+.photocredit{position:fixed;right:10px;bottom:6px;z-index:5;font-size:10px;color:rgba(255,255,255,.42);text-decoration:none;text-shadow:0 1px 2px #000}
+.photocredit:hover{color:#fff}
+
+/* =====================================================================
+   INFORMAZIONI UTILI NELLA TESTATA
+   ===================================================================== */
+.facts{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:8px;min-width:0}
+.fact{display:inline-flex;flex-direction:column;gap:3px;background:transparent;border:0;border-left:2px solid var(--sa);padding:1px 0 1px 9px;text-align:left;color:var(--text);min-width:0;max-width:100%}
+.fact small{font:700 10px/1.1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.fact b{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+button.fact:hover b,button.fact:focus-visible b{text-decoration:underline}
+.fact.load{border-left-color:var(--line)}
+html[data-couch="1"] .fact b{font-size:16px}
+html[data-couch="1"] .fact small{font-size:12px}
+
+/* =====================================================================
+   STRISCIA NOTIZIE SOTTO IL MENU
+   ===================================================================== */
+.ticker{display:flex;align-items:center;height:38px;background:rgba(6,9,16,.86);border-bottom:1px solid var(--line);backdrop-filter:blur(6px);overflow:hidden;position:relative;z-index:20}
+.tk-label{flex:none;display:flex;align-items:center;gap:7px;height:100%;padding:0 24px 0 16px;background:var(--sa);color:#0b0f19;font:900 12px/1 var(--f-display);font-stretch:118%;letter-spacing:.08em;clip-path:polygon(0 0,100% 0,calc(100% - 12px) 100%,0 100%)}
+.tk-label .ico{width:16px;height:16px;color:#0b0f19}
+.tk-view{flex:1;min-width:0;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 28px,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(90deg,transparent,#000 28px,#000 calc(100% - 28px),transparent)}
+.tk-track{display:flex;width:max-content}
+.tk-track.go{animation:tk var(--tkdur,40s) linear infinite}
+.tk-view:hover .tk-track,.tk-view:focus-within .tk-track{animation-play-state:paused}
+@keyframes tk{to{transform:translateX(-50%)}}
+.tk-run{display:flex;align-items:center;gap:16px;padding-right:16px}
+.tk-it{display:inline-flex;align-items:center;gap:7px;background:transparent;border:0;color:var(--text);font-size:12.5px;white-space:nowrap;padding:4px 2px;cursor:pointer}
+.tk-it.tk-empty{cursor:default;color:var(--muted)}
+.tk-it .ico{width:15px;height:15px;color:var(--sa)}
+.tk-it b{font-weight:800}
+.tk-tag{font:800 10.5px/1 var(--f-mono);letter-spacing:.06em;padding:4px 6px;border-radius:5px;background:var(--panel2);color:var(--muted);text-transform:uppercase}
+.tk-tag.live{background:var(--red);color:#fff}
+.tk-tag.fin{background:rgba(255,255,255,.12);color:#fff}
+.tk-tag.fact{background:color-mix(in srgb,var(--sa) 24%,transparent);color:var(--text)}
+.tk-sub{color:var(--dim);font-size:11px}
+.tk-sep{color:var(--dim);font-size:8px}
+.tk-x{flex:none;height:100%;padding:0 15px;background:transparent;border:0;border-left:1px solid var(--line);color:var(--muted);font-weight:800}
+.tk-x:hover,.tk-x:focus-visible{color:#fff}
+#btnTicker[aria-pressed="false"]{opacity:.55}
+html[data-couch="1"] .ticker{height:48px}
+html[data-couch="1"] .tk-it{font-size:15.5px}
+html[data-couch="1"] .tk-tag{font-size:12px}
+@media (max-width:760px){.tk-label{padding:0 18px 0 12px}.tk-label{font-size:0}.tk-label .ico{width:18px;height:18px}}
+@media (prefers-reduced-motion:reduce){.tk-view{overflow-x:auto}.tk-run[aria-hidden]{display:none}}
+/* ritocco: foto più presente, schede a vetro smerigliato (su TV restano piene) */
+:root{--veil:linear-gradient(180deg,rgba(6,9,16,.34) 0%,rgba(6,9,16,.58) 35%,rgba(6,9,16,.78) 75%,rgba(6,9,16,.88) 100%)}
+html[data-style="regia"]{--veil:linear-gradient(180deg,rgba(4,6,12,.42) 0%,rgba(4,6,12,.64) 40%,rgba(4,6,12,.86) 100%)}
+.card{background:color-mix(in srgb,var(--panel) 80%,transparent);backdrop-filter:blur(8px) saturate(1.1)}
+html[data-couch="1"] .card{background:color-mix(in srgb,var(--panel) 92%,transparent)}
+/* credito della foto: in fondo alla pagina, non sopra i dati */
+.photocredit{position:static;display:block;text-align:right;padding:0 16px 16px;text-shadow:none}
+/* testata e filtri sopra la foto: fondo a vetro per leggerli bene */
+.grid>.subbar.ingrid,body:not([data-sport="home"]) .subbar:not(.ingrid){background:rgba(8,11,20,.58);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);padding:12px 14px}
+body:not([data-sport="home"]) .subbar:not(.ingrid){margin:12px 16px 0}
+html[data-couch="1"] .grid>.subbar.ingrid{background:rgba(8,11,20,.82);backdrop-filter:none}
+.fact small{color:rgba(233,238,248,.72)}
+.hero{text-shadow:0 2px 12px rgba(0,0,0,.6)}
+
+/* =====================================================================
+   RIQUADRI "STADIO 3D" (scelta: mix tra Tabellone e Tessere 3D)
+   - cornice spessa nel colore dello sport, con bulloni agli angoli
+   - contenuto incassato come uno schermo, titolo su fascia da regia TV
+   - spessore visibile sotto la cornice, inclinazione e riflesso che seguono il mouse
+   ===================================================================== */
+html[data-frame] .grid{gap:28px 26px;padding-top:18px;perspective:1600px}
+html[data-frame] .card{
+  border:0;border-radius:14px;background:color-mix(in srgb,#05080f 84%,transparent);
+  --ring:color-mix(in srgb,var(--sa) 55%,#151b2b);
+  transform:perspective(1100px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateZ(0);
+  transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s;
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,.75),
+    0 0 0 5px var(--ring),
+    0 0 0 6px rgba(255,255,255,.22),
+    0 0 0 7px rgba(0,0,0,.6),
+    0 3px 0 7px color-mix(in srgb,var(--sa) 34%,#080b13),
+    0 6px 0 7px color-mix(in srgb,var(--sa) 24%,#06080f),
+    0 9px 0 7px color-mix(in srgb,var(--sa) 14%,#04060b),
+    0 10px 0 7px rgba(255,255,255,.07),
+    inset 0 0 0 1px rgba(255,255,255,.07),
+    inset 0 14px 34px rgba(0,0,0,.65),
+    0 36px 54px -14px rgba(0,0,0,.85),
+    0 0 64px -16px color-mix(in srgb,var(--sa) 55%,transparent)}
+html[data-frame] .card.tilting{transition:transform .08s linear,box-shadow .35s;will-change:transform}
+html[data-frame] .card:not(.full):hover{--ring:color-mix(in srgb,var(--sa) 75%,#151b2b)}
+/* riflesso di luce che segue il mouse */
+html[data-frame] .card::before{left:0;right:0;top:0;height:100%;border-radius:inherit;opacity:1;z-index:2;pointer-events:none;box-shadow:none;
+  background:radial-gradient(520px circle at var(--gx,30%) var(--gy,-25%),rgba(255,255,255,.11),rgba(255,255,255,.025) 35%,transparent 60%)}
+/* bulloni negli angoli della cornice */
+html[data-frame] .card::after{content:"";position:absolute;inset:-4px;pointer-events:none;border-radius:16px;z-index:3;
+  --b:radial-gradient(circle at center,#eef2fa 0 1.5px,#5b6478 1.6px 2.4px,transparent 2.6px);
+  background:var(--b) top left/8px 8px no-repeat,var(--b) top right/8px 8px no-repeat,var(--b) bottom left/8px 8px no-repeat,var(--b) bottom right/8px 8px no-repeat}
+/* titolo su fascia da regia TV */
+html[data-frame] .card>header{border-bottom:0;padding:0;margin:10px 10px 4px;border-radius:8px;overflow:hidden;
+  background:linear-gradient(90deg,color-mix(in srgb,var(--sa) 30%,#0b0f19),rgba(11,15,25,.6) 65%,transparent)}
+html[data-frame] .card>header h2{background:var(--sa);color:#0b0f19;padding:8px 22px 8px 12px;clip-path:polygon(0 0,100% 0,calc(100% - 12px) 100%,0 100%);text-shadow:none}
+html[data-frame] .card>header h2::before{background:#0b0f19}
+html[data-frame] .card>header .sub{color:var(--text);opacity:.85}
+html[data-frame] .card>header .tools{padding-right:6px}
+html[data-frame] .card .body{padding-top:10px}
+/* schermo intero: niente inclinazione, cornice dentro lo schermo */
+html[data-frame] .card.full{transform:none;box-shadow:inset 0 0 0 6px var(--ring)}
+html[data-frame] .card.full::after{display:none}
+/* la barra di testata e filtri accanto alla Diretta TV: cornice sottile coordinata */
+html[data-frame] .grid>.subbar.ingrid{border:0;box-shadow:0 0 0 1px rgba(0,0,0,.6),0 0 0 3px color-mix(in srgb,var(--sa) 35%,#151b2b),0 18px 36px -12px rgba(0,0,0,.7)}
+/* TV, tablet e "riduci movimento": niente inclinazione, resta la cornice con lo spessore */
+html[data-couch="1"][data-frame] .card{backdrop-filter:none;transition:none;transform:none}
+html[data-couch="1"][data-frame] .card::before{display:none}
+@media (max-width:760px){html[data-frame] .grid{gap:24px}}
+@media (prefers-reduced-motion:reduce){html[data-frame] .card{transform:none!important}}
+/* con una scheda a schermo intero la prospettiva della griglia va tolta, altrimenti la scheda non copre tutto lo schermo */
+body.has-full .grid{perspective:none}
+
+/* =====================================================================
+   SISTEMA TESTI E PULSANTI + "PELLE" DI OGNI SPORT
+   Struttura e dimensioni uguali ovunque; ogni sport cambia font dei pulsanti, colori e forma.
+   ===================================================================== */
+
+/* ---------- 1. testi: più contrasto, niente scritte minuscole, font leggibile per le frasi ---------- */
+:root{--muted:#a6b0c6;--dim:#7f8aa5;--line:#2b3651;--f-text:"Archivo",system-ui,sans-serif;
+  --btn-h:36px;--chip-h:34px}
+@media (pointer:coarse){:root{--btn-h:44px;--chip-h:42px}}
+html[data-couch="1"]{--btn-h:48px;--chip-h:46px}
+body{font:500 14px/1.45 var(--f-text);font-stretch:100%}
+/* numeri, orari e tabelle restano a spaziatura fissa (allineati) */
+.mono,.clock,.tbl td,.stat .v,.feed li .t,.trow,.mtile .st,.mrow .min,.tk-tag,.cd,.score,.bug .clk,.daynav button.cur{font-family:var(--f-mono)}
+.tbl td.l,.tbl td.l .tn{font-family:var(--f-text);font-weight:600}
+.feed li .x{font-family:var(--f-text)}
+/* dimensioni minime */
+.card>header .sub{font-size:12.5px}
+.tag{font-size:11px;padding:4px 8px}
+.tbl{font-size:13.5px}.tbl th{font-size:11.5px;color:var(--muted)}
+.feed li{font-size:13.5px}
+.note,.legend,.hint{font-size:12.5px;line-height:1.5}
+.stat .lab{font-size:11.5px}
+.mtile .st,.tmatch .hd,.htile .hd,.htile .ft,.mrow .last,.trow.h{font-size:12px}
+.mtile .tn{font-size:13.5px}
+.bench,.scorers{font-size:12.5px}
+.fact small{font-size:11px}.fact b{font-size:14px}
+.tk-it{font-size:13.5px}.tk-sub{font-size:12px}.tk-tag{font-size:11px}
+.empty{font-size:14px}
+html[data-couch="1"] body{font-size:17px}
+html[data-couch="1"] .tag{font-size:13px}
+html[data-couch="1"] .mtile .st,html[data-couch="1"] .htile .hd,html[data-couch="1"] .htile .ft,html[data-couch="1"] .mrow .last{font-size:14px}
+html[data-couch="1"] .note,html[data-couch="1"] .legend{font-size:14.5px}
+
+/* ---------- 2. pelle di ogni sport: font dei pulsanti, colori, forma ---------- */
+/* casa (neutra) */
+.sp-home,body[data-sport="home"]{--f-ui:"Archivo",system-ui,sans-serif;--ui-w:800;--ui-st:normal;--ui-tt:uppercase;--ui-ls:.06em;--ui-stretch:110%;
+  --btn-r:10px;--btn-clip:none;--btn-bw:1px;--sa-ink:#ffffff;--sa2:#ff8f8f;--tint:#e5383b}
+/* calcio: angoli tagliati come le toppe delle maglie, verde prato e bianco gesso */
+.sp-calcio,body[data-sport="calcio"]{--f-ui:"Archivo",system-ui,sans-serif;--ui-w:800;--ui-st:normal;--ui-tt:uppercase;--ui-ls:.07em;--ui-stretch:82%;
+  --btn-r:2px;--btn-clip:polygon(7px 0,calc(100% - 7px) 0,100% 7px,100% calc(100% - 7px),calc(100% - 7px) 100%,7px 100%,0 calc(100% - 7px),0 7px);--btn-bw:1px;--sa-ink:#06130b;--sa2:#e8f5ec;--tint:#2fbf71}
+/* basket: pillola tonda come il pallone, arancio e cuoio */
+.sp-basket,body[data-sport="basket"]{--f-ui:"Archivo",system-ui,sans-serif;--ui-w:900;--ui-st:normal;--ui-tt:uppercase;--ui-ls:.05em;--ui-stretch:122%;
+  --btn-r:999px;--btn-clip:none;--btn-bw:2px;--sa-ink:#1a0b02;--sa2:#ffd2a8;--tint:#f5803e}
+/* tennis: corsivo elegante, angoli alternati, giallo pallina e terra rossa */
+.sp-tennis,body[data-sport="tennis"]{--f-ui:"Fraunces",Georgia,serif;--ui-w:800;--ui-st:italic;--ui-tt:none;--ui-ls:.01em;--ui-stretch:100%;
+  --btn-r:14px 3px 14px 3px;--btn-clip:none;--btn-bw:1px;--sa-ink:#141a02;--sa2:#e07a3f;--tint:#c9dc3c}
+/* rugby: squadrati e robusti, bordo spesso, banda come le maglie a righe, azzurro */
+.sp-rugby,body[data-sport="rugby"]{--f-ui:"Alfa Slab One",Rockwell,serif;--ui-w:400;--ui-st:normal;--ui-tt:uppercase;--ui-ls:.05em;--ui-stretch:100%;
+  --btn-r:3px;--btn-clip:none;--btn-bw:2px;--sa-ink:#04121b;--sa2:#f1f2f1;--tint:#3fa7d6}
+/* moto: parallelogramma "in velocità", font da cronometro, rosso e bianco cordolo */
+.sp-moto,body[data-sport="moto"]{--f-ui:"Orbitron",var(--f-mono);--ui-w:700;--ui-st:normal;--ui-tt:uppercase;--ui-ls:.08em;--ui-stretch:100%;
+  --btn-r:0;--btn-clip:polygon(9px 0,100% 0,calc(100% - 9px) 100%,0 100%);--btn-bw:1px;--sa-ink:#ffffff;--sa2:#f6f6f6;--tint:#e5383b}
+/* golf: maiuscole incise come sui trofei, cartellino con doppio filo, oro su verde fairway */
+.sp-golf,body[data-sport="golf"]{--f-ui:"Cinzel",Georgia,serif;--ui-w:700;--ui-st:normal;--ui-tt:uppercase;--ui-ls:.1em;--ui-stretch:100%;
+  --btn-r:6px;--btn-clip:none;--btn-bw:1px;--sa-ink:#0b2414;--sa2:#1f6b3a;--tint:#2e8a52}
+
+/* pannelli leggermente tinti con il colore dello sport */
+:root{--panel:color-mix(in srgb,#101624 92%,var(--tint,#101624))}
+body{--panel:color-mix(in srgb,#101624 91%,var(--tint));--panel2:color-mix(in srgb,#161d2d 88%,var(--tint))}
+html[data-frame] .card{background:color-mix(in srgb,color-mix(in srgb,#05080f 90%,var(--tint)) 84%,transparent)}
+/* anello di focus nel colore dello sport (telecomando e tastiera) */
+:focus-visible{outline:3px solid var(--sa);outline-offset:3px;border-radius:6px}
+
+/* ---------- 3. pulsanti: stessa struttura, forma e font dello sport ---------- */
+.btn,.chip,.tbtn,.seg2 button,.daynav button,.menu button,.seg button,.tk-x,.mbtn{
+  font-family:var(--f-ui);font-weight:var(--ui-w);font-style:var(--ui-st);text-transform:var(--ui-tt);letter-spacing:var(--ui-ls);font-stretch:var(--ui-stretch);font-synthesis:none;
+  transition:background-color .15s,border-color .15s,color .15s,transform .1s,box-shadow .15s}
+.btn,.chip,.tbtn,.menu button{min-height:var(--btn-h);border-radius:var(--btn-r);clip-path:var(--btn-clip);border-width:var(--btn-bw)}
+.chip{min-height:var(--chip-h);padding:0 15px;font-size:13px;color:var(--text);border-color:color-mix(in srgb,var(--sa) 22%,var(--line))}
+.chip .n{font-family:var(--f-mono);font-style:normal;color:var(--muted)}
+.btn{padding:0 16px;font-size:13px}
+.tbtn{padding:0 13px;font-size:12.5px}
+.btn.pri{background:var(--sa);border-color:var(--sa);color:var(--sa-ink)}
+.chip:hover,.btn:hover,.tbtn:hover{border-color:var(--sa);color:var(--text)}
+.chip:active,.btn:active,.tbtn:active,.seg2 button:active,.daynav button:active{transform:translateY(1px)}
+.chip[aria-pressed="true"]{background:var(--sa);border-color:var(--sa);color:var(--sa-ink)}
+.chip[aria-pressed="true"] .n{color:var(--sa-ink);opacity:.75}
+.chip[aria-pressed="true"] .ico{color:var(--sa-ink)}
+/* rugby: banda orizzontale come le maglie a righe sul pulsante attivo */
+body[data-sport="rugby"] .chip[aria-pressed="true"],body[data-sport="rugby"] .btn.pri{background:linear-gradient(180deg,var(--sa) 0 74%,#f1f2f1 74% 84%,var(--sa) 84%)}
+/* moto: pulsante attivo con il bordo a cordolo */
+body[data-sport="moto"] .chip[aria-pressed="true"],body[data-sport="moto"] .btn.pri{background:linear-gradient(var(--sa),var(--sa)) top/100% calc(100% - 4px) no-repeat,repeating-linear-gradient(90deg,#ffffff 0 8px,#7a0f12 8px 16px) bottom/100% 4px no-repeat}
+/* golf: doppio filo come il bordo di una scorecard */
+body[data-sport="golf"] .chip[aria-pressed="true"],body[data-sport="golf"] .btn.pri{box-shadow:inset 0 0 0 2px var(--sa),inset 0 0 0 3px #0b2414}
+/* basket: bordo pieno arancio sul pulsante attivo, come la cucitura del pallone */
+body[data-sport="basket"] .chip[aria-pressed="true"]{box-shadow:inset 0 0 0 2px #1a0b02,inset 0 0 0 4px var(--sa)}
+/* calcio: riga di gesso sotto il pulsante attivo */
+body[data-sport="calcio"] .chip[aria-pressed="true"]{box-shadow:inset 0 -3px 0 var(--sa2)}
+/* tennis: rovescio terra rossa sul bordo del pulsante attivo */
+body[data-sport="tennis"] .chip[aria-pressed="true"]{box-shadow:inset 3px 0 0 var(--sa2)}
+
+/* segmenti dentro le schede (2D/3D, Singolare/Doppio, Ospiti/Casa…) */
+.seg2{border-radius:var(--btn-r);clip-path:var(--btn-clip);padding:3px;gap:3px;background:rgba(0,0,0,.35);border-color:color-mix(in srgb,var(--sa) 25%,var(--line))}
+.seg2 button{min-height:30px;padding:0 12px;font-size:12px;border-radius:var(--btn-r);clip-path:var(--btn-clip);color:var(--muted)}
+.seg2 button[aria-pressed="true"]{background:var(--sa);color:var(--sa-ink)}
+@media (pointer:coarse){.seg2 button{min-height:38px}}
+html[data-couch="1"] .seg2 button{min-height:40px;font-size:14px}
+/* giorno precedente/successivo */
+.daynav{border-radius:var(--btn-r);clip-path:var(--btn-clip);border-color:color-mix(in srgb,var(--sa) 25%,var(--line));padding:3px}
+.daynav button{min-height:calc(var(--chip-h) - 8px);min-width:38px;font-size:13px;border-radius:var(--btn-r);color:var(--text)}
+.daynav button.cur{min-width:150px;font-style:normal;letter-spacing:0;text-transform:none}
+.daynav button:not(.cur):hover{background:var(--sa);color:var(--sa-ink)}
+/* menu ⋯ e stelline: area toccabile più grande */
+.mbtn{min-width:36px;min-height:32px;font-size:15px;color:var(--text)}
+.menu button{padding:0 14px;font-size:12.5px;color:var(--text)}
+.menu button[aria-pressed="true"]{background:var(--sa);border-color:var(--sa);color:var(--sa-ink)}
+.star{min-width:30px;min-height:30px;font-size:17px;color:var(--dim);border-radius:50%}
+.star:hover{color:var(--yellow)}
+@media (pointer:coarse){.star{min-width:40px;min-height:40px}.mbtn{min-width:44px;min-height:40px}}
+/* impostazioni: segmenti */
+.seg button{min-height:40px;font-size:12px;border-radius:var(--btn-r)}
+.seg button[aria-pressed="true"]{background:var(--sa);color:var(--sa-ink)}
+/* barra in alto: linguette degli sport con la forma del proprio sport quando sono attive */
+.tabs button{min-height:40px;border-radius:var(--btn-r);font-size:13px}
+.tabs button[aria-pressed="true"]{clip-path:var(--btn-clip);color:var(--sa-ink)}
+.tabs button[aria-pressed="true"] .ico{color:var(--sa-ink)}
+.tbtn{font-size:12.5px;color:var(--text)}
+/* filtro "Live ora": sempre rosso, ma con la forma dello sport */
+.chip.hot[aria-pressed="true"]{color:#fff}
+/* pulsanti grandi su TV */
+html[data-couch="1"] .chip{font-size:15px;padding:0 18px}
+html[data-couch="1"] .btn{font-size:15px}
+html[data-couch="1"] .tabs button{min-height:48px;font-size:16px}
+/* la pelle dello sport vale anche nello stile Regia TV (che altrimenti impone il suo font) */
+html[data-style] body .chip,html[data-style] body .btn,html[data-style] body .tbtn,html[data-style] body .seg2 button,html[data-style] body .menu button,html[data-style] body .seg button{
+  font-family:var(--f-ui);font-weight:var(--ui-w);font-style:var(--ui-st);text-transform:var(--ui-tt);letter-spacing:var(--ui-ls);font-stretch:var(--ui-stretch)}
+html[data-style] body .daynav button.cur{font-family:var(--f-mono);font-style:normal;text-transform:none;letter-spacing:0}
+.tabs button .ln{font-size:11.5px;min-width:20px;padding:2px 6px}
+.photocredit{font-size:11.5px}
+.bench h4,.rounds h4{font-size:12px}
+
+/* =====================================================================
+   DIRETTA TV: spenta = compatta e utile; accesa = schermo 16:9
+   ===================================================================== */
+.tvbar{display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+.tvsvc{display:flex;flex-wrap:wrap;gap:8px}
+.tvsvc .chip{min-height:var(--chip-h)}
+.tvcustom{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tvcustom input[type=url]{flex:1 1 220px;min-height:var(--btn-h);background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:0 10px;color:var(--text)}
+.tvacts{display:flex;gap:8px;flex-wrap:wrap}
+.tvacts .go{font-size:14px;padding:0 20px;min-height:calc(var(--btn-h) + 6px)}
+/* spenta: niente schermo nero, solo testo e partite in diretta */
+.card[data-k="tv"]:not(.tv-on) .tvstage{aspect-ratio:auto;background:transparent;overflow:visible;border-radius:0}
+.card[data-k="tv"]:not(.tv-on) .tvidle{position:static;display:flex;flex-direction:column;align-items:stretch;gap:12px;padding:0;background:none;text-align:left}
+.tvtxt{color:var(--muted);font-size:13.5px;line-height:1.5}
+.tvlive{display:flex;flex-direction:column;gap:6px}
+.tvlive h4{margin:2px 0 2px;display:flex;align-items:center;gap:8px;font:700 12px/1.2 var(--f-ui);font-style:var(--ui-st);text-transform:var(--ui-tt);letter-spacing:var(--ui-ls);color:var(--muted)}
+.tvl{display:grid;grid-template-columns:22px 1fr auto;gap:10px;align-items:center;min-height:var(--btn-h);padding:6px 12px;background:var(--panel2);border:1px solid color-mix(in srgb,var(--sa) 20%,var(--line));border-radius:var(--btn-r);color:var(--text);text-align:left;font-size:14px}
+.tvl .ico{width:18px;height:18px;color:var(--sa)}
+.tvl-t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tvl-s{font:700 12px/1 var(--f-mono);color:var(--red);white-space:nowrap}
+.tvl:hover{border-color:var(--sa)}
+/* accesa: schermo 16:9 come prima */
+.card[data-k="tv"].tv-on .tvstage{aspect-ratio:16/9;background:#000}
+.card[data-k="tv"].tv-on .tvidle{position:absolute;inset:0}
+.card[data-k="tv"].tv-on .tvlive{display:none}
+.card[data-k="tv"].tv-on .tvsvc{display:none}
+html[data-couch="1"] .tvl{font-size:16px}
+html[data-couch="1"] .tvtxt{font-size:15.5px}
+.tvbar{align-items:stretch}
+.tvacts{justify-content:flex-start}
+/* telefono: logo e pulsanti sulla stessa riga, più spazio ai contenuti */
+@media (max-width:760px){
+  .top{gap:8px 8px;padding:8px 12px}
+  .logo{font-size:15px}
+  .logo span,.logo b{padding:6px 7px}
+  .topr{gap:6px}
+  .tbtn{padding:0 10px;min-height:40px}
+}
+@media (max-width:760px){
+  .tvl{grid-template-columns:22px 1fr;row-gap:4px;padding:8px 12px}
+  .tvl-t{white-space:normal}
+  .tvl-s{grid-column:2}
+}
+
+/* ---------- golf: classifica e scorecard ---------- */
+.gname{font-family:var(--f-sport);font-weight:900;letter-spacing:.04em;font-size:16px}
+.gboard tbody tr{cursor:pointer}
+.gboard tbody tr.sel td{background:color-mix(in srgb,var(--sa) 16%,transparent)}
+.gboard tr.out td{opacity:.55}
+.gboard .rr{color:var(--muted);font-family:var(--f-mono)}
+.gpar{font-family:var(--f-mono)}
+.gpar.un{color:#ff6b6b}.gpar.ov{color:#8fb7ff}
+.ghead{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.ghead .gbig{font:900 30px/1 var(--f-score);letter-spacing:.02em}
+.ghead .gbig.un{color:#ff6b6b}.ghead .gbig.ov{color:#8fb7ff}
+.gsc{table-layout:fixed;min-width:520px}
+.gsc th,.gsc td{text-align:center;padding:4px 2px}
+.gsc th.l,.gsc td.l{text-align:left;width:56px;padding-left:6px}
+.gsc tr.gh th{font-family:var(--f-ui);color:var(--sa);font-size:11px;border-bottom:1px solid color-mix(in srgb,var(--sa) 40%,transparent)}
+.gsc tr.gh th:last-child,.gsc td:last-child{background:color-mix(in srgb,var(--sa) 10%,transparent)}
+.gsc tr.gp td{color:var(--muted);font-family:var(--f-mono);font-size:12px}
+.gsc tr.gs td{padding:6px 2px 10px}
+/* segni della scorecard: birdie cerchio, eagle doppio cerchio, bogey quadrato, doppio bogey doppio quadrato */
+.gm{display:inline-grid;place-items:center;min-width:26px;height:26px;font:700 14px/1 var(--f-mono);border:2px solid transparent}
+.gm.bi{border-color:#ff6b6b;border-radius:50%;color:#ffb3b3}
+.gm.eg{border-color:#d8b45a;border-radius:50%;box-shadow:0 0 0 2px var(--panel,#101624),0 0 0 4px #d8b45a;color:#ffe7a8}
+.gm.bo{border-color:#8fb7ff;border-radius:2px;color:#c9dbff}
+.gm.db{border-color:#8fb7ff;border-radius:2px;box-shadow:0 0 0 2px var(--panel,#101624),0 0 0 4px #8fb7ff;color:#c9dbff}
+.glegend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:10px;font-size:12.5px;color:var(--muted)}
+.glegend .gm{min-width:20px;height:20px;font-size:11px;margin-right:4px;transform:scale(.85)}
+.gita{grid-template-columns:auto 1fr auto!important;cursor:pointer}
+.gita .gpos{font:900 20px/1 var(--f-score);min-width:42px}
+html[data-couch="1"] .gboard .rr{display:none}
+/* sette linguette: sotto i 1700px i pulsanti in alto mostrano solo il simbolo (il nome resta nel suggerimento) */
+@media (max-width:1700px){.topr .tbtn span{display:none}.topr .tbtn{padding:0 11px}}
+
+/* telefono: se ci sono pulsanti nell'intestazione, vanno su una riga sotto al titolo invece di schiacciarlo */
+@media (max-width:640px){
+  .card>header:has(.tools>*){flex-wrap:wrap}
+  .card>header:has(.tools>*) h2{flex:0 1 auto;max-width:calc(100% - 44px)}
+  .card>header:has(.tools>*) .tools{order:5;flex:1 1 100%;margin-left:0;justify-content:flex-start;flex-wrap:wrap;padding:4px 0 2px}
+  .card>header:has(.tools>*) .mbtn{margin-left:auto}
+  .card>header:has(.tools>*) .sub{flex:1 1 0}
 }

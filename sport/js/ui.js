@@ -75,8 +75,15 @@ UI.empty=(t)=>'<div class="empty">'+t+'</div>';
 
 /* ---------- sottobarra: competizioni e giorno ---------- */
 UI.chips=function(items,cur,on,extraCls){const w=document.createElement("div");w.className="chips "+(extraCls||"");
-  w.innerHTML=items.map(it=>'<button type="button" class="chip" data-v="'+h(it.k)+'" aria-pressed="'+(it.k===cur)+'">'+(it.live?'<i class="lv" title="in diretta"></i>':"")+(it.ic?SL.ico(it.ic):"")+h(it.n)+(it.c!=null?' <span class="n">'+it.c+'</span>':"")+'</button>').join("");
+  w.innerHTML=items.map(it=>'<button type="button" class="chip'+(it.hot?" hot"+(it.c?"":" zero"):"")+'"'+(it.hot?' data-sp="'+h(it.hot)+'"':"")+' data-v="'+h(it.k)+'" aria-pressed="'+(it.k===cur)+'">'+(it.live||it.hot?'<i class="lv" title="in diretta"></i>':"")+(it.ic?SL.ico(it.ic):"")+h(it.n)+(it.c!=null?' <span class="n">'+it.c+'</span>':"")+'</button>').join("");
   w.addEventListener("click",e=>{const b=e.target.closest("button");if(b)on(b.dataset.v);});return w;};
+/* filtro "Live ora": eventi in corso adesso in tutte le competizioni dello sport; il numero si aggiorna da solo */
+UI.liveCount=sport=>(SL.live.bySport[sport]||[]).filter(x=>x.live).length;
+UI.liveChip=sport=>({k:"live",n:"Live ora",hot:sport,c:UI.liveCount(sport)});
+UI.refreshLiveChips=()=>document.querySelectorAll(".chip.hot[data-sp]").forEach(b=>{const n=UI.liveCount(b.dataset.sp);const el=b.querySelector(".n");if(el)el.textContent=n;b.classList.toggle("zero",!n);});
+UI.liveNote=t=>{const s=document.createElement("span");s.className="muted";s.innerHTML='<span class="tag live">LIVE</span> '+h(t);return s;};
+/* con la Diretta TV in pagina, la barra di competizioni e partite le si affianca a destra */
+UI.dock=(sub,main)=>{if(!SL.solo&&main.querySelector('.card[data-k="tv"]:not([hidden])')){sub.classList.add("ingrid");main.prepend(sub);}};
 UI.daynav=function(off,on){const w=document.createElement("div");w.className="daynav";const d=SL.addDays(Date.now(),off);
   w.innerHTML='<button type="button" data-d="-1" aria-label="Giorno precedente">‹</button><button type="button" class="cur" data-d="0">'+h(off===0?"Oggi · "+SL.fmtDay(d):SL.relDay(d)===SL.fmtDay(d)?SL.fmtDay(d):SL.relDay(d)+" · "+SL.fmtDay(d))+'</button><button type="button" data-d="1" aria-label="Giorno successivo">›</button>';
   w.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const v=+b.dataset.d;on(v===0?0:off+v);});return w;};
@@ -90,6 +97,7 @@ UI.openSettings=function(){
   segInit("setStyle",S.style,v=>{S.style=v;SL.saveSettings();SL.applyLook();bcLook();SL.emit("resize");});
   segInit("setCouch",S.couch,v=>{S.couch=v;SL.saveSettings();SL.applyLook();bcLook();couchNow();SL.route();});
   segInit("setAlerts",S.alerts,v=>{S.alerts=v;SL.saveSettings();});
+  segInit("setTilt",S.tilt===false?"off":"on",v=>{S.tilt=v==="on";SL.saveSettings();if(!S.tilt)document.querySelectorAll(".card.tilting").forEach(c=>{c.classList.remove("tilting");c.style.cssText="";});});
   $("setSound").checked=!!S.sound;$("setSound").onchange=e=>{S.sound=e.target.checked;SL.saveSettings();};
   couchNow();favRender();
   const ext=SL.ext(),dat=SL.extData();
@@ -97,7 +105,7 @@ UI.openSettings=function(){
   $("dlgSettings").showModal();
 };
 function couchNow(){$("couchNow").textContent=SL.couch()?"Ora è attiva.":"Ora non è attiva.";}
-function bcLook(){try{SL.chan&&SL.chan.postMessage({type:"look",settings:{style:SL.settings.style,couch:SL.settings.couch}});}catch(e){}}
+function bcLook(){try{SL.chan&&SL.chan.postMessage({type:"look",settings:{style:SL.settings.style,couch:SL.settings.couch,tilt:SL.settings.tilt}});}catch(e){}}
 function favRender(){const L=SL.fav.list;$("favCount").textContent=L.length?"("+L.length+")":"";
   $("favList").innerHTML=L.length?L.map((x,i)=>'<li class="sp-'+h(x.s)+'">'+(x.s?SL.ico(x.s):"")+" "+h(x.n)+'<button type="button" data-i="'+i+'" aria-label="Togli '+h(x.n)+'">✕</button></li>').join(""):'<li class="muted">Nessun preferito.</li>';}
 $("favList")&&$("favList").addEventListener("click",e=>{const b=e.target.closest("button[data-i]");if(!b)return;const it=SL.fav.list[+b.dataset.i];if(it)SL.fav.toggle(it);favRender();});
@@ -178,66 +186,103 @@ const SVC={
   raiplay:{n:"RaiPlay",u:"https://www.raiplay.it/dirette",frame:true},
   tv8:{n:"TV8",u:"https://www.tv8.it/streaming",frame:true},
   nba:{n:"NBA League Pass",u:"https://www.nba.com/watch/league-pass-stream",frame:true},
+  elt:{n:"EuroLeague TV",u:"https://euroleague.tv/",frame:true},
   supertennis:{n:"SuperTennis",u:"https://www.supertennis.tv/",frame:true},
   hbomax:{n:"HBO Max (Eurosport)",u:"https://play.hbomax.com/",frame:true},
   custom:{n:"Altro sito…",u:"",frame:false}
 };
-const SVC_BY={calcio:["dazn","skygo","now","prime","infinity","raiplay","tv8"],basket:["nba","skygo","now"],tennis:["skygo","now","supertennis","hbomax","raiplay"],rugby:["skygo","now","tv8","raiplay"],moto:["skygo","now","tv8"],home:["skygo","now","dazn","prime","raiplay","tv8"]};
+const SVC_BY={calcio:["dazn","skygo","now","prime","infinity","raiplay","tv8"],basket:["nba","skygo","now","elt"],"basket-eu":["elt","skygo","now","dazn"],tennis:["skygo","now","supertennis","hbomax","raiplay"],rugby:["skygo","now","tv8","raiplay"],moto:["skygo","now","tv8"],golf:["skygo","now"],home:["skygo","now","dazn","prime","raiplay","tv8"]};
 const TV=SL.TV={win:null,at:null,card:null};
-UI.tv=function(c,sport){
-  const list=(SVC_BY[sport]||SVC_BY.home).concat("custom");
-  let cfg=SL.store.get("tv."+sport,{svc:list[0],url:"",embed:false});if(list.indexOf(cfg.svc)<0)cfg.svc=list[0];
-  const save=()=>SL.store.set("tv."+sport,cfg);
+UI.tv=function(c,sport,variant){
+  /* variant: stessa pagina ma servizi diversi (es. basket europeo: prima EuroLeague TV), scelta ricordata a parte */
+  const list=(SVC_BY[variant?sport+"-"+variant:sport]||SVC_BY[sport]||SVC_BY.home).concat("custom"),skey="tv."+sport+(variant?"-"+variant:"");
+  let cfg=SL.store.get(skey,{svc:list[0],url:"",embed:false});if(list.indexOf(cfg.svc)<0)cfg.svc=list[0];
+  const save=()=>SL.store.set(skey,cfg);
   const svc=()=>SVC[cfg.svc]||SVC[list[0]];
   const url=()=>{const u=cfg.svc==="custom"?cfg.url:svc().u;return/^https:\/\//i.test(u||"")?u:"";};
   const inline=()=>!!url()&&!SL.inFrame&&((svc().frame&&!!SL.ext())||(cfg.svc==="custom"&&cfg.embed));
   const tvLike=SL.isTVLike();
-  c.body.innerHTML='<div class="tvbar"><select aria-label="Servizio">'+list.map(k=>'<option value="'+k+'"'+(k===cfg.svc?" selected":"")+'>'+h(SVC[k].n)+'</option>').join("")+'</select>'+
-    '<input type="url" placeholder="https://…" aria-label="Indirizzo del sito" value="'+h(cfg.url)+'">'+
-    '<label class="chk emb"><input type="checkbox"'+(cfg.embed?" checked":"")+'> nel riquadro</label>'+
-    '<button type="button" class="btn pri go"></button><button type="button" class="btn stop">■ STOP</button><button type="button" class="btn fs">⛶</button></div>'+
-    '<div class="tvstage"><iframe title="Diretta TV" hidden allow="autoplay; encrypted-media; fullscreen; picture-in-picture; storage-access" referrerpolicy="strict-origin-when-cross-origin" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation allow-storage-access-by-user-activation"></iframe><div class="tvidle"><div class="big">Diretta TV</div><div class="tx"></div></div></div><div class="note msg" hidden></div>';
-  const q=s=>c.body.querySelector(s),fr=q("iframe"),sel=q("select"),inp=q("input[type=url]"),emb=q(".emb input");
+  /* due stati: spenta = riquadro compatto e utile (servizi + partite in diretta); accesa = schermo 16:9 */
+  c.body.innerHTML='<div class="tvbar"><div class="tvsvc" role="group" aria-label="Servizio">'+list.map(k=>'<button type="button" class="chip" data-svc="'+k+'" aria-pressed="'+(k===cfg.svc)+'">'+h(SVC[k].n)+'</button>').join("")+'</div>'+
+    '<div class="tvcustom"><input type="url" placeholder="https://…" aria-label="Indirizzo del sito" value="'+h(cfg.url)+'"><label class="chk emb"><input type="checkbox"'+(cfg.embed?" checked":"")+'> nel riquadro</label></div>'+
+    '<div class="tvacts"><button type="button" class="btn pri go"></button><button type="button" class="btn stop">■ STOP</button><button type="button" class="btn fs" aria-label="Schermo intero">⛶</button></div></div>'+
+    '<div class="tvstage"><iframe title="Diretta TV" hidden allow="autoplay; encrypted-media; fullscreen; picture-in-picture; storage-access" referrerpolicy="strict-origin-when-cross-origin" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation allow-storage-access-by-user-activation"></iframe>'+
+    '<div class="tvidle"><div class="tvtxt"></div><div class="tvlive"></div></div></div><div class="note msg" hidden></div>';
+  const q=s=>c.body.querySelector(s),fr=q("iframe"),inp=q(".tvcustom input[type=url]"),emb=q(".emb input");
   let loaded=false;
-  const render=()=>{const s=svc(),alive=!!(TV.win&&!TV.win.closed&&TV.card===c.el),show=inline()&&loaded;
-    inp.hidden=cfg.svc!=="custom";q(".emb").hidden=cfg.svc!=="custom";
-    q(".go").textContent=show?"↻ RICARICA":alive?"↻ RIPOSIZIONA":tvLike?"▶ APRI "+(cfg.svc==="custom"?"SITO":s.n.toUpperCase()):"▶ COLLEGA "+(cfg.svc==="custom"?"SITO":s.n.toUpperCase());
+  const on=()=>(inline()&&loaded)||!!(TV.win&&!TV.win.closed&&TV.card===c.el);
+  const render=()=>{const s=svc(),alive=!!(TV.win&&!TV.win.closed&&TV.card===c.el),show=inline()&&loaded,nm=cfg.svc==="custom"?"SITO":s.n.toUpperCase();
+    c.el.classList.toggle("tv-on",show||alive);
+    q(".tvcustom").hidden=cfg.svc!=="custom";
+    c.body.querySelectorAll("[data-svc]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.svc===cfg.svc)));
+    q(".go").textContent=show?"↻ RICARICA":alive?"↻ RIPOSIZIONA":(tvLike?"▶ APRI ":"▶ COLLEGA ")+nm;
     q(".stop").hidden=!(alive||show);q(".fs").hidden=!show;fr.hidden=!show;q(".tvidle").hidden=show;
-    c.sub(show?s.n+" nel riquadro":alive?s.n+" in finestra agganciata":"");
-    q(".tvidle .tx").textContent=tvLike?"Su Smart TV e tablet il video non può stare dentro l'app: APRI avvia "+s.n+" (o la sua app). Torna qui con il tasto indietro.":
-      alive?"La diretta è nella finestra di "+s.n+" sopra questo riquadro. Se hai spostato o ridimensionato, premi RIPOSIZIONA.":
-      inline()?"Premi COLLEGA: "+s.n+" si carica qui dentro. Accedi con il tuo abbonamento come sul sito.":
-      s.frame?"Con l'estensione per PC (Impostazioni ⚙) "+s.n+" si vede qui dentro. Senza, COLLEGA lo apre in una finestra appoggiata sopra il riquadro.":
-      "Premi COLLEGA: il sito si apre in una finestra appoggiata sopra il riquadro.";};
+    c.sub(show?s.n+" nel riquadro":alive?s.n+" in finestra agganciata":"spenta");
+    q(".tvtxt").textContent=tvLike?"Su Smart TV e tablet il video si apre nell'app o nel sito di "+s.n+": torna qui con il tasto indietro.":
+      alive?"La diretta è nella finestra di "+s.n+" sopra questo riquadro. Se hai spostato la pagina, premi RIPOSIZIONA.":
+      inline()?"Scegli il servizio e premi COLLEGA: "+s.n+" si carica qui dentro, con il tuo abbonamento.":
+      s.frame?"Premi COLLEGA: "+s.n+" si apre in una finestra appoggiata qui sopra. Con l'estensione per PC (⚙) si vede dentro il riquadro.":
+      "Premi COLLEGA: il sito si apre in una finestra appoggiata qui sopra.";
+    liveList();};
+  /* finché è spenta: le partite in diretta di questo sport, toccabili */
+  const liveList=()=>{const box=q(".tvlive");if(!box)return;if(on()){box.innerHTML="";return;}
+    const L=(SL.live.bySport[sport]||[]);const live=L.filter(x=>x.live).sort((a,b)=>b.important-a.important).slice(0,4);
+    const fmt=x=>{const l=x.lines||[];if(x.sport==="moto")return l.slice(0,2).map(y=>y.n).join(" · ");const a=l[0]||{},b=l[1]||{};const num=v=>v!==""&&v!=null&&!isNaN(+v);
+      return h(a.n||"")+(num(a.v)&&num(b.v)?" <b>"+h(a.v)+"-"+h(b.v)+"</b> ":" – ")+h(b.n||"");};
+    if(live.length){box.innerHTML='<h4><span class="tag live">LIVE</span> In diretta ora · tocca per aprire</h4>'+live.map(x=>'<button type="button" class="tvl" data-go="'+h(JSON.stringify(x.go||{sport}))+'">'+SL.ico(x.sport)+'<span class="tvl-t">'+fmt(x)+'</span><span class="tvl-s">'+h(x.status||"")+'</span></button>').join("");return;}
+    const nx=L.filter(x=>x.state==="pre").sort((a,b)=>new Date(a.date)-new Date(b.date))[0];
+    box.innerHTML=nx?'<h4>Nessuna partita in diretta · la prossima</h4><button type="button" class="tvl" data-go="'+h(JSON.stringify(nx.go||{sport}))+'">'+SL.ico(nx.sport)+'<span class="tvl-t">'+fmt(nx)+'</span><span class="tvl-s">'+h(SL.when(nx.date))+'</span></button>':'<h4>Nessuna partita in diretta in questo momento</h4>';};
+  c.body.addEventListener("click",e=>{const g=e.target.closest(".tvl[data-go]");if(g){try{SL.go(JSON.parse(g.dataset.go));}catch(x){}return;}
+    const b=e.target.closest("[data-svc]");if(b&&b.dataset.svc!==cfg.svc){stop();cfg.svc=b.dataset.svc;save();render();if(cfg.svc==="custom")inp.focus();}});
+  SL.onPage("live",liveList);
   const msg=(t)=>{const m=q(".msg");m.hidden=!t;m.textContent=t||"";};
   const rect=()=>{const r=q(".tvstage").getBoundingClientRect();if(!r.width)return null;const bx=Math.max(0,(window.outerWidth-window.innerWidth)/2),by=Math.max(0,window.outerHeight-window.innerHeight-bx);
     return{x:Math.round(window.screenX+bx+r.left),y:Math.round(window.screenY+by+r.top),w:Math.round(r.width),h:Math.round(r.height)};};
   const openWin=()=>{const u=url();if(!u){msg("Scrivi l'indirizzo del sito (deve iniziare con https://).");return;}
     if(tvLike){window.open(u,"_blank");return;}
     if(SL.inFrame){msg("Dentro un riquadro non si possono aprire finestre: apri il sito direttamente.");return;}
+    c.el.classList.add("tv-on"); /* prima allarga lo schermo, poi ci appoggia sopra la finestra */
     const R=rect()||{x:screenX+40,y:screenY+40,w:960,h:540};try{TV.win&&!TV.win.closed&&TV.win.close();}catch(e){}
     let w=null;try{w=window.open("about:blank","sl_tv","popup=yes,left="+R.x+",top="+R.y+",width="+R.w+",height="+R.h);}catch(e){}
-    if(!w){msg("Il browser ha bloccato la finestra: consenti i popup per questo sito e riprova.");return;}
+    if(!w){c.el.classList.remove("tv-on");msg("Il browser ha bloccato la finestra: consenti i popup per questo sito e riprova.");return;}
     try{w.moveTo(R.x,R.y);w.resizeTo(R.w,R.h);w.location.href=u;}catch(e){}
     TV.win=w;TV.at=R;TV.card=c.el;msg("");render();};
   const connect=()=>{if(inline()){loaded=true;fr.src=url();msg("");render();
       let got=false;fr.onload=()=>{got=true;};setTimeout(()=>{if(loaded&&!got)msg("Il sito non risponde nel riquadro. Se resta nero, premi ■ STOP e poi apri in finestra togliendo l'estensione.");},12000);return;}
     openWin();};
   const stop=()=>{try{TV.win&&TV.card===c.el&&TV.win.close();}catch(e){}if(TV.card===c.el)TV.win=null;loaded=false;fr.removeAttribute("src");render();};
-  sel.onchange=()=>{cfg.svc=sel.value;save();stop();render();};
   inp.onchange=()=>{cfg.url=inp.value.trim();save();render();};
   emb.onchange=()=>{cfg.embed=emb.checked;save();render();};
   q(".go").onclick=connect;q(".stop").onclick=stop;
   q(".fs").onclick=()=>{try{const p=q(".tvstage").requestFullscreen();p&&p.catch&&p.catch(()=>{});}catch(e){}};
-  /* la finestra agganciata segue il riquadro */
-  const follow=setInterval(()=>{if(!TV.win||TV.win.closed||TV.card!==c.el)return;const r=rect();if(!r)return;const a=TV.at||{};
+  /* la finestra agganciata segue il riquadro; se l'hai chiusa a mano il riquadro torna compatto */
+  const follow=setInterval(()=>{if(TV.card===c.el&&TV.win&&TV.win.closed){TV.win=null;render();return;}
+    if(!TV.win||TV.win.closed||TV.card!==c.el)return;const r=rect();if(!r)return;const a=TV.at||{};
     if(Math.abs(a.x-r.x)>2||Math.abs(a.y-r.y)>2||Math.abs(a.w-r.w)>2||Math.abs(a.h-r.h)>2){try{TV.win.moveTo(r.x,r.y);TV.win.resizeTo(r.w,r.h);TV.at=r;}catch(e){}}},1200);
   SL.onCleanup(()=>clearInterval(follow));
   render();
 };
 
+/* ---------- riquadri 3D: inclinazione e riflesso seguono il mouse (solo con mouse, non su TV/touch) ---------- */
+UI.tilt=function(){
+  let cur=null,raf=0,ev=null;
+  const reset=c=>{if(!c)return;c.classList.remove("tilting");c.style.removeProperty("--rx");c.style.removeProperty("--ry");c.style.removeProperty("--gx");c.style.removeProperty("--gy");};
+  document.addEventListener("pointermove",e=>{
+    if(SL.settings.tilt===false||e.pointerType!=="mouse"||SL.couch()||matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+    const c=e.target.closest&&e.target.closest(".card:not(.full)");
+    if(c!==cur){reset(cur);cur=c;}
+    if(!c)return;ev=e;if(raf)return;
+    raf=requestAnimationFrame(()=>{raf=0;const r=c.getBoundingClientRect(),x=(ev.clientX-r.left)/r.width,y=(ev.clientY-r.top)/r.height;
+      const max=r.width>900?1.2:r.width>600?2.2:3.5; /* le schede grandi si inclinano meno, per leggere comodi */
+      c.classList.add("tilting");c.style.setProperty("--ry",((x-.5)*2*max).toFixed(2)+"deg");c.style.setProperty("--rx",((.5-y)*2*max).toFixed(2)+"deg");
+      c.style.setProperty("--gx",(x*100).toFixed(1)+"%");c.style.setProperty("--gy",(y*100).toFixed(1)+"%");});
+  },{passive:true});
+  document.addEventListener("pointerleave",()=>{reset(cur);cur=null;});
+};
+
 /* ---------- avvio ---------- */
 UI.init=function(){
+  UI.tilt();
   $("btnSettings").addEventListener("click",UI.openSettings);
   $("btnScreens").addEventListener("click",UI.openScreens);
   $("scrDetect").addEventListener("click",detect);

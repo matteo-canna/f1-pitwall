@@ -40,10 +40,12 @@ V.pitch=function(inner,o){o=o||{};const st='stroke="'+(o.line||"rgba(255,255,255
 };
 
 /* ---------- metà campo NBA: coordinate in piedi, x 0..50, y 0..47 (canestro in alto) ---------- */
-V.court=function(inner){const st='stroke="rgba(255,255,255,.55)" stroke-width=".25" fill="none"';
+/* metà campo in piedi, canestro a (25, 5.25). fiba: linea da tre a 6,75 m (6,60 m negli angoli) invece di quella NBA */
+V.court=function(inner,fiba){const st='stroke="rgba(255,255,255,.55)" stroke-width=".25" fill="none"';
   return'<svg viewBox="-1 -1 52 49" width="100%" role="img" aria-label="Mappa dei tiri" style="height:auto;border-radius:10px;background:linear-gradient(180deg,#5b3a22,#6d4528)">'+
   '<rect x="0" y="0" width="50" height="47" '+st+'/><rect x="17" y="0" width="16" height="19" '+st+' fill="rgba(0,0,0,.12)"/><circle cx="25" cy="19" r="6" '+st+'/>'+
-  '<line x1="3" y1="0" x2="3" y2="14" '+st+'/><line x1="47" y1="0" x2="47" y2="14" '+st+'/><path d="M3 14 A23.75 23.75 0 0 0 47 14" '+st+'/>'+
+  (fiba?'<line x1="3.35" y1="0" x2="3.35" y2="9.93" '+st+'/><line x1="46.65" y1="0" x2="46.65" y2="9.93" '+st+'/><path d="M3.35 9.93 A22.15 22.15 0 0 0 46.65 9.93" '+st+'/>'
+    :'<line x1="3" y1="0" x2="3" y2="14" '+st+'/><line x1="47" y1="0" x2="47" y2="14" '+st+'/><path d="M3 14 A23.75 23.75 0 0 0 47 14" '+st+'/>')+
   '<path d="M21 5.25 A4 4 0 0 0 29 5.25" '+st+'/><line x1="22" y1="4" x2="28" y2="4" stroke="#fff" stroke-width=".35"/><circle cx="25" cy="5.25" r=".75" stroke="#f59b42" stroke-width=".3" fill="none"/>'+
   '<path d="M19 47 A6 6 0 0 1 31 47" '+st+'/>'+inner+'</svg>';
 };

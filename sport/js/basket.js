@@ -1,9 +1,11 @@
-/* Sport LIVE APP — BASKET (NBA)
-   Partite, tabellone con quarti, probabilità di vittoria, mappa tiri 2D/3D, box score, migliori, play-by-play, classifica. Dati: ESPN. */
+/* Sport LIVE APP — BASKET (NBA, EuroLega, EuroCup)
+   NBA: partite, tabellone con quarti, probabilità di vittoria, mappa tiri 2D/3D, box score, migliori, play-by-play, classifica. Dati: ESPN.
+   EuroLega ed EuroCup: vedi eurolega.js (feed ufficiali). */
 (function(){
 "use strict";
 const h=SL.h,E=SL.espn,V=SL.viz,UI=SL.ui;
-const M=SL.sports.basket={name:"Basket NBA",tab:"Basket",icon:"🏀",color:"#f5803e"};
+const M=SL.sports.basket={name:"Basket",tab:"Basket",icon:"🏀",color:"#f5803e"};
+const EU=SL.euro;
 const NY="America/New_York";
 
 /* partite di un giorno italiano: le NBA notturne stanno nella data americana precedente */
@@ -20,15 +22,31 @@ function item(ev){const sc=ev.state!=="pre";
     sig:E.score(ev)+"|"+ev.state+"|"+ev.period,
     lines:[{n:ev.away.name,img:ev.away.logo,v:sc?ev.away.score:"",lose:ev.done&&ev.home.winner},{n:ev.home.name,img:ev.home.logo,v:sc?ev.home.score:"",lose:ev.done&&ev.away.winner}],
     foot:ev.state==="pre"?ev.venue:(ev.away.rec&&ev.home.rec?ev.away.rec+" · "+ev.home.rec:""),go:{sport:"basket",e:ev.id,d:SL.dayOff(ev.date)||""}};}
-M.homeFeed=async(day,ttl)=>(await dayGames(day,ttl)).map(item);
-M.onChange=function(p,it){const a=p.ev,b=it.ev,t=b.away.name+" "+b.away.score+" – "+b.home.score+" "+b.home.name;
-  if(a.state==="in"&&b.state==="post")return{id:"f:"+b.id,big:"FINALE",title:t,text:"NBA",color:"var(--orange)"};
-  if(a.state==="pre"&&b.state==="in")return{id:"k:"+b.id,big:"VIA",title:b.away.name+" @ "+b.home.name,text:"Palla a due · NBA",color:"var(--cyan)",important:b.fav};
+M.homeFeed=async(day,ttl)=>{const [a,b]=await Promise.all([dayGames(day,ttl),EU.day(day,ttl).catch(()=>[])]);return a.map(item).concat(b.map(EU.item));};
+M.onChange=function(p,it){const a=p.ev,b=it.ev,eu=b.league!=="nba";
+  const t=eu?b.home.name+" "+b.home.score+" – "+b.away.score+" "+b.away.name:b.away.name+" "+b.away.score+" – "+b.home.score+" "+b.home.name;
+  if(a.state==="in"&&b.state==="post")return{id:"f:"+b.id,big:"FINALE",title:t,text:b.comp||"NBA",color:"var(--orange)",icon:eu&&b.ita?"ita":undefined};
+  if(a.state==="pre"&&b.state==="in")return{id:"k:"+b.id,big:"VIA",title:eu?b.home.name+" – "+b.away.name:b.away.name+" @ "+b.home.name,text:"Palla a due · "+(b.comp||"NBA"),color:"var(--cyan)",important:b.important};
+  if(eu&&b.ita&&a.period!==b.period&&b.period>1)return{id:"q:"+b.id+":"+b.period,big:"Q"+(b.period-1),title:t,text:"Fine "+(b.period-1)+"° quarto · "+b.comp,color:"var(--orange)",icon:"ita"};
   if(b.fav&&a.period!==b.period&&b.period>1)return{id:"q:"+b.id+":"+b.period,big:"Q"+(b.period-1),title:t,text:"Fine "+(b.period-1)+"° quarto",color:"var(--orange)"};
   const lead=x=>Math.sign((+x.home.score||0)-(+x.away.score||0));
   if(b.fav&&b.period>=4&&lead(a)!==lead(b)&&lead(b)!==0)return{id:"l:"+b.id+":"+E.score(b),big:"SORPASSO",title:t,text:b.clock,color:"var(--yellow)"};
   return null;};
 
+/* fatti: ultima partita finita, prime della classe a Est e Ovest, prossima palla a due */
+M.facts=async function(st){
+  if(st&&EU.comps[st.c])return EU.facts(st.c);
+  const [a,b,c]=await Promise.all([dayGames(0,60000),dayGames(-1,900000),dayGames(1,900000)]);const all=a.concat(b,c);
+  const done=all.filter(x=>x.done).sort((x,y)=>new Date(y.date)-new Date(x.date))[0],next=all.filter(x=>x.state==="pre").sort((x,y)=>new Date(x.date)-new Date(y.date))[0];
+  const out=[];
+  if(done)out.push({l:"Ultima finita",v:done.away.name+" "+done.away.score+"-"+done.home.score+" "+done.home.name,go:{sport:"basket",e:done.id,d:SL.dayOff(done.date)||""}});
+  const d=await SL.tryGet(SL.ESPN2+"basketball/nba/standings",{ttl:900000});
+  if(d)E.groups(d).forEach(g=>{const top=g.entries.slice().sort((x,y)=>E.stat(y,"winPercent")-E.stat(x,"winPercent"))[0];if(top)out.push({l:"Prima a "+(/East/i.test(g.name)?"Est":"Ovest"),v:top.team.displayName+" · "+E.stat(top,"wins")+"-"+E.stat(top,"losses")});});
+  if(next)out.push({l:"Prossima",v:next.away.name+" @ "+next.home.name+" · "+SL.when(next.date),go:{sport:"basket",e:next.id,d:SL.dayOff(next.date)||""}});
+  /* in home e sulla pagina NBA anche la capolista di EuroLega */
+  if(!st||!st.sport||st.sport==="home")try{const f=await EU.facts("el");if(f[0])out.push(f[0]);}catch(e){}
+  return out;
+};
 const DEFS=[
   {k:"tv",n:"Diretta TV",sz:2,fixed:true},
   {k:"match",n:"Partita",sz:2},
@@ -41,9 +59,31 @@ const DEFS=[
   {k:"table",n:"Classifica",sz:2}
 ];
 M.mount=function(ctx){
-  const st=ctx.st,day=+st.d||0;
-  const r=document.createElement("div");r.className="row";r.appendChild(UI.daynav(day,v=>SL.go({d:v||"",e:""})));
-  const hint=document.createElement("span");hint.className="muted";hint.textContent="Orari italiani: le partite della notte sono nel giorno in cui iniziano da noi.";r.appendChild(hint);
+  const st=ctx.st,liveMode=st.f==="live",comp=EU.comps[st.c]?st.c:"nba";
+  const r0=document.createElement("div");r0.className="row";
+  r0.appendChild(UI.chips([UI.liveChip("basket"),{k:"nba",n:"NBA"},{k:"el",n:"EuroLega"},{k:"ec",n:"EuroCup"}],liveMode?"live":comp,v=>SL.go({f:v==="live"?"live":"",c:v==="live"||v==="nba"?"":v,e:"",d:"",r:""})));
+  ctx.sub.appendChild(r0);
+  if(liveMode){mountLive(ctx);return;}
+  if(comp!=="nba"){EU.mount(ctx,comp,false);return;}
+  mountNBA(ctx,false);
+};
+/* Live ora: NBA di notte, EuroLega ed EuroCup la sera. Mostro quella che sta giocando adesso */
+async function mountLive(ctx){const rid=SL.routeId;
+  const [n,e]=await Promise.all([dayGames(0,15000).catch(()=>[]),EU.day(0,15000).catch(()=>[])]);
+  if(rid!==SL.routeId)return;
+  const nl=n.filter(x=>x.live).length,el=e.filter(x=>x.live);
+  if(!nl&&el.length){const k=(el.find(x=>x.ita)||el[0]).league;
+    const other=el.filter(x=>x.league!==k).length;if(other){const r=document.createElement("div");r.className="row";r.appendChild(UI.liveNote("In corso anche "+other+" partite di "+EU.comps[k==="el"?"ec":"el"].n+": aprila dai pulsanti qui sopra."));ctx.sub.appendChild(r);}
+    EU.mount(ctx,k,true);}
+  else mountNBA(ctx,true,el);
+  UI.dock(ctx.sub,ctx.main);
+}
+function mountNBA(ctx,liveMode,euLive){
+  const st=ctx.st,day=liveMode?0:(+st.d||0);
+  const r=document.createElement("div");r.className="row";
+  if(liveMode)r.appendChild(UI.liveNote("Solo le partite NBA in corso adesso. Si aggiorna da sola."+(euLive&&euLive.length?" In corso anche "+euLive.length+" partite europee: tocca EuroLega o EuroCup.":"")));
+  else{r.appendChild(UI.daynav(day,v=>SL.go({d:v||"",e:""})));
+    const hint=document.createElement("span");hint.className="muted";hint.textContent="Orari italiani: le partite della notte sono nel giorno in cui iniziano da noi.";r.appendChild(hint);}
   const strip=document.createElement("div");strip.className="strip";ctx.sub.append(r,strip);
   const cards=UI.mount(ctx.main,DEFS);UI.tv(cards.tv,"basket");
   const S={evs:[],sel:st.e||"",sum:null,team:"all",shot3d:SL.store.get("shot3d","2d"),boxT:"a"};
@@ -57,19 +97,22 @@ M.mount=function(ctx){
   SL.onPage("resize",()=>{drawWP();});
   function select(id){if(id===S.sel)return;S.sel=id;SL.setQuiet({e:id});drawStrip();drawGames();S.sum=null;shots3D=null;["match","wp","shots","leaders","box","pbp"].forEach(k=>cards[k].body.innerHTML='<div class="loading">Carico</div>');loadGame(true);}
   async function loadBoard(){
-    S.evs=await dayGames(day,15000);
+    const all=await dayGames(day,15000);
+    S.evs=liveMode?all.filter(x=>x.live||(x.id===S.sel&&x.done)):all;
+    if(liveMode&&!S.evs.some(x=>x.live)){const nx=all.concat(await dayGames(1,600000)).filter(x=>x.state==="pre").sort((a,b)=>new Date(a.date)-new Date(b.date))[0];
+      S.next=nx?"Nessuna partita in corso. La prossima: <b>"+h(nx.away.name+" @ "+nx.home.name)+"</b> "+h(SL.when(nx.date))+".":"Nessuna partita NBA in corso.";}else S.next="";
     if(!S.sel||!sel()){const p=S.evs.find(x=>x.live&&x.fav)||S.evs.find(x=>x.live)||S.evs.find(x=>x.fav)||S.evs.find(x=>x.done)||S.evs[0];S.sel=p?p.id:"";if(S.sel)SL.setQuiet({e:S.sel});}
     drawStrip();drawGames();}
-  function drawStrip(){strip.innerHTML=S.evs.map(ev=>{const t=E.tile(ev,S.sel);return t;}).join("")||'<span class="muted">Nessuna partita NBA in questo giorno.</span>';}
+  function drawStrip(){strip.innerHTML=S.evs.map(ev=>{const t=E.tile(ev,S.sel);return t;}).join("")||'<span class="muted">'+(liveMode?S.next:"Nessuna partita NBA in questo giorno.")+'</span>';}
   function drawGames(){const c=cards.games;const n=S.evs.filter(x=>x.live).length;c.sub(n?n+" in diretta":S.evs.length+" partite");
-    if(!S.evs.length){c.body.innerHTML=UI.empty("Nessuna partita NBA in questo giorno.");return;}
+    if(!S.evs.length){c.body.innerHTML=liveMode?'<div class="nolive">'+SL.ico("basket")+'<div>'+S.next+'</div></div>':UI.empty("Nessuna partita NBA in questo giorno.");return;}
     c.body.innerHTML='<div class="mlist">'+S.evs.map(ev=>{const sc=ev.state!=="pre";
       return'<button type="button" class="mrow'+(ev.id===S.sel?" sel":"")+'" data-ev="'+ev.id+'"><span class="min'+(ev.live?" live":"")+'">'+h(ev.live?ev.clock:ev.done?"FIN":SL.fmtTime(ev.date))+'</span>'+
         '<span class="tt"><img class="logo-t" src="'+h(ev.away.logo)+'" alt="" loading="lazy"><span>'+h(ev.away.name)+'</span></span><span class="s">'+(sc?h(ev.away.score):"")+'</span>'+
         '<span class="tt"><img class="logo-t" src="'+h(ev.home.logo)+'" alt="" loading="lazy"><span>'+h(ev.home.name)+'</span></span><span class="s">'+(sc?h(ev.home.score):"")+'</span>'+
         '<span class="last">'+h(ev.away.rec&&ev.home.rec?ev.away.rec+" · "+ev.home.rec:ev.venue)+'</span></button>';}).join("")+'</div>';}
 
-  async function loadGame(first){const ev=sel();if(!ev){["match","wp","shots","leaders","box","pbp"].forEach(k=>cards[k].body.innerHTML=UI.empty("Scegli una partita."));return;}
+  async function loadGame(first){const ev=sel();if(!ev){["match","wp","shots","leaders","box","pbp"].forEach(k=>cards[k].body.innerHTML=UI.empty(liveMode?"Nessuna partita in corso adesso: appena ne inizia una compare qui.":"Scegli una partita."));return;}
     try{S.sum=await E.summary("basketball","nba",ev.id,ev.live?8000:600000);}catch(e){if(first)cards.match.body.innerHTML=UI.empty("Dati della partita non disponibili ora.");return;}
     drawMatch();drawWP();drawShots(first);drawLeaders();drawBox();drawPbp();}
   function T(){const ev=sel(),[ch,ca]=V.pair(ev.home.color,ev.away.color);return{ev,ch,ca,hid:ev.home.id,aid:ev.away.id};}
@@ -150,7 +193,7 @@ M.mount=function(ctx){
       return'<h4 class="muted" style="margin:8px 0 4px">'+h(g.name.replace("Eastern Conference","Est").replace("Western Conference","Ovest"))+'</h4><table class="tbl"><thead><tr><th>#</th><th class="l">Squadra</th><th>V</th><th>P</th><th>%</th><th>GB</th><th>SERIE</th></tr></thead><tbody>'+
         rows.map((x,i)=>{const id=String(x.team.id),me=ev&&(id===ev.home.id||id===ev.away.id);return'<tr class="'+(i<6?"zone-cl":i<10?"zone-el":"")+(me?" me":"")+'"><td>'+(i+1)+'</td><td class="l"><span class="tn"><img class="logo-t" src="'+h(x.team.logos&&x.team.logos[0]&&x.team.logos[0].href||"")+'" alt="" loading="lazy">'+h(x.team.displayName)+'</span></td><td>'+E.stat(x,"wins")+'</td><td>'+E.stat(x,"losses")+'</td><td>'+h(E.statD(x,"winPercent"))+'</td><td>'+h(E.statD(x,"gamesBehind"))+'</td><td>'+h(E.statD(x,"streak"))+'</td></tr>';}).join("")+'</tbody></table>';}).join("")+'</div><div class="legend"><span><i style="background:var(--blue)"></i>Playoff</span><span><i style="background:var(--orange)"></i>Play-in</span></div>';}
   const anyLive=()=>S.evs.some(x=>x.live)||S.evs.some(x=>x.state==="pre"&&new Date(x.date)-Date.now()<15*60000);
-  SL.every(async()=>{await loadBoard();if(!S.sum)await loadGame(true);},()=>anyLive()?15000:180000);
+  SL.every(async()=>{await loadBoard();if(!S.sum)await loadGame(true);},()=>liveMode||anyLive()?15000:180000);
   SL.every(async()=>{const ev=sel();if(ev&&ev.live)await loadGame(false);},10000,{delay:10000});
   SL.every(loadTable,600000,{delay:1500});
   SL.every(()=>{const el=cards.match.body.querySelector(".cdown"),ev=sel();if(el&&ev)el.textContent=SL.countdown(new Date(ev.date)-Date.now());},1000,{delay:1000});

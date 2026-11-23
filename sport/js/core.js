@@ -1,7 +1,7 @@
 /* Sport LIVE APP — nucleo: dati, orari, preferiti, avvisi, navigazione */
 (function(){
 "use strict";
-const SL=window.SL={sports:{},order:["home","calcio","basket","tennis","rugby","moto"],timers:[],state:{}};
+const SL=window.SL={sports:{},order:["home","calcio","basket","tennis","rugby","moto","golf"],timers:[],state:{}};
 const $=id=>document.getElementById(id);
 SL.$=$;
 SL.h=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -135,6 +135,7 @@ SL.isTVLike=()=>{const ua=navigator.userAgent||"";
   return false;};
 SL.couch=()=>SL.settings.couch==="on"||(SL.settings.couch==="auto"&&SL.isTVLike());
 SL.applyLook=()=>{const r=document.documentElement;r.dataset.style=SL.settings.style;r.dataset.couch=SL.couch()?"1":"0";
+  r.dataset.frame="stadio3d"; /* riquadri: cornice da tabellone + spessore e inclinazione 3D */
   const mt=document.querySelector('meta[name="theme-color"]');if(mt)mt.content=SL.settings.style==="regia"?"#04060c":"#090d16";};
 
 /* ---------- estensione per PC ---------- */
@@ -197,8 +198,9 @@ if(SL.chan)SL.chan.onmessage=ev=>{const m=ev.data||{};
 };
 
 /* ---------- disegno della pagina ---------- */
+SL.routeId=0;
 SL.route=function(){
-  const st=SL.parseHash();SL.state=st;
+  const st=SL.parseHash();SL.state=st;SL.routeId++;
   SL.clearTimers();
   document.body.dataset.sport=st.sport;
   SL.renderTabs();
@@ -208,10 +210,12 @@ SL.route=function(){
   SL.ui.reset(st.sport);
   const mod=SL.sports[st.sport];
   const head=SL.icons.head(st.sport);if(head)sub.appendChild(head);
+  SL.icons.credit(st.sport);
   try{mod.mount({st,sub,main});}catch(e){console.error(e);main.innerHTML='<div class="empty" style="grid-column:1/-1">Qualcosa è andato storto in questa sezione. <b>Ricarica la pagina.</b></div>';}
   /* Diretta TV in alto a sinistra: la barra di competizioni e partite le si affianca a destra */
-  if(main.querySelector('.card[data-k="tv"]:not([hidden])')&&!SL.solo){sub.classList.add("ingrid");main.prepend(sub);}
+  SL.ui.dock(sub,main);
   SL.syncOut();
+  if(SL.ticker)SL.ticker.page(st.sport);
   document.title=(st.sport==="home"?"Live ora":mod.name)+" · Sport LIVE APP";
 };
 SL.liveCount={};
@@ -234,6 +238,7 @@ SL.start=function(){
   window.addEventListener("hashchange",()=>{if(SL.hashOf(SL.parseHash())!==SL.hashOf(SL.state))SL.route();});
   const tick=()=>{const c=$("clock");if(c)c.textContent=SL.fmtDay(Date.now())+" · "+fT.format(new Date());};tick();setInterval(tick,15000);
   SL.ui.init();
+  SL.ticker.init();
   if(window.isFollower()){$("top").hidden=true;$("followBar").hidden=false;$("followHome").href=location.pathname+location.hash;
     try{SL.chan&&SL.chan.postMessage({type:"ping"});}catch(e){}}
   SL.route();
