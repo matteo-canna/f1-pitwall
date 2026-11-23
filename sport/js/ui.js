@@ -97,6 +97,7 @@ UI.openSettings=function(){
   segInit("setStyle",S.style,v=>{S.style=v;SL.saveSettings();SL.applyLook();bcLook();SL.emit("resize");});
   segInit("setCouch",S.couch,v=>{S.couch=v;SL.saveSettings();SL.applyLook();bcLook();couchNow();SL.route();});
   segInit("setAlerts",S.alerts,v=>{S.alerts=v;SL.saveSettings();});
+  segInit("setFrame",S.frame||"",v=>{S.frame=v;SL.saveSettings();SL.applyLook();bcLook();});
   $("setSound").checked=!!S.sound;$("setSound").onchange=e=>{S.sound=e.target.checked;SL.saveSettings();};
   couchNow();favRender();
   const ext=SL.ext(),dat=SL.extData();
@@ -104,7 +105,7 @@ UI.openSettings=function(){
   $("dlgSettings").showModal();
 };
 function couchNow(){$("couchNow").textContent=SL.couch()?"Ora è attiva.":"Ora non è attiva.";}
-function bcLook(){try{SL.chan&&SL.chan.postMessage({type:"look",settings:{style:SL.settings.style,couch:SL.settings.couch}});}catch(e){}}
+function bcLook(){try{SL.chan&&SL.chan.postMessage({type:"look",settings:{style:SL.settings.style,couch:SL.settings.couch,frame:SL.settings.frame}});}catch(e){}}
 function favRender(){const L=SL.fav.list;$("favCount").textContent=L.length?"("+L.length+")":"";
   $("favList").innerHTML=L.length?L.map((x,i)=>'<li class="sp-'+h(x.s)+'">'+(x.s?SL.ico(x.s):"")+" "+h(x.n)+'<button type="button" data-i="'+i+'" aria-label="Togli '+h(x.n)+'">✕</button></li>').join(""):'<li class="muted">Nessun preferito.</li>';}
 $("favList")&&$("favList").addEventListener("click",e=>{const b=e.target.closest("button[data-i]");if(!b)return;const it=SL.fav.list[+b.dataset.i];if(it)SL.fav.toggle(it);favRender();});
@@ -243,8 +244,26 @@ UI.tv=function(c,sport){
   render();
 };
 
+/* ---------- riquadri "tessere 3D": inclinazione e riflesso seguono il mouse (solo con mouse, non su TV/touch) ---------- */
+UI.tilt=function(){
+  let cur=null,raf=0,ev=null;
+  const reset=c=>{if(!c)return;c.classList.remove("tilting");c.style.removeProperty("--rx");c.style.removeProperty("--ry");c.style.removeProperty("--gx");c.style.removeProperty("--gy");};
+  document.addEventListener("pointermove",e=>{
+    if(document.documentElement.dataset.frame!=="tessere"||e.pointerType!=="mouse"||SL.couch()||matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+    const c=e.target.closest&&e.target.closest(".card:not(.full)");
+    if(c!==cur){reset(cur);cur=c;}
+    if(!c)return;ev=e;if(raf)return;
+    raf=requestAnimationFrame(()=>{raf=0;const r=c.getBoundingClientRect(),x=(ev.clientX-r.left)/r.width,y=(ev.clientY-r.top)/r.height;
+      const max=r.width>900?1.2:r.width>600?2.2:3.5; /* le schede grandi si inclinano meno, per leggere comodi */
+      c.classList.add("tilting");c.style.setProperty("--ry",((x-.5)*2*max).toFixed(2)+"deg");c.style.setProperty("--rx",((.5-y)*2*max).toFixed(2)+"deg");
+      c.style.setProperty("--gx",(x*100).toFixed(1)+"%");c.style.setProperty("--gy",(y*100).toFixed(1)+"%");});
+  },{passive:true});
+  document.addEventListener("pointerleave",()=>{reset(cur);cur=null;});
+};
+
 /* ---------- avvio ---------- */
 UI.init=function(){
+  UI.tilt();
   $("btnSettings").addEventListener("click",UI.openSettings);
   $("btnScreens").addEventListener("click",UI.openScreens);
   $("scrDetect").addEventListener("click",detect);
