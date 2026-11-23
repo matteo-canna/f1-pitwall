@@ -167,6 +167,7 @@ function mount(ctx){
     html+='</div>';
     if(list.length>show.length)html+='<button type="button" class="dmore" data-open="'+id+'">Mostra altri '+(list.length-show.length)+' ▾</button>';
     return html+'</div>';}
+  let front=0; /* scheda dei giorni in primo piano (schermi larghi): Oggi, finché non ne scegli un'altra */
   function drawCol(d){const col=main.querySelector('section[data-day="'+d+'"]');if(!col)return;const body=col.querySelector(".dbody"),cnt=col.querySelector(".dc");
     const all=dayItems(d);if(!all){body.innerHTML='<div class="loading">Carico</div>';return;}
     const nl=all.filter(x=>x.live).length;cnt.innerHTML=(nl?'<span class="live"><i class="dot"></i>'+nl+' live</span> · ':"")+all.length+(all.length===1?" evento":" eventi");
@@ -174,13 +175,15 @@ function mount(ctx){
     const sortP=(a,b)=>(firstAll(a)-firstAll(b))||byTime(a,b);
     let html="";
     const nm=s=>SL.sports[s]?SL.sports[s].name:s;
+    /* caselle grandi nella scheda in primo piano (sui telefoni: Oggi) */
+    const cs=$("hCols"),big=d===(cs&&cs.classList.contains("stacked")?front:0);
     const wait=d===0?SPORTS.filter(s=>!LIVE.loaded[s]&&(S.f==="all"||S.f===s)):[],ko=d===0?SPORTS.filter(s=>LIVE.failed[s]&&(S.f==="all"||S.f===s)):[];
     const note=(wait.length?'<div class="dpending"><span class="spin"></span>Sto ancora caricando: '+wait.map(nm).join(", ")+'</div>':"")+
       (ko.length?'<div class="dpending err">Non raggiungibili adesso: '+ko.map(nm).join(", ")+' · riprovo tra pochi secondi</div>':"");
     if(d===0){const live=all.filter(x=>x.live).sort((a,b)=>(imp(b)-imp(a))||byTime(a,b)),pre=all.filter(x=>x.state==="pre"&&!x.live).sort(sortP),done=all.filter(x=>x.done&&!x.live).sort((a,b)=>(imp(b)-imp(a))||(new Date(b.date)-new Date(a.date)));
-      html=group("live",'<i class="dot"></i> In diretta ora',live,{cls:"g-live",big:true})+group("pre","Prossime",pre,{slots:true,max:30,big:true})+group("done","Finite oggi",done,{max:8,big:true});}
-    else if(d<0){const done=all.slice().sort(sortP);html=group("y","Risultati",done,{slots:true,max:30});}
-    else{const pre=all.slice().sort(sortP);html=group("d"+d,"In programma",pre,{slots:true,max:30});}
+      html=group("live",'<i class="dot"></i> In diretta ora',live,{cls:"g-live",big})+group("pre","Prossime",pre,{slots:true,max:30,big})+group("done","Finite oggi",done,{max:8,big});}
+    else if(d<0){const done=all.slice().sort(sortP);html=group("y","Risultati",done,{slots:true,max:30,big});}
+    else{const pre=all.slice().sort(sortP);html=group("d"+d,"In programma",pre,{slots:true,max:30,big});}
     if(d===0&&!html&&wait.length){body.innerHTML=note+'<div class="loading">Carico</div>';return;}
     body.innerHTML=(d===0?note:"")+(html||'<div class="dempty">'+SL.ico(S.f==="all"?"home":S.f)+'<span>'+(S.only==="ita"?"Nessun evento con squadre o atleti italiani "+(d===0?"oggi":d<0?"ieri":d===1?"domani":"dopodomani")+".":S.only==="fav"?"Nessun evento dei tuoi preferiti "+(d===0?"oggi":d<0?"ieri":d===1?"domani":"dopodomani")+". Tocca ★ accanto a squadre e atleti per aggiungerli.":"Nessun evento "+(d===0?"oggi":d<0?"ieri":d===1?"domani":"dopodomani")+(S.f!=="all"?" per "+SL.sports[S.f].name:"")+".")+'</span></div>');}
   function drawCols(){DAYS.forEach(drawCol);}
@@ -200,23 +203,55 @@ function mount(ctx){
   let raf=0;cols.addEventListener("scroll",()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{let best=null,bd=1e9;cols.querySelectorAll(".dcol").forEach(c=>{const d=Math.abs(c.offsetLeft-cols.offsetLeft-cols.scrollLeft);if(d<bd){bd=d;best=c.dataset.day;}});
     sw.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",String(x.dataset.day===best)));});},{passive:true});
   /* ---------- schermi larghi: le quattro schede "a mazzo" ----------
-     Tutte della stessa misura. Oggi al centro della pagina, sopra; Ieri sbuca da sinistra, Domani e Dopodomani da destra,
-     più in basso e dietro. Il contenuto delle schede dietro sta nella parte che si vede (--vis), così resta leggibile. */
+     Tutte della stessa misura. Quella in primo piano (all'inizio Oggi) è al centro della pagina, sopra; le altre restano in
+     ordine di giorno: quelle prima sbucano da sinistra, quelle dopo da destra, più in basso e dietro.
+     Il contenuto delle schede dietro sta nella parte che si vede (--vis), così resta leggibile.
+     Passando col mouse (o toccando) una scheda dietro, va lei in primo piano. */
   function layoutStage(){
     const secs={};cols.querySelectorAll("section[data-day]").forEach(s=>{secs[s.dataset.day]=s;});
     const C=cols.clientWidth,couch=SL.couch();
-    if(innerWidth<1100||C<1000){cols.classList.remove("stacked");Object.values(secs).forEach(s=>{s.removeAttribute("style");delete s.dataset.side;s.classList.remove("narrow");});cols.style.height="";return;}
+    if(innerWidth<1100||C<1000){cols.classList.remove("stacked");Object.values(secs).forEach(s=>{s.removeAttribute("style");delete s.dataset.side;s.classList.remove("narrow","slim");
+      const d=+s.dataset.day;s.classList.toggle("dtoday",d===0);s.classList.toggle("dside",d!==0);});cols.style.height="";return;}
     cols.classList.add("stacked");
     const W=Math.round(Math.min(couch?760:660,Math.max(460,C*0.40))),ml=(C-W)/2,room=ml;
-    const v1=Math.round(Math.min(W*0.58,room*0.6)),v2=Math.round(Math.max(150,Math.min(W*0.45,room-v1)));
     const H=Math.round(Math.max(540,Math.min(innerHeight-120,couch?1150:1000))),drop=26;
+    /* quanto si vede di ogni scheda dietro, dalla più vicina alla più lontana */
+    const visOf=n=>{if(n===1)return[Math.round(Math.min(W*0.58,room*0.6))];
+      if(n===2){const v1=Math.round(Math.min(W*0.58,room*0.6));return[v1,Math.round(Math.max(150,Math.min(W*0.45,room-v1)))];}
+      const a=Math.round(Math.min(W*0.5,room*0.46)),b=Math.round(Math.min(W*0.4,room*0.32));return[a,b,Math.round(Math.max(84,room-a-b))];};
     const put=(s,left,top,z,vis,side)=>{if(!s)return;s.style.cssText="left:"+Math.round(left)+"px;top:"+top+"px;width:"+W+"px;height:"+H+"px;z-index:"+z+";--vis:"+vis+"px";
-      s.dataset.side=side;s.classList.toggle("narrow",vis<215);};
-    put(secs[0],ml,0,5,W,"main");
-    put(secs[-1],ml-v1,drop,3,v1,"left");      /* si vede la parte sinistra */
-    put(secs[1],ml+v1,drop,3,v1,"right");      /* si vede la parte destra */
-    put(secs[2],ml+v1+v2,drop*2,2,v2,"right"); /* ancora più dietro, sbuca a destra di Domani */
-    cols.style.height=(H+drop*2+6)+"px";}
+      s.dataset.side=side;s.classList.toggle("narrow",vis<215);s.classList.toggle("slim",vis<130);
+      const d=+s.dataset.day;s.classList.toggle("dtoday",side==="main");s.classList.toggle("dside",side!=="main");};
+    const fi=DAYS.indexOf(front),L=DAYS.slice(0,fi).reverse(),R=DAYS.slice(fi+1),vl=visOf(L.length),vr=visOf(R.length);
+    put(secs[front],ml,0,6,W,"main");
+    let off=0;L.forEach((d,i)=>{off+=vl[i];put(secs[d],ml-off,drop*(i+1),5-i,vl[i],"left");});
+    off=0;R.forEach((d,i)=>{off+=vr[i];put(secs[d],ml+off,drop*(i+1),5-i,vr[i],"right");});
+    cols.style.height=(H+drop*3+6)+"px";}
+  /* porta in primo piano la scheda di un giorno (con un breve scorrimento) */
+  let animT=0;
+  function setFront(d){
+    if(d===front||DAYS.indexOf(d)<0||!cols.classList.contains("stacked"))return;
+    const old=front;front=d;sw.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",String(+x.dataset.day===d)));
+    cols.classList.add("anim");clearTimeout(animT);animT=setTimeout(()=>cols.classList.remove("anim"),480);
+    layoutStage();drawCol(old);drawCol(d);}
+  /* mouse sopra una scheda dietro (fermo un istante): va in primo piano.
+     Conta solo se il mouse si è mosso davvero: quando le schede scorrono sotto il puntatore fermo non succede niente. */
+  let hvT=0,hvDay=null,ptr={x:-1e4,y:-1e4},still={x:-1e4,y:-1e4};
+  const hvStop=()=>{clearTimeout(hvT);hvT=0;hvDay=null;};
+  cols.addEventListener("mousemove",e=>{ptr={x:e.clientX,y:e.clientY};
+    if(!cols.classList.contains("stacked"))return;
+    const s=e.target.closest("section[data-day]");
+    if(!s||s.dataset.side==="main"){hvStop();return;}
+    if(Math.abs(e.clientX-still.x)+Math.abs(e.clientY-still.y)<10)return;
+    const d=+s.dataset.day;if(hvDay===d)return;
+    hvStop();hvDay=d;hvT=setTimeout(()=>{hvT=0;hvDay=null;still={x:ptr.x,y:ptr.y};setFront(d);},220);});
+  cols.addEventListener("mouseleave",hvStop);
+  /* tocco o clic su una scheda dietro: prima va in primo piano (il secondo tocco apre la partita) */
+  cols.addEventListener("click",e=>{if(!cols.classList.contains("stacked"))return;const s=e.target.closest("section[data-day]");
+    if(!s||s.dataset.side==="main")return;e.preventDefault();e.stopPropagation();hvStop();still={x:e.clientX,y:e.clientY};setFront(+s.dataset.day);},true);
+  /* da tastiera: il Tab che entra in una scheda dietro la porta davanti */
+  cols.addEventListener("focusin",e=>{if(!cols.classList.contains("stacked"))return;const s=e.target.closest("section[data-day]");if(!s||s.dataset.side==="main")return;
+    let kb=true;try{kb=e.target.matches(":focus-visible");}catch(x){}if(kb)setFront(+s.dataset.day);});
   layoutStage();SL.onPage("resize",layoutStage);
   requestAnimationFrame(()=>{if(cols.classList.contains("stacked"))return;const t=cols.querySelector('.dcol[data-day="0"]');if(t&&cols.scrollWidth>cols.clientWidth+4)cols.scrollLeft=t.offsetLeft-cols.offsetLeft;});
   SL.onPage("live",()=>{if(SL.state.sport==="home")draw();});
