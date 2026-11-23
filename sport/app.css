@@ -1100,3 +1100,17 @@ html[data-style] body .card.hero>header h2{font-size:calc(var(--h2size)*var(--fs
 html[data-frame] .card.hero{box-shadow:0 0 0 1px rgba(0,0,0,.6),0 0 0 3px color-mix(in srgb,var(--sa) 75%,#151b2b),0 0 26px -4px color-mix(in srgb,var(--sa) 45%,transparent),0 18px 36px -12px rgba(0,0,0,.7)}
 /* nella sezione principale le tabelle mostrano più righe prima di scorrere */
 .card.hero .scroll{max-height:min(72vh,760px)}
+
+/* ---------- sezioni senza dati: fila di pulsanti nella barra dei filtri ---------- */
+.etray{display:flex;align-items:center;flex-wrap:wrap;gap:6px 8px;padding-top:10px;border-top:1px dashed rgba(255,255,255,.12)}
+.et-l{font:800 11px/1 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:inline-flex;align-items:center;gap:6px}
+.et-l b{display:inline-grid;place-items:center;min-width:18px;height:18px;border-radius:99px;background:rgba(255,255,255,.1);color:var(--text);font-size:10.5px}
+.et-l~.et-l{margin-left:8px}
+.chip.et-c{min-height:30px;padding:0 11px;font-size:11.5px;opacity:.85;border-style:dashed}
+.chip.et-c:hover,.chip.et-c:focus-visible{opacity:1;border-style:solid}
+html[data-couch="1"] .chip.et-c{min-height:40px;font-size:14px}
+/* sezione riaccesa a mano ma ancora vuota */
+.unforce{border:1px dashed var(--line);background:transparent;color:var(--muted);border-radius:6px;padding:4px 8px;font:700 10.5px/1 var(--f-ui);letter-spacing:.05em;white-space:nowrap}
+.unforce:hover{color:var(--text);border-color:var(--muted)}
+.card.is-empty>.body{opacity:.75}
+.card.flash{animation:flash 1.2s ease 2}
