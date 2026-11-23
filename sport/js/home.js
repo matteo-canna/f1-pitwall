@@ -199,7 +199,26 @@ function mount(ctx){
   sw.addEventListener("click",e=>{const b=e.target.closest("button[data-day]");if(!b)return;const c=cols.querySelector('.dcol[data-day="'+b.dataset.day+'"]');if(c)cols.scrollTo({left:c.offsetLeft-cols.offsetLeft,behavior:"smooth"});});
   let raf=0;cols.addEventListener("scroll",()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{let best=null,bd=1e9;cols.querySelectorAll(".dcol").forEach(c=>{const d=Math.abs(c.offsetLeft-cols.offsetLeft-cols.scrollLeft);if(d<bd){bd=d;best=c.dataset.day;}});
     sw.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",String(x.dataset.day===best)));});},{passive:true});
-  requestAnimationFrame(()=>{const t=cols.querySelector('.dcol[data-day="0"]');if(t&&cols.scrollWidth>cols.clientWidth+4)cols.scrollLeft=t.offsetLeft-cols.offsetLeft;});
+  /* ---------- schermi larghi: le quattro schede "a mazzo" ----------
+     Tutte della stessa misura. Oggi al centro della pagina, sopra; Ieri sbuca da sinistra, Domani e Dopodomani da destra,
+     più in basso e dietro. Il contenuto delle schede dietro sta nella parte che si vede (--vis), così resta leggibile. */
+  function layoutStage(){
+    const secs={};cols.querySelectorAll("section[data-day]").forEach(s=>{secs[s.dataset.day]=s;});
+    const C=cols.clientWidth,couch=SL.couch();
+    if(innerWidth<1100||C<1000){cols.classList.remove("stacked");Object.values(secs).forEach(s=>{s.removeAttribute("style");delete s.dataset.side;s.classList.remove("narrow");});cols.style.height="";return;}
+    cols.classList.add("stacked");
+    const W=Math.round(Math.min(couch?760:660,Math.max(460,C*0.40))),ml=(C-W)/2,room=ml;
+    const v1=Math.round(Math.min(W*0.58,room*0.6)),v2=Math.round(Math.max(150,Math.min(W*0.45,room-v1)));
+    const H=Math.round(Math.max(540,Math.min(innerHeight-120,couch?1150:1000))),drop=26;
+    const put=(s,left,top,z,vis,side)=>{if(!s)return;s.style.cssText="left:"+Math.round(left)+"px;top:"+top+"px;width:"+W+"px;height:"+H+"px;z-index:"+z+";--vis:"+vis+"px";
+      s.dataset.side=side;s.classList.toggle("narrow",vis<215);};
+    put(secs[0],ml,0,5,W,"main");
+    put(secs[-1],ml-v1,drop,3,v1,"left");      /* si vede la parte sinistra */
+    put(secs[1],ml+v1,drop,3,v1,"right");      /* si vede la parte destra */
+    put(secs[2],ml+v1+v2,drop*2,2,v2,"right"); /* ancora più dietro, sbuca a destra di Domani */
+    cols.style.height=(H+drop*2+6)+"px";}
+  layoutStage();SL.onPage("resize",layoutStage);
+  requestAnimationFrame(()=>{if(cols.classList.contains("stacked"))return;const t=cols.querySelector('.dcol[data-day="0"]');if(t&&cols.scrollWidth>cols.clientWidth+4)cols.scrollLeft=t.offsetLeft-cols.offsetLeft;});
   SL.onPage("live",()=>{if(SL.state.sport==="home")draw();});
   SL.onPage("flash",id=>{const t=document.querySelector('.htile[data-id="'+CSS.escape(id)+'"]');if(t){t.classList.remove("flash");void t.offsetWidth;t.classList.add("flash");}});
   SL.onPage("fav",()=>drawCols());

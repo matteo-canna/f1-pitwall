@@ -1324,3 +1324,35 @@ html[data-couch="1"] .top .tbtn.icobtn{font-size:24px;min-width:52px}
   .dstage .dtoday{border-color:#e5383b}
   .grid>.subbar.ingrid,body:not([data-sport="home"]) .subbar:not(.ingrid){background:rgba(8,11,20,.85)}
 }
+
+/* =====================================================================
+   HOME: schede dei giorni "a mazzo" (schermi larghi). Posizioni calcolate in home.js.
+   Oggi centrata e sopra; le altre tre della stessa misura, dietro, che sbucano ai lati.
+   ===================================================================== */
+.dcols.stacked{position:relative;display:block;padding:0;overflow:visible}
+.dcols.stacked>section{position:absolute;margin:0;max-height:none;min-height:0;flex:none;display:flex;flex-direction:column}
+.dcols.stacked>section>.dbody{flex:1 1 auto;min-height:0;overflow-y:auto}
+/* la principale: piena (copre le altre), bordo rosso e ombra forte */
+.dcols.stacked>section[data-side="main"]{background:#0b0f1a;backdrop-filter:none;border:2px solid color-mix(in srgb,var(--red) 75%,var(--line));
+  box-shadow:0 30px 60px -18px #000,0 0 0 1px rgba(0,0,0,.7),0 0 40px -6px color-mix(in srgb,var(--red) 45%,transparent)}
+/* le schede dietro: piene, un po' attenuate, il loro contenuto nella parte che si vede */
+.dcols.stacked>section[data-side="left"],.dcols.stacked>section[data-side="right"]{background:#0a0d16;backdrop-filter:none;border:1px solid #2a3348;
+  box-shadow:0 18px 40px -16px #000;opacity:.86;filter:saturate(.82)}
+.dcols.stacked>section[data-side="left"]:hover,.dcols.stacked>section[data-side="right"]:hover{opacity:1;filter:none}
+.dcols.stacked>section[data-side="left"]>.dch,.dcols.stacked>section[data-side="left"]>.dbody{width:var(--vis);margin-right:auto}
+.dcols.stacked>section[data-side="right"]>.dch,.dcols.stacked>section[data-side="right"]>.dbody{width:var(--vis);margin-left:auto}
+.dcols.stacked>section[data-side="left"]>.dch{border-radius:16px 0 0 0}
+.dcols.stacked>section[data-side="right"]>.dch{border-radius:0 16px 0 0}
+.dcols.stacked>section:not([data-side="main"]) .dch{flex-wrap:wrap}
+.dcols.stacked>section:not([data-side="main"]) .dch .dc{margin-left:0}
+/* striscia sottile più scura sul bordo coperto: fa capire che la scheda continua sotto */
+.dcols.stacked>section[data-side="left"]::after,.dcols.stacked>section[data-side="right"]::after{content:"";position:absolute;top:0;bottom:0;width:24px;pointer-events:none}
+.dcols.stacked>section[data-side="left"]::after{left:calc(var(--vis) - 24px);background:linear-gradient(90deg,transparent,rgba(0,0,0,.45))}
+.dcols.stacked>section[data-side="right"]::after{right:calc(var(--vis) - 24px);background:linear-gradient(270deg,transparent,rgba(0,0,0,.45))}
+/* schede dietro molto strette: via loghi e piè di pagina, restano nomi e risultati */
+.dcols.stacked>section.narrow .htile .lg,.dcols.stacked>section.narrow .ht-ft{display:none}
+.dcols.stacked>section.narrow .k-tm .ln{grid-template-columns:minmax(0,1fr) auto}
+.dcols.stacked>section.narrow .ht-band .cmp{font-size:10px}
+.dcols.stacked>section.narrow .dch .dn{font-size:15px}
+.dcols.stacked>section.narrow .dch{padding:10px 10px 8px}
+.dcols.stacked>section.narrow .dgh{font-size:11px}
