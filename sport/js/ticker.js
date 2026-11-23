@@ -5,8 +5,8 @@
 (function(){
 "use strict";
 const h=SL.h,TK=SL.ticker={};
-const SPORTS=["calcio","basket","tennis","rugby","moto"];
-const NAMES={calcio:"Calcio",basket:"NBA",tennis:"Tennis",rugby:"Rugby",moto:"Moto"};
+const SPORTS=["calcio","basket","tennis","rugby","moto","golf"];
+const NAMES={calcio:"Calcio",basket:"Basket",tennis:"Tennis",rugby:"Rugby",moto:"Motori",golf:"Golf"};
 
 /* ---------- "fatti" di ogni sport (capolista, ultimo risultato, prossimo evento…) ---------- */
 const fcache={};
@@ -23,7 +23,7 @@ TK.cachedFacts=(sport,st)=>{const c=fcache[sport+":"+((st&&(st.c||st.s))||"")];r
 /* ---------- elementi della striscia ---------- */
 function line(it){
   const L=it.lines||[];if(!L.length)return h(it.comp||"");
-  if(it.sport==="moto")return L.map(l=>h(l.n)+(l.v?" <b>"+h(l.v)+"</b>":"")).join(" · ");
+  if(it.sport==="moto"||it.sport==="golf")return L.map(l=>h(l.n)+(l.v?" <b>"+h(l.v)+"</b>":"")).join(" · ");
   const a=L[0],b=L[1]||{};const num=x=>x!=null&&x!==""&&!isNaN(+x);
   if(num(a.v)&&num(b.v))return h(a.n)+" <b>"+h(a.v)+"-"+h(b.v)+"</b> "+h(b.n);
   if(a.v||b.v)return h(a.n)+" <b>"+h(a.v||"")+"</b> – "+h(b.n)+" <b>"+h(b.v||"")+"</b>";
@@ -32,8 +32,8 @@ function line(it){
 function eventItems(sport,limit){
   const L=(SL.live.bySport[sport]||[]).slice(),now=Date.now(),out=[];
   L.filter(x=>x.live).sort((a,b)=>(b.important-a.important)).forEach(x=>out.push({s:sport,tag:x.status&&x.status!=="LIVE"?"LIVE "+x.status:"LIVE",cls:"live",txt:line(x),sub:x.comp,go:x.go,imp:x.important}));
-  L.filter(x=>x.done&&now-new Date(x.date)<10*36e5).sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,limit).forEach(x=>out.push({s:sport,tag:"FINALE",cls:"fin",txt:line(x),sub:x.comp,go:x.go,imp:x.important}));
-  L.filter(x=>x.state==="pre"&&new Date(x.date)-now<12*36e5).sort((a,b)=>new Date(a.date)-new Date(b.date)).slice(0,limit).forEach(x=>out.push({s:sport,tag:"ORE "+SL.fmtTime(x.date),cls:"pre",txt:line(x),sub:x.comp,go:x.go,imp:x.important}));
+  L.filter(x=>x.done&&now-new Date(x.date)<10*36e5).sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,limit).forEach(x=>out.push({s:sport,tag:x.tk||"FINALE",cls:"fin",txt:line(x),sub:x.comp,go:x.go,imp:x.important}));
+  L.filter(x=>x.state==="pre"&&new Date(x.date)-now<12*36e5).sort((a,b)=>new Date(a.date)-new Date(b.date)).slice(0,limit).forEach(x=>out.push({s:sport,tag:x.tk||"ORE "+SL.fmtTime(x.date),cls:"pre",txt:line(x),sub:x.comp,go:x.go,imp:x.important}));
   return out;
 }
 function factItems(sport,st){return TK.cachedFacts(sport,st).map(f=>({s:sport,tag:f.l,cls:"fact",txt:h(f.v),go:f.go}));}

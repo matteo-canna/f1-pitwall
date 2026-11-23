@@ -4,7 +4,7 @@
 (function(){
 "use strict";
 const h=SL.h,UI=SL.ui;
-const M=SL.sports.moto={name:"Moto",tab:"Moto",icon:"🏍",color:"#e5383b"};
+const M=SL.sports.moto={name:"Motori",tab:"Motori",icon:"🏍",color:"#e5383b"};
 const GP="https://api.motogp.pulselive.com/motogp/v1/",SBK="https://api.pulselive.worldsbk.com/";
 const SES={FP:"Libere",PR:"Practice",Q:"Qualifica",SPR:"Sprint",WUP:"Warm up",RAC:"Gara"};
 const sesName=s=>(SES[s.type]||s.type)+(s.number?" "+s.number:"");
@@ -25,10 +25,28 @@ const ltRiders=d=>Object.values(d&&d.rider||{}).sort((a,b)=>((a.pos>0?a.pos:900)
 const ltToday=d=>{const x=d&&d.head&&d.head.date;if(!x)return false;const [dd,mm,yy]=x.split("/");return yy+mm+dd===SL.dayKey(Date.now());};
 const ltState=d=>{const st=d&&d.head&&d.head.session_status_id;if(st==="F")return"post";const R=ltRiders(d);return R.some(r=>r.num_lap>0||r.lap_time)?"in":"pre";};
 
+/* ---------- IndyCar: dati ESPN, nessuna estensione ---------- */
+const IRL=SL.ESPN+"racing/irl/";
+async function indySeason(ttl){const y=new Date().getFullYear();
+  const [a,b,c]=await Promise.all([SL.tryGet(IRL+"scoreboard?dates="+y,{ttl:36e5}),SL.tryGet(IRL+"scoreboard?dates="+(y+1),{ttl:36e5}),SL.tryGet(IRL+"scoreboard",{ttl:ttl||60000})]);
+  const map=new Map();[].concat((a&&a.events)||[],(b&&b.events)||[],(c&&c.events)||[]).forEach(e=>map.set(String(e.id),e)); /* il tabellone corrente vince: è il più aggiornato */
+  return [...map.values()].sort((x,z)=>new Date(x.date)-new Date(z.date));}
+const indyState=e=>((e.status||{}).type||{}).state||"pre";
+const indyComp=e=>{const cps=e.competitions||[];return cps.filter(x=>(x.competitors||[]).length).pop()||cps[cps.length-1]||{};};
+function indyRows(e){return((indyComp(e).competitors)||[]).slice().sort((a,b)=>(a.order||99)-(b.order||99)).map(x=>{const a=x.athlete||{};
+  return{pos:x.order,name:a.displayName||"",flag:(a.flag||{}).href||"",cc:(a.flag||{}).alt||"",ita:/ital/i.test((a.flag||{}).alt||""),win:!!x.winner,id:String(a.id||x.id||"")};});}
+async function indyStandings(){const d=await SL.tryGet(SL.ESPN2+"racing/irl/standings",{ttl:36e5});if(!d)return[];const en=[];
+  (function w(n){if(!n)return;if(n.standings&&n.standings.entries)n.standings.entries.forEach(x=>en.push(x));(n.children||[]).forEach(w);})(d);
+  const st=(x,k)=>{const v=(x.stats||[]).find(z=>z.name===k);return v?v.value:null;};
+  return en.map(x=>({name:x.athlete.displayName,flag:(x.athlete.flag||{}).href||"",ita:/ital/i.test((x.athlete.flag||{}).alt||""),id:String(x.athlete.id),rank:st(x,"rank")||99,pts:st(x,"championshipPts")||0,wins:st(x,"wins")})).sort((a,b)=>a.rank-b.rank);}
+
 /* ---------- home e avvisi ---------- */
 M.homeFeed=async function(day,ttl){
-  if(!SL.extData())return[];
   const out=[],tgt=SL.dayKey(SL.addDays(Date.now(),day));
+  try{const evs=await indySeason(ttl);evs.filter(e=>SL.dayKey(e.date)===tgt||(day===0&&indyState(e)==="in")).forEach(e=>{const st=indyState(e),R=indyRows(e);
+    out.push({id:"moto:indy:"+e.id,sport:"moto",comp:"IndyCar · "+e.name,date:e.date,state:st,live:st==="in",done:st==="post",status:st==="pre"?SL.when(e.date):st==="in"?"IN GARA":"FINALE",important:R.slice(0,1).some(r=>r.ita||favR(r.name)),
+      sig:(R[0]&&R[0].id)+"|"+st,indy:R,lines:st==="pre"||!R.length?[{n:"Gara",ico:"flag",v:SL.fmtTime(e.date)}]:R.slice(0,3).map(r=>({n:r.pos+". "+r.name,ita:r.ita,v:""})),foot:"IndyCar",go:{sport:"moto",s:"indy"}});});}catch(e){}
+  if(!SL.extData())return out;
   try{
     if(day===0){const d=await live(ttl<20000?5000:60000);if(d&&d.head&&ltToday(d)){const R=ltRiders(d),st=ltState(d),hd=d.head;
       out.push({id:"moto:gp:"+hd.event_id+":"+hd.session_id,sport:"moto",comp:"MotoGP · "+hd.event_tv_name,date:Date.now(),state:st,live:st==="in",done:st==="post",
@@ -40,15 +58,23 @@ M.homeFeed=async function(day,ttl){
         sig:"pre",lines:[{n:sesName(s),ico:s.type==="RAC"||s.type==="SPR"?"flag":"stopwatch",v:SL.fmtTime(s.date)}],foot:(ev.circuit&&ev.circuit.name)||"",go:{sport:"moto",s:"gp"}}));}
   }catch(e){}
   return out;};
-M.onChange=function(p,it){if(!it.R)return null;const a=p.R&&p.R[0],b=it.R[0];if(!b)return null;const nm=b.rider_name+" "+b.rider_surname;
+M.onChange=function(p,it){
+  if(it.indy){const w=it.indy[0];if(w&&p.state!=="post"&&it.state==="post")return{id:"w:"+it.id,big:"VINCE",icon:w.ita?"ita":"flag",title:w.name,text:it.comp,color:"var(--red)"};
+    if(w&&p.indy&&p.indy[0]&&p.indy[0].id!==w.id&&it.state==="in")return{id:"l:"+it.id+":"+w.id,big:"IN TESTA",title:w.name,text:it.comp,color:"var(--yellow)"};return null;}
+  if(!it.R)return null;const a=p.R&&p.R[0],b=it.R[0];if(!b)return null;const nm=b.rider_name+" "+b.rider_surname;
   const imp=ITA(b.rider_nation)||favR(nm);
   if(p.state!=="post"&&it.state==="post")return{id:"w:"+it.id,big:"VINCE",icon:ITA(b.rider_nation)?"ita":"flag",title:nm,text:"MotoGP · "+it.head.session_name+" · "+it.head.event_tv_name,color:"var(--red)",important:imp};
   if(a&&a.rider_number!==b.rider_number&&it.state==="in")return{id:"l:"+it.id+":"+b.rider_number+":"+b.num_lap,big:"IN TESTA",title:nm,text:"Giro "+b.num_lap+" · MotoGP "+it.head.session_name,color:"var(--yellow)",important:imp};
   return null;};
 
 /* ---------- fatti: ultima gara e vincitore, leader del mondiale, prossimo GP, Superbike ---------- */
+async function indyFacts(n){const out=[];try{const evs=await indySeason(),now=Date.now();
+    const last=evs.filter(e=>indyState(e)==="post").pop(),w=last&&indyRows(last).find(r=>r.win);if(w)out.push({l:"Ultima IndyCar · "+last.name.replace(/^Grand Prix of /i,"GP "),v:"vince "+w.name,go:{sport:"moto",s:"indy"}});
+    const S=await indyStandings();if(S[0])out.push({l:(evs.some(e=>indyState(e)!=="post")?"Leader":"Campione")+" IndyCar",v:S[0].name+" · "+S[0].pts+" pt",go:{sport:"moto",s:"indy"}});
+    const nx=evs.find(e=>new Date(e.date).getTime()>now);if(nx)out.push({l:"Prossima IndyCar",v:nx.name+" · "+SL.when(nx.date),go:{sport:"moto",s:"indy"}});}catch(e){}
+  return out.slice(0,n);}
 M.facts=async function(){
-  if(!SL.extData())return[{l:"MotoGP e Superbike",v:"risultati e classifiche con l'estensione per PC"}];
+  if(!SL.extData())return[{l:"MotoGP e Superbike",v:"risultati e classifiche con l'estensione per PC"}].concat(await indyFacts(3));
   const out=[];
   try{
     const evs=await events(),cur=currentEvent(evs),i=evs.indexOf(cur),now=Date.now();
@@ -62,7 +88,7 @@ M.facts=async function(){
   try{const y=new Date().getFullYear(),d=await SL.tryGet(SBK+"wsbk-results/v1/seasons/"+y+"/categories/SBK/riders/standings",{ttl:900000});
     if(d&&d.data&&d.data.length){const top=d.data.slice().sort((a,b)=>a.attributes.position-b.attributes.position)[0];const rd=(d.included||[]).find(x=>x.type==="riders"&&x.id===top.relationships.rider.data.id);
       if(rd)out.push({l:"Leader WorldSBK "+y,v:rd.attributes.name+" "+rd.attributes.surname+" · "+top.attributes.points+" pt",go:{sport:"moto",s:"sbk"}});}}catch(e){}
-  return out;
+  return out.concat(await indyFacts(2));
 };
 
 /* ---------- pagina ---------- */
@@ -83,15 +109,16 @@ const DEFS_SBK=[
   {k:"cal",n:"Calendario",sz:2,couch:false}
 ];
 M.mount=function(ctx){
-  const st=ctx.st,ser=st.s==="sbk"?"sbk":st.s==="live"?"live":"gp";
+  const st=ctx.st,ser=["sbk","live","indy"].indexOf(st.s)>=0?st.s:"gp";
   const r=document.createElement("div");r.className="row";
-  r.appendChild(UI.chips([UI.liveChip("moto"),{k:"gp",n:"MotoGP"},{k:"sbk",n:"WorldSBK"}],ser,v=>SL.go({s:v==="gp"?"":v})));
+  r.appendChild(UI.chips([UI.liveChip("moto"),{k:"gp",n:"MotoGP"},{k:"sbk",n:"WorldSBK"},{k:"indy",n:"IndyCar"}],ser,v=>SL.go({s:v==="gp"?"":v})));
   ctx.sub.appendChild(r);
-  if(!SL.extData()){
+  if(ser==="indy"){mountIndy(ctx);return;} /* IndyCar non ha bisogno dell'estensione */
+  if(!SL.extData()&&ser!=="live"){
     const cards=UI.mount(ctx.main,[{k:"tv",n:"Diretta TV",sz:2,fixed:true},{k:"need",n:"Dati moto",sz:2}]);UI.tv(cards.tv,"moto");
     const tvLike=SL.isTVLike();
     cards.need.body.innerHTML='<div class="empty" style="text-align:left;line-height:1.6"><b>MotoGP e Superbike non permettono ad altri siti di leggere i loro dati.</b><br>'+
-      (tvLike?"Su Smart TV e tablet questa sezione non può mostrarli. Aprila da un PC con Chrome o Edge e l'estensione dell'app.":"Installa (o aggiorna) l'estensione per Chrome/Edge da <b>Impostazioni ⚙</b>: sblocca live timing, risultati e classifiche. È la stessa estensione della Diretta TV dell'app F1.")+
+      'L\'<b>IndyCar</b> invece funziona ovunque: tocca IndyCar qui sopra.<br><br>'+(tvLike?"Su Smart TV e tablet MotoGP e Superbike non si possono mostrare. Aprile da un PC con Chrome o Edge e l'estensione dell'app.":"Installa (o aggiorna) l'estensione per Chrome/Edge da <b>Impostazioni ⚙</b>: sblocca live timing, risultati e classifiche. È la stessa estensione della Diretta TV dell'app F1.")+
       '<br><br>'+(SL.ext()?'<span class="tag big">Hai la versione '+h(SL.ext())+': aggiornala con lo zip nuovo.</span>':"")+(!tvLike?' <button type="button" class="btn pri" id="motoSet">⚙ APRI IMPOSTAZIONI</button>':"")+'</div>';
     const b=cards.need.body.querySelector("#motoSet");if(b)b.onclick=()=>UI.openSettings();
     return;}
@@ -102,13 +129,16 @@ M.mount=function(ctx){
 async function mountLive(ctx){
   const rid=SL.routeId,note=document.createElement("div");note.className="row";ctx.sub.appendChild(note);
   note.appendChild(UI.liveNote("Cerco chi è in pista adesso…"));
-  const [lt,sb]=await Promise.all([SL.tryGet(GP+"timing-gateway/livetiming-lite",{ttl:5000}),SL.tryGet(SBK+"wsbk-results/v1/sessions/latest",{ttl:20000})]);
+  const ext=!!SL.extData();
+  const [lt,sb,ie]=await Promise.all([ext?SL.tryGet(GP+"timing-gateway/livetiming-lite",{ttl:5000}):null,ext?SL.tryGet(SBK+"wsbk-results/v1/sessions/latest",{ttl:20000}):null,indySeason(30000).catch(()=>[])]);
+  const indyLive=(ie||[]).find(e=>indyState(e)==="in");
   if(rid!==SL.routeId)return; /* nel frattempo hai cambiato pagina */
   const gpLive=lt&&ltToday(lt)&&ltState(lt)==="in";
   const a=sb&&sb.data&&sb.data.attributes||{},sbkLive=!!(a.effective_start_date&&!a.effective_end_date);
   note.innerHTML="";
   if(gpLive){note.appendChild(UI.liveNote("In pista adesso: "+(lt.head.category||"MotoGP")+" · "+lt.head.session_name+" · "+lt.head.event_tv_name));mountGP(ctx);}
   else if(sbkLive){note.appendChild(UI.liveNote("In pista adesso: WorldSBK · "+(SBKN[a.short_name]||a.short_name||"")));mountSBK(ctx);}
+  else if(indyLive){note.appendChild(UI.liveNote("In pista adesso: IndyCar · "+indyLive.name));mountIndy(ctx,true);return;}
   else{
     const cards=UI.mount(ctx.main,[{k:"tv",n:"Diretta TV",sz:2,fixed:true},{k:"nolive",n:"Live ora",sz:2}]);UI.tv(cards.tv,"moto");
     note.innerHTML='<span class="muted">Nessuna sessione in pista in questo momento. Controllo di nuovo ogni minuto.</span>';
@@ -118,7 +148,7 @@ async function mountLive(ctx){
         if(n){nx="La prossima MotoGP: <b>"+h(sesName(n))+"</b> "+h(SL.when(n.date))+" · "+h(ev.sponsored_name||ev.name)+".";break;}}
       const ne=evs.find(e=>new Date(e.date_start)>Date.now());if(!nx&&ne)nx="Prossimo GP: <b>"+h(ne.sponsored_name||ne.name)+"</b>, dal "+h(SL.fmtDay(ne.date_start))+" (orari non ancora pubblicati).";}catch(e){}
     if(rid!==SL.routeId)return;
-    cards.nolive.body.innerHTML='<div class="nolive">'+SL.ico("flag")+'<div>Nessuna sessione MotoGP o WorldSBK in pista adesso.<br>'+(nx||"")+'</div></div>';
+    cards.nolive.body.innerHTML='<div class="nolive">'+SL.ico("flag")+'<div>Nessuna sessione MotoGP, WorldSBK o IndyCar in pista adesso.<br>'+(nx||"")+(ext?"":"<br><span class=\"muted\">Per MotoGP e Superbike serve l'estensione per PC (⚙).</span>")+'</div></div>';
     SL.every(async()=>{const d=await SL.tryGet(GP+"timing-gateway/livetiming-lite",{ttl:5000});if(d&&ltToday(d)&&ltState(d)==="in"&&rid===SL.routeId)SL.route();},60000,{delay:60000});
   }
   UI.dock(ctx.sub,ctx.main);
@@ -228,5 +258,33 @@ function mountSBK(ctx){
         return'<tr class="'+(it?"ita":"")+(favR(nm)?" me":"")+'"><td>'+a.position+'</td><td class="l"><span class="tn" style="max-width:none"><b>'+h(a.number||"")+'</b> '+h(nm)+(it?' <span class="tag ita" style="padding:1px 4px;font-size:9px">ITA</span>':"")+SL.star("moto","rider",rid,nm)+'</span></td><td class="l">'+h(tm.name||"")+'</td><td><b>'+a.points+'</b></td></tr>';}).join("")+'</tbody></table></div>';
     }catch(e){c.body.innerHTML=UI.empty("Classifica non raggiungibile.");}}
   SL.every(latest,30000);SL.every(rounds,36e5,{delay:400});SL.every(standings,600000,{delay:900});
+}
+
+/* ---------- IndyCar ---------- */
+function mountIndy(ctx,docked){
+  const cards=UI.mount(ctx.main,[{k:"tv",n:"Diretta TV",sz:2,fixed:true},{k:"race",n:"Gara",sz:2},{k:"standings",n:"Classifica piloti",sz:2},{k:"next",n:"Prossima gara",sz:1},{k:"cal",n:"Calendario",sz:2,couch:false}]);
+  UI.tv(cards.tv,"moto");
+  const S={evs:[],sel:SL.state.e||""};
+  const row=r=>'<tr class="'+(r.ita?"ita":"")+(favR(r.name)?" me":"")+'"><td>'+h(r.pos||"–")+'</td><td class="l"><span class="tn" style="max-width:none">'+(r.flag?'<img class="flag" src="'+h(r.flag)+'" alt="'+h(r.cc)+'">':"")+h(r.name)+(r.win?' <span class="tag ok">VINCE</span>':"")+SL.star("moto","rider",r.id,r.name)+'</span></td></tr>';
+  async function load(){
+    S.evs=await indySeason(20000);const live=S.evs.find(e=>indyState(e)==="in"),now=Date.now();
+    const ev=S.evs.find(e=>String(e.id)===S.sel)||live||S.evs.filter(e=>indyState(e)==="post").pop()||S.evs[0];
+    const c=cards.race;if(!ev){c.body.innerHTML=UI.empty("Calendario IndyCar non disponibile.");return;}
+    const st=indyState(ev),R=indyRows(ev);c.title(st==="in"?"Gara in corso":st==="post"?"Ultima gara":"Gara");c.sub(ev.name+" · "+SL.fmtDay(ev.date));
+    c.body.innerHTML='<div class="row" style="justify-content:space-between;margin-bottom:8px">'+(st==="in"?'<span class="tag live">IN GARA</span>':st==="post"?'<span class="tag">FINALE</span>':'<span class="tag">'+h(SL.when(ev.date))+'</span>')+'<span class="muted">'+h(ev.name)+'</span></div>'+
+      (R.length?'<div class="scroll"><table class="tbl"><thead><tr><th>#</th><th class="l">Pilota</th></tr></thead><tbody>'+R.map(row).join("")+'</tbody></table></div>':UI.empty("L'ordine d'arrivo compare con la gara."));
+    const nx=S.evs.find(e=>new Date(e.date).getTime()>now),n=cards.next;
+    if(nx){n.sub(nx.name);n.body.innerHTML='<p class="muted">'+h(SL.fmtDayLong(nx.date))+" · "+h(SL.fmtTime(nx.date))+'</p><div class="cd" data-cd="'+h(nx.date)+'">'+h(SL.countdown(new Date(nx.date)-now))+'</div>';}
+    else{n.sub("");n.body.innerHTML=UI.empty("Stagione finita: il calendario "+(new Date().getFullYear()+1)+" non è ancora pubblicato.");}
+    const cal=cards.cal;cal.sub(S.evs.length+" gare");
+    cal.body.innerHTML='<ul class="feed">'+S.evs.map(e=>{const s2=indyState(e),w=s2==="post"&&indyRows(e).find(r=>r.win);return'<li class="'+(e===ev?"goal":"")+'" style="cursor:pointer;'+(s2==="post"?"opacity:.75":"")+'" data-e="'+h(e.id)+'"><span class="t">'+h(SL.fmtDay(e.date).replace(/^\w+ /,""))+'</span><span>'+SL.ico(s2==="post"?"flag":"clock")+'</span><span class="x">'+h(e.name)+(w?'<small>vince '+h(w.name)+'</small>':"")+'</span></li>';}).join("")+'</ul>';}
+  cards.cal.body.addEventListener("click",e=>{const li=e.target.closest("[data-e]");if(!li)return;S.sel=li.dataset.e;SL.setQuiet({e:S.sel});load();});
+  async function loadStand(){const c=cards.standings,L=await indyStandings();if(!L.length){c.body.innerHTML=UI.empty("Classifica non disponibile.");return;}
+    c.sub("IndyCar "+new Date().getFullYear());
+    c.body.innerHTML='<div class="scroll"><table class="tbl"><thead><tr><th>#</th><th class="l">Pilota</th>'+(L[0].wins!=null?'<th>VITT.</th>':"")+'<th>PUNTI</th></tr></thead><tbody>'+L.map(r=>'<tr class="'+(r.ita?"ita":"")+(favR(r.name)?" me":"")+'"><td>'+h(r.rank)+'</td><td class="l"><span class="tn" style="max-width:none">'+(r.flag?'<img class="flag" src="'+h(r.flag)+'" alt="">':"")+h(r.name)+SL.star("moto","rider",r.id,r.name)+'</span></td>'+(r.wins!=null?'<td>'+h(r.wins)+'</td>':"")+'<td><b>'+h(r.pts)+'</b></td></tr>').join("")+'</tbody></table></div>';}
+  SL.every(load,()=>S.evs.some(e=>indyState(e)==="in")?20000:300000);
+  SL.every(loadStand,600000,{delay:600});
+  SL.every(()=>{const el=cards.next.body.querySelector("[data-cd]");if(el)el.textContent=SL.countdown(new Date(el.dataset.cd)-Date.now());},1000,{delay:1000});
+  if(docked)UI.dock(ctx.sub,ctx.main);
 }
 })();

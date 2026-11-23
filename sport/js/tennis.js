@@ -1,13 +1,14 @@
-/* Sport LIVE APP — TENNIS (ATP)
-   Partite di oggi, partita, italiani, tabellone, ranking ATP, calendario tornei. In evidenza italiani e grandi eventi. Dati: ESPN. */
+/* Sport LIVE APP — TENNIS (ATP e WTA)
+   Partite di oggi, partita, italiani/italiane, tabellone, ranking, calendario tornei. In evidenza italiani e grandi eventi. Dati: ESPN. */
 (function(){
 "use strict";
 const h=SL.h,UI=SL.ui;
-const M=SL.sports.tennis={name:"Tennis ATP",tab:"Tennis",icon:"🎾",color:"#c9dc3c"};
-const BASE=SL.ESPN+"tennis/atp/";
+const M=SL.sports.tennis={name:"Tennis",tab:"Tennis",icon:"🎾",color:"#c9dc3c"};
+const BASE_OF=t=>SL.ESPN+"tennis/"+(t==="wta"?"wta":"atp")+"/";
+const W1000=/Qatar|Doha|Dubai|Indian Wells|BNP Paribas Open|Miami Open|Madrid|Internazionali BNL|Italian Open|National Bank Open|Omnium Banque|Canadian Open|Cincinnati|China Open|Wuhan/i;
 const M1000=/Indian Wells|BNP Paribas Open|Miami Open|Monte[- ]Carlo|Madrid|Internazionali BNL|Italian Open|National Bank Open|Canadian Open|Omnium Banque|Cincinnati|Western & Southern|Shanghai|Paris Masters|Rolex Paris/i;
 const M500=/ABN Amro|Rio Open|Abierto Mexicano|Mexican Open|Dubai|Qatar ExxonMobil|Barcelona|Halle|Terra Wortmann|Queen'?s|cinch|HSBC Championships|Hamburg|Mubadala Citi DC|Washington|China Open|Kinoshita|Japan Open|Erste Bank|Vienna|Swiss Indoors|Basel/i;
-M.cat=e=>e.major?{k:"slam",n:"SLAM"}:/ATP Finals/i.test(e.name)?{k:"fin",n:"FINALS"}:M1000.test(e.name)?{k:"1000",n:"MASTERS 1000"}:/Next Gen/i.test(e.name)?{k:"ng",n:"NEXT GEN"}:M500.test(e.name)?{k:"500",n:"ATP 500"}:/United Cup|Laver Cup|Davis/i.test(e.name)?{k:"team",n:"A SQUADRE"}:{k:"250",n:"ATP 250"};
+M.cat=e=>e.major?{k:"slam",n:"SLAM"}:e._tour==="wta"?(/WTA Finals/i.test(e.name)?{k:"fin",n:"WTA FINALS"}:W1000.test(e.name)?{k:"1000",n:"WTA 1000"}:/Billie Jean King|United Cup/i.test(e.name)?{k:"team",n:"A SQUADRE"}:{k:"wta",n:"WTA"}):/ATP Finals/i.test(e.name)?{k:"fin",n:"FINALS"}:M1000.test(e.name)?{k:"1000",n:"MASTERS 1000"}:/Next Gen/i.test(e.name)?{k:"ng",n:"NEXT GEN"}:M500.test(e.name)?{k:"500",n:"ATP 500"}:/United Cup|Laver Cup|Davis/i.test(e.name)?{k:"team",n:"A SQUADRE"}:{k:"250",n:"ATP 250"};
 const big=c=>c.k==="slam"||c.k==="1000"||c.k==="fin";
 const isIta=a=>a&&((a.flag&&/\/ita\.png/i.test(a.flag.href||""))||/^Italy$/i.test(a.flag&&a.flag.alt||"")||a.citizenshipCountry==="ITA");
 
@@ -21,25 +22,25 @@ function norm(ev,g,c){
   const st=(c.status||{}).type||{},state=st.state||"pre",cat=M.cat(ev);
   const ps=(c.competitors||[]).slice().sort((a,b)=>(a.order||0)-(b.order||0)).map(pl);
   const fav=ps.some(p=>SL.fav.has(SL.fav.key("tennis","player",p.id)));
-  const m={id:String(c.id),tid:String(ev.id),tourn:ev.name.replace(/ presented by.*$/i,""),cat,big:big(cat),type:/doubles/i.test(g.grouping&&g.grouping.displayName||"")?"D":"S",
+  const m={tour:ev._tour||"atp",id:String(c.id),tid:String(ev.id),tourn:ev.name.replace(/ presented by.*$/i,""),cat,big:big(cat),type:/doubles/i.test(g.grouping&&g.grouping.displayName||"")?"D":"S",
     round:SL.tr.round(c.round&&c.round.displayName),date:c.date,timeValid:c.timeValid!==false,state,live:state==="in",done:state==="post",
     court:(c.venue&&c.venue.court)||"",p:ps,note:(c.notes&&c.notes[0]&&c.notes[0].text)||"",period:(c.status||{}).period||0,
     detail:st.shortDetail||st.description||""};
   m.ita=ps.some(p=>p.ita);m.fav=fav;m.important=fav||(m.ita&&m.type==="S");
   m.status=m.live?"In corso · "+(m.period?m.period+"° set":""):m.done?(/retire|ret\./i.test(m.detail+m.note)?"Ritiro":/walkover|w\/o/i.test(m.detail+m.note)?"Walkover":"Finale"):(m.timeValid?SL.when(m.date):SL.relDay(m.date)+" · orario da definire");
   return m;}
-async function week(key,ttl){const d=await SL.tryGet(BASE+"scoreboard"+(key?"?dates="+key:""),{ttl:ttl==null?20000:ttl});if(!d)return{evs:[],matches:[]};
-  const matches=[];(d.events||[]).forEach(ev=>(ev.groupings||[]).forEach(g=>(g.competitions||[]).forEach(c=>matches.push(norm(ev,g,c)))));
+async function week(key,ttl,tour){const d=await SL.tryGet(BASE_OF(tour)+"scoreboard"+(key?"?dates="+key:""),{ttl:ttl==null?20000:ttl});if(!d)return{evs:[],matches:[]};
+  const matches=[];(d.events||[]).forEach(ev=>{ev._tour=tour==="wta"?"wta":"atp";(ev.groupings||[]).forEach(g=>(g.competitions||[]).forEach(c=>matches.push(norm(ev,g,c))));});
   return{evs:d.events||[],matches};}
 const setsStr=m=>m.p.map(p=>p.sets.map(s=>s.v).join(" ")).join(" | ");
 function item(m){const lose=i=>m.done&&!m.p[i].winner&&m.p[1-i]&&m.p[1-i].winner;
-  return{id:"tennis:"+m.id,sport:"tennis",comp:m.tourn+(m.round?" · "+m.round:""),date:m.date,state:m.state,live:m.live,done:m.done,status:m.live?"LIVE":m.status,important:m.important,m,
+  return{id:"tennis:"+m.id,sport:"tennis",comp:(m.tour==="wta"?"WTA · ":"")+m.tourn+(m.round?" · "+m.round:""),date:m.date,state:m.state,live:m.live,done:m.done,status:m.live?"LIVE":m.status,important:m.important,m,
     sig:setsStr(m)+"|"+m.state,
     lines:m.p.map((p,i)=>({n:(p.seed?"("+p.seed+") ":"")+p.name,img:p.flag,ita:p.ita,v:p.sets.map(s=>s.v).join(" "),lose:lose(i)})),
-    foot:[m.cat.n,m.court].filter(Boolean).join(" · "),go:{sport:"tennis",t:m.tid,e:m.id}};}
+    foot:[m.cat.n,m.court].filter(Boolean).join(" · "),go:{sport:"tennis",tour:m.tour==="wta"?"wta":"",t:m.tid,e:m.id}};}
 M.homeFeed=async function(day,ttl){
   const key=day===0?"":SL.dayKey(SL.addDays(Date.now(),day));const tgt=SL.dayKey(SL.addDays(Date.now(),day));
-  const {matches}=await week(key,ttl);
+  const [A,W]=await Promise.all([week(key,ttl,"atp"),week(key,ttl,"wta")]);const matches=A.matches.concat(W.matches);
   return matches.filter(m=>(m.type==="S"||m.ita||m.live)&&(SL.dayKey(m.date)===tgt||(day===0&&m.live))).map(item);};
 M.onChange=function(p,it){const a=p.m,b=it.m;const nm=b.p.map(x=>x.name).join(" – ");
   const score=b.p[0].sets.map((s,i)=>s.v+"-"+((b.p[1].sets[i]||{}).v||0)).join(" ");
@@ -50,11 +51,12 @@ M.onChange=function(p,it){const a=p.m,b=it.m;const nm=b.p.map(x=>x.name).join(" 
   return null;};
 
 /* fatti: n.1 del mondo, primo italiano, ultimo torneo concluso e chi l'ha vinto, prossimo torneo */
-M.facts=async function(){
+M.facts=async function(st){
+  const tour=(st&&st.tour)==="wta"?"wta":"atp",BASE=BASE_OF(tour),TT=tour.toUpperCase();
   const out=[],y=new Date().getFullYear(),now=Date.now();
   const rk=await SL.tryGet(BASE+"rankings",{ttl:36e5});const R=rk&&rk.rankings&&rk.rankings[0]&&rk.rankings[0].ranks;
-  if(R&&R[0])out.push({l:"N.1 ATP",v:R[0].athlete.displayName+" · "+Number(R[0].points).toLocaleString("it-IT")+" pt"});
-  const it=R&&R.find(r=>isIta(r.athlete));if(it)out.push({l:"Primo italiano",v:it.athlete.displayName+" · n."+it.current});
+  if(R&&R[0])out.push({l:"N.1 "+TT,v:R[0].athlete.displayName+" · "+Number(R[0].points).toLocaleString("it-IT")+" pt"});
+  const it=R&&R.find(r=>isIta(r.athlete));if(it)out.push({l:tour==="wta"?"Prima italiana":"Primo italiano",v:it.athlete.displayName+" · n."+it.current});
   const [a,b]=await Promise.all([SL.tryGet(BASE+"scoreboard?dates="+y,{ttl:216e5}),SL.tryGet(BASE+"scoreboard?dates="+(y+1),{ttl:216e5})]);
   const evs=[].concat((a&&a.events)||[],(b&&b.events)||[]).sort((x,z)=>new Date(x.date)-new Date(z.date));
   /* ultimo torneo concluso: cerco la finale del singolare nel tabellone del suo ultimo giorno */
@@ -73,13 +75,18 @@ const DEFS=[
   {k:"today",n:"Partite",sz:2},
   {k:"ita",n:"Italiani",sz:2},
   {k:"draw",n:"Tabellone",sz:3,couch:false},
-  {k:"rank",n:"Ranking ATP",sz:2},
+  {k:"rank",n:"Ranking",sz:2},
   {k:"cal",n:"Calendario tornei",sz:2}
 ];
 M.mount=function(ctx){
   const st=ctx.st;const S={evs:[],matches:[],t:st.t||"",sel:st.e||"",f:st.f||"all",type:"S",rank:null};
-  const r1=document.createElement("div");r1.className="row";const r2=document.createElement("div");r2.className="row";ctx.sub.append(r1,r2);
+  /* circuito: ATP (uomini) o WTA (donne) */
+  const TOUR=st.tour==="wta"?"wta":"atp",BASE=BASE_OF(TOUR),TT=TOUR.toUpperCase(),W=TOUR==="wta";
+  const r0=document.createElement("div");r0.className="row";
+  r0.appendChild(UI.chips([{k:"atp",n:"ATP · uomini"},{k:"wta",n:"WTA · donne"}],TOUR,v=>SL.go({tour:v==="wta"?"wta":"",t:"",e:""})));
+  const r1=document.createElement("div");r1.className="row";const r2=document.createElement("div");r2.className="row";ctx.sub.append(r0,r1,r2);
   const cards=UI.mount(ctx.main,DEFS);UI.tv(cards.tv,"tennis");
+  cards.rank.title("Ranking "+TT);cards.ita.title(W?"Italiane":"Italiani");
   UI.seg(cards.today,[["all","Tutti"],["ita","Italiani"],["fav","★"]],S.f,v=>{S.f=v;SL.setQuiet({f:v==="all"?"":v});drawToday();});
   UI.seg(cards.today,[["S","Singolare"],["D","Doppio"]],"S",v=>{S.type=v;drawToday();});
   const pick=id=>{S.sel=id;SL.setQuiet({e:id});drawToday();drawMatch();drawDraw();};
@@ -89,14 +96,16 @@ M.mount=function(ctx){
   const tidNow=()=>{if(!isLive())return S.t;const m=S.matches.find(x=>x.id===S.sel);return m?m.tid:"";};
   const T=()=>S.evs.find(e=>String(e.id)===tidNow());
   async function load(){
-    const w=await week("",20000);S.evs=w.evs;S.matches=w.matches;
+    /* "Live ora" guarda entrambi i circuiti, altrimenti solo quello scelto */
+    if(isLive()){const [a,b]=await Promise.all([week("",20000,"atp"),week("",20000,"wta")]);S.evs=a.evs.concat(b.evs);S.matches=a.matches.concat(b.matches);}
+    else{const w=await week("",20000,TOUR);S.evs=w.evs;S.matches=w.matches;}
     if(!S.t||(!isLive()&&!T())){const live=S.matches.find(m=>m.live&&m.ita)||S.matches.find(m=>m.live);S.t=live?live.tid:(S.evs.find(e=>M.cat(e).k!=="250")||S.evs[0]||{}).id||"";S.t=String(S.t);}
     if(isLive()){const cur=S.matches.find(m=>m.id===S.sel);if(!cur||(!cur.live&&!cur.done)){const lv=S.matches.filter(m=>m.live);const p=lv.find(m=>m.ita)||lv.find(m=>m.type==="S")||lv[0];S.sel=p?p.id:"";}}
     else if(!S.sel||!S.matches.find(m=>m.id===S.sel)){const ms=S.matches.filter(m=>m.tid===S.t&&m.type==="S");const today=SL.dayKey(Date.now()),pre=ms.filter(m=>m.state==="pre").sort((a,b)=>new Date(a.date)-new Date(b.date));
       const p=ms.find(m=>m.live&&m.ita)||ms.find(m=>m.live)||ms.find(m=>m.ita&&!m.done)||pre.find(m=>SL.dayKey(m.date)===today)||ms.filter(m=>m.done).sort((a,b)=>new Date(b.date)-new Date(a.date))[0]||pre[0]||ms[0];S.sel=p?p.id:"";}
     r1.innerHTML="";
-    r1.appendChild(UI.chips([UI.liveChip("tennis")].concat(S.evs.map(e=>{const c=M.cat(e);return{k:String(e.id),n:e.name.replace(/ presented by.*$/i,"")+" · "+c.n,live:S.matches.some(m=>m.tid===String(e.id)&&m.live)};})),S.t,v=>{S.t=v;S.sel="";SL.setQuiet({t:v,e:""});load();}));
-    const ev=T();r2.innerHTML=isLive()?'<span class="tag live">LIVE</span> <span class="muted">Solo le partite in corso adesso, in tutti i tornei ATP.</span>':ev?'<span class="tag'+(big(M.cat(ev))?" big":"")+'">'+h(M.cat(ev).n)+'</span><span class="muted">'+h([SL.fmtDay(ev.date)+(ev.endDate?" – "+SL.fmtDay(ev.endDate):""),ev.venue&&ev.venue.displayName].filter(Boolean).join(" · "))+'</span>':'<span class="muted">Nessun torneo ATP in corso questa settimana.</span>';
+    r1.appendChild(UI.chips([UI.liveChip("tennis")].concat(S.evs.filter(e=>e._tour===TOUR).map(e=>{const c=M.cat(e);return{k:String(e.id),n:e.name.replace(/ presented by.*$/i,"")+" · "+c.n,live:S.matches.some(m=>m.tid===String(e.id)&&m.live)};})),S.t,v=>{S.t=v;S.sel="";SL.setQuiet({t:v,e:""});load();}));
+    const ev=T();r2.innerHTML=isLive()?'<span class="tag live">LIVE</span> <span class="muted">Solo le partite in corso adesso, in tutti i tornei ATP e WTA.</span>':ev?'<span class="tag'+(big(M.cat(ev))?" big":"")+'">'+h(M.cat(ev).n)+'</span><span class="muted">'+h([SL.fmtDay(ev.date)+(ev.endDate?" – "+SL.fmtDay(ev.endDate):""),ev.venue&&ev.venue.displayName].filter(Boolean).join(" · "))+'</span>':'<span class="muted">Nessun torneo '+TT+' in corso questa settimana.</span>';
     drawToday();drawMatch();drawDraw();drawIta();}
   const tm=(m,selc)=>{const lose=i=>m.done&&!m.p[i].winner;const n=Math.max(...m.p.map(p=>p.sets.length),0);
     return'<div role="button" tabindex="0" class="tmatch'+(m.ita?" ita":"")+(m.id===S.sel?" sel":"")+'" data-m="'+m.id+'"><span class="hd">'+(m.live?'<span class="tag live">LIVE</span>':"")+'<span>'+h(m.round)+'</span><span>'+h(m.court)+'</span><span style="margin-left:auto">'+h(m.live?(m.period?m.period+"° set":""):m.status)+'</span></span>'+
@@ -117,7 +126,7 @@ M.mount=function(ctx){
   function drawMatch(){const c=cards.match,m=S.matches.find(x=>x.id===S.sel);
     if(!m){c.body.innerHTML=UI.empty(isLive()?"Nessuna partita in corso adesso: appena ne inizia una compare qui.":"Scegli una partita.");c.sub("");return;}
     const n=Math.max(...m.p.map(p=>p.sets.length),1);
-    const rk=id=>{const r=S.rank&&S.rank.find(x=>String(x.athlete&&x.athlete.id)===id);return r?"N. "+r.current+" ATP":"";};
+    const rk=id=>{const r=S.rank&&S.rank.find(x=>String(x.athlete&&x.athlete.id)===id);return r?"N. "+r.current+" "+TT:"";};
     let s='<div class="row" style="justify-content:space-between;margin-bottom:10px"><span class="tag'+(m.big?" big":"")+'">'+h(m.cat.n)+'</span><span class="muted">'+h([m.tourn,m.round,m.court].filter(Boolean).join(" · "))+'</span>'+(m.live?'<span class="tag live">LIVE</span>':'<span class="tag">'+h(m.status)+'</span>')+'</div>';
     s+='<table class="tbl" style="font-size:1.2em"><thead><tr><th class="l">Giocatore</th>'+Array.from({length:n},(_,i)=>'<th>SET '+(i+1)+'</th>').join("")+'</tr></thead><tbody>'+
       m.p.map(p=>'<tr class="'+(p.ita?"ita":"")+'"><td class="l"><span class="tn" style="max-width:none">'+(p.flag?'<img class="flag" src="'+h(p.flag)+'" alt="">':"")+'<b>'+h(p.name)+'</b>'+(p.seed?' <span class="dim">('+p.seed+')</span>':"")+(p.winner?' <span class="tag ok">VINCE</span>':"")+' <span class="dim">'+h(rk(p.id))+'</span>'+SL.star("tennis","player",p.id,p.name)+'</span></td>'+
@@ -135,12 +144,12 @@ M.mount=function(ctx){
   async function loadRank(){const d=await SL.tryGet(BASE+"rankings",{ttl:36e5});const c=cards.rank;
     const R=d&&d.rankings&&d.rankings[0]&&d.rankings[0].ranks;if(!R){c.body.innerHTML=UI.empty("Ranking non disponibile.");return;}
     S.rank=R;drawIta();drawMatch();
-    c.sub((d.rankings[0].headline||"").replace(/ATP: Week/,"settimana"));
+    c.sub((d.rankings[0].headline||"").replace(/(ATP|WTA): Week/,"settimana"));
     c.body.innerHTML='<div class="scroll"><table class="tbl"><thead><tr><th>#</th><th></th><th class="l">Giocatore</th><th>PUNTI</th><th>ETÀ</th></tr></thead><tbody>'+R.slice(0,100).map(r=>{const a=r.athlete||{},mv=(r.previous||r.current)-r.current;
       return'<tr class="'+(isIta(a)?"ita":"")+(SL.fav.has(SL.fav.key("tennis","player",String(a.id)))?" me":"")+'"><td>'+r.current+'</td><td>'+(mv?'<span class="'+(mv>0?"up":"dn")+'">'+(mv>0?"▲":"▼")+Math.abs(mv)+'</span>':'<span class="dim">–</span>')+'</td><td class="l"><span class="tn" style="max-width:none">'+(a.flag?'<img class="flag" src="'+h(a.flag.href)+'" alt="'+h(a.flag.alt||"")+'">':"")+h(a.displayName||"")+SL.star("tennis","player",String(a.id),a.displayName||"")+'</span></td><td>'+Number(r.points||0).toLocaleString("it-IT")+'</td><td>'+h(a.age||"")+'</td></tr>';}).join("")+'</tbody></table></div>';}
   function drawIta(){const c=cards.ita;if(!S.rank){c.body.innerHTML='<div class="loading">Carico</div>';return;}
     const I=S.rank.filter(r=>isIta(r.athlete));
-    c.sub(I.length+" italiani nei primi "+S.rank.length);
+    c.sub(I.length+(W?" italiane":" italiani")+" nei primi "+S.rank.length);
     c.body.innerHTML='<div style="display:flex;flex-direction:column;gap:6px">'+I.map(r=>{const a=r.athlete,id=String(a.id);
       const ms=S.matches.filter(m=>m.p.some(p=>p.id===id)&&m.type==="S").sort((x,y)=>new Date(y.date)-new Date(x.date));const live=ms.find(m=>m.live),nx=ms.find(m=>m.state==="pre"),last=ms.find(m=>m.done);
       const opp=m=>{const o=m.p.find(p=>p.id!==id);return o?o.name:"";};
@@ -148,7 +157,7 @@ M.mount=function(ctx){
       return'<div class="tmatch ita" style="grid-template-columns:auto 1fr auto"><b style="font:900 22px/1 var(--f-display);min-width:42px">'+r.current+'</b><span class="pl w"><span>'+h(a.displayName)+'</span>'+SL.star("tennis","player",id,a.displayName)+'</span><span class="muted">'+Number(r.points||0).toLocaleString("it-IT")+' pt</span>'+(info?'<span class="hd" style="grid-column:1/-1">'+info+'</span>':"")+'</div>';}).join("")+'</div>';}
   async function loadCal(){const c=cards.cal,y=new Date().getFullYear();
     const [a,b]=await Promise.all([SL.tryGet(BASE+"scoreboard?dates="+y,{ttl:864e5}),SL.tryGet(BASE+"scoreboard?dates="+(y+1),{ttl:864e5})]);
-    const all=[].concat((a&&a.events)||[],(b&&b.events)||[]).filter(e=>new Date(e.endDate||e.date)>Date.now()-864e5);
+    const all=[].concat((a&&a.events)||[],(b&&b.events)||[]).filter(e=>new Date(e.endDate||e.date)>Date.now()-864e5);all.forEach(e=>{e._tour=TOUR;});
     const seen=new Set(),L=all.filter(e=>{if(seen.has(e.id))return false;seen.add(e.id);return true;}).sort((x,z)=>new Date(x.date)-new Date(z.date)).slice(0,30);
     if(!L.length){c.body.innerHTML=UI.empty("Calendario non disponibile.");return;}
     c.body.innerHTML='<div class="scroll"><table class="tbl"><thead><tr><th class="l">Date</th><th class="l">Torneo</th><th class="l">Categoria</th><th class="l">Campione uscente</th></tr></thead><tbody>'+L.map(e=>{const k=M.cat(e),pw=(e.previousWinners||[]).find(w=>/singles/i.test(w.type||w.name||""))||(e.previousWinners||[])[0];

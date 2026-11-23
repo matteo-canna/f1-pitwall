@@ -18,6 +18,7 @@ body[data-sport="basket"]{--sa:#f5803e}
 body[data-sport="tennis"]{--sa:#c9dc3c}
 body[data-sport="rugby"]{--sa:#3fa7d6}
 body[data-sport="moto"]{--sa:#e5383b}
+body[data-sport="golf"]{--sa:#d8b45a}
 
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--text)}
@@ -429,6 +430,8 @@ html[data-couch="1"][data-style="regia"]{--h2size:18px;--scoresize:76px;--nmsize
   --stripe:linear-gradient(90deg,#1b5fbf,#3fa7d6 45%,#f1f2f1 45% 55%,#3fa7d6 55%,#1b5fbf)}
 .sp-moto,body[data-sport="moto"]{--f-sport:"Racing Sans One",system-ui,sans-serif;--f-score:"Orbitron",var(--f-mono);--fw:400;--fw2:900;--fst:normal;--fs:1.14;--fs2:.82;--ls:.05em;--stretch:100%;--sa:#e5383b;--ic:var(--ic-moto);--icload:var(--ic-wheel);--load:spin .7s linear infinite;
   --stripe:repeating-linear-gradient(90deg,#e5383b 0 16px,#f6f6f6 16px 32px)}
+.sp-golf,body[data-sport="golf"]{--f-sport:"Cinzel",Georgia,serif;--f-score:"Cinzel",Georgia,serif;--fw:900;--fw2:700;--fst:normal;--fs:1.02;--fs2:.9;--ls:.06em;--stretch:100%;--sa:#d8b45a;--ic:var(--ic-golf);--icload:var(--ic-golfball);--load:spin 1.3s linear infinite;
+  --stripe:linear-gradient(90deg,#1f6b3a,#d8b45a 30% 70%,#1f6b3a)}
 
 /* --- sfondi illustrati --- */
 body{position:relative;z-index:0}
@@ -546,6 +549,7 @@ body[data-sport="basket"]{--photo:url("img/bg-basket.jpg");--ppos:center 55%}
 body[data-sport="tennis"]{--photo:url("img/bg-tennis.jpg");--ppos:center 40%}
 body[data-sport="rugby"]{--photo:url("img/bg-rugby.jpg");--ppos:center 58%}
 body[data-sport="moto"]{--photo:url("img/bg-moto.jpg");--ppos:center 35%}
+body[data-sport="golf"]{--photo:url("img/bg-golf.jpg");--ppos:center 45%}
 @media (max-width:900px){
   body[data-sport="home"]{--photo:url("img/bg-home-sm.jpg")}
   body[data-sport="calcio"]{--photo:url("img/bg-calcio-sm.jpg")}
@@ -553,6 +557,7 @@ body[data-sport="moto"]{--photo:url("img/bg-moto.jpg");--ppos:center 35%}
   body[data-sport="tennis"]{--photo:url("img/bg-tennis-sm.jpg")}
   body[data-sport="rugby"]{--photo:url("img/bg-rugby-sm.jpg")}
   body[data-sport="moto"]{--photo:url("img/bg-moto-sm.jpg")}
+  body[data-sport="golf"]{--photo:url("img/bg-golf-sm.jpg")}
 }
 /* in stile regia i pannelli sono molto trasparenti: sopra una foto servono un po' più pieni */
 html[data-style="regia"] .card{background:rgba(10,14,24,.72)}
@@ -724,6 +729,9 @@ html[data-couch="1"] .note,html[data-couch="1"] .legend{font-size:14.5px}
 /* moto: parallelogramma "in velocità", font da cronometro, rosso e bianco cordolo */
 .sp-moto,body[data-sport="moto"]{--f-ui:"Orbitron",var(--f-mono);--ui-w:700;--ui-st:normal;--ui-tt:uppercase;--ui-ls:.08em;--ui-stretch:100%;
   --btn-r:0;--btn-clip:polygon(9px 0,100% 0,calc(100% - 9px) 100%,0 100%);--btn-bw:1px;--sa-ink:#ffffff;--sa2:#f6f6f6;--tint:#e5383b}
+/* golf: maiuscole incise come sui trofei, cartellino con doppio filo, oro su verde fairway */
+.sp-golf,body[data-sport="golf"]{--f-ui:"Cinzel",Georgia,serif;--ui-w:700;--ui-st:normal;--ui-tt:uppercase;--ui-ls:.1em;--ui-stretch:100%;
+  --btn-r:6px;--btn-clip:none;--btn-bw:1px;--sa-ink:#0b2414;--sa2:#1f6b3a;--tint:#2e8a52}
 
 /* pannelli leggermente tinti con il colore dello sport */
 :root{--panel:color-mix(in srgb,#101624 92%,var(--tint,#101624))}
@@ -751,6 +759,8 @@ html[data-frame] .card{background:color-mix(in srgb,color-mix(in srgb,#05080f 90
 body[data-sport="rugby"] .chip[aria-pressed="true"],body[data-sport="rugby"] .btn.pri{background:linear-gradient(180deg,var(--sa) 0 74%,#f1f2f1 74% 84%,var(--sa) 84%)}
 /* moto: pulsante attivo con il bordo a cordolo */
 body[data-sport="moto"] .chip[aria-pressed="true"],body[data-sport="moto"] .btn.pri{background:linear-gradient(var(--sa),var(--sa)) top/100% calc(100% - 4px) no-repeat,repeating-linear-gradient(90deg,#ffffff 0 8px,#7a0f12 8px 16px) bottom/100% 4px no-repeat}
+/* golf: doppio filo come il bordo di una scorecard */
+body[data-sport="golf"] .chip[aria-pressed="true"],body[data-sport="golf"] .btn.pri{box-shadow:inset 0 0 0 2px var(--sa),inset 0 0 0 3px #0b2414}
 /* basket: bordo pieno arancio sul pulsante attivo, come la cucitura del pallone */
 body[data-sport="basket"] .chip[aria-pressed="true"]{box-shadow:inset 0 0 0 2px #1a0b02,inset 0 0 0 4px var(--sa)}
 /* calcio: riga di gesso sotto il pulsante attivo */
@@ -840,4 +850,45 @@ html[data-couch="1"] .tvtxt{font-size:15.5px}
   .tvl{grid-template-columns:22px 1fr;row-gap:4px;padding:8px 12px}
   .tvl-t{white-space:normal}
   .tvl-s{grid-column:2}
+}
+
+/* ---------- golf: classifica e scorecard ---------- */
+.gname{font-family:var(--f-sport);font-weight:900;letter-spacing:.04em;font-size:16px}
+.gboard tbody tr{cursor:pointer}
+.gboard tbody tr.sel td{background:color-mix(in srgb,var(--sa) 16%,transparent)}
+.gboard tr.out td{opacity:.55}
+.gboard .rr{color:var(--muted);font-family:var(--f-mono)}
+.gpar{font-family:var(--f-mono)}
+.gpar.un{color:#ff6b6b}.gpar.ov{color:#8fb7ff}
+.ghead{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.ghead .gbig{font:900 30px/1 var(--f-score);letter-spacing:.02em}
+.ghead .gbig.un{color:#ff6b6b}.ghead .gbig.ov{color:#8fb7ff}
+.gsc{table-layout:fixed;min-width:520px}
+.gsc th,.gsc td{text-align:center;padding:4px 2px}
+.gsc th.l,.gsc td.l{text-align:left;width:56px;padding-left:6px}
+.gsc tr.gh th{font-family:var(--f-ui);color:var(--sa);font-size:11px;border-bottom:1px solid color-mix(in srgb,var(--sa) 40%,transparent)}
+.gsc tr.gh th:last-child,.gsc td:last-child{background:color-mix(in srgb,var(--sa) 10%,transparent)}
+.gsc tr.gp td{color:var(--muted);font-family:var(--f-mono);font-size:12px}
+.gsc tr.gs td{padding:6px 2px 10px}
+/* segni della scorecard: birdie cerchio, eagle doppio cerchio, bogey quadrato, doppio bogey doppio quadrato */
+.gm{display:inline-grid;place-items:center;min-width:26px;height:26px;font:700 14px/1 var(--f-mono);border:2px solid transparent}
+.gm.bi{border-color:#ff6b6b;border-radius:50%;color:#ffb3b3}
+.gm.eg{border-color:#d8b45a;border-radius:50%;box-shadow:0 0 0 2px var(--panel,#101624),0 0 0 4px #d8b45a;color:#ffe7a8}
+.gm.bo{border-color:#8fb7ff;border-radius:2px;color:#c9dbff}
+.gm.db{border-color:#8fb7ff;border-radius:2px;box-shadow:0 0 0 2px var(--panel,#101624),0 0 0 4px #8fb7ff;color:#c9dbff}
+.glegend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:10px;font-size:12.5px;color:var(--muted)}
+.glegend .gm{min-width:20px;height:20px;font-size:11px;margin-right:4px;transform:scale(.85)}
+.gita{grid-template-columns:auto 1fr auto!important;cursor:pointer}
+.gita .gpos{font:900 20px/1 var(--f-score);min-width:42px}
+html[data-couch="1"] .gboard .rr{display:none}
+/* sette linguette: sotto i 1700px i pulsanti in alto mostrano solo il simbolo (il nome resta nel suggerimento) */
+@media (max-width:1700px){.topr .tbtn span{display:none}.topr .tbtn{padding:0 11px}}
+
+/* telefono: se ci sono pulsanti nell'intestazione, vanno su una riga sotto al titolo invece di schiacciarlo */
+@media (max-width:640px){
+  .card>header:has(.tools>*){flex-wrap:wrap}
+  .card>header:has(.tools>*) h2{flex:0 1 auto;max-width:calc(100% - 44px)}
+  .card>header:has(.tools>*) .tools{order:5;flex:1 1 100%;margin-left:0;justify-content:flex-start;flex-wrap:wrap;padding:4px 0 2px}
+  .card>header:has(.tools>*) .mbtn{margin-left:auto}
+  .card>header:has(.tools>*) .sub{flex:1 1 0}
 }

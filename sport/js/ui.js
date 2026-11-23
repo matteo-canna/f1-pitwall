@@ -186,16 +186,18 @@ const SVC={
   raiplay:{n:"RaiPlay",u:"https://www.raiplay.it/dirette",frame:true},
   tv8:{n:"TV8",u:"https://www.tv8.it/streaming",frame:true},
   nba:{n:"NBA League Pass",u:"https://www.nba.com/watch/league-pass-stream",frame:true},
+  elt:{n:"EuroLeague TV",u:"https://euroleague.tv/",frame:true},
   supertennis:{n:"SuperTennis",u:"https://www.supertennis.tv/",frame:true},
   hbomax:{n:"HBO Max (Eurosport)",u:"https://play.hbomax.com/",frame:true},
   custom:{n:"Altro sito…",u:"",frame:false}
 };
-const SVC_BY={calcio:["dazn","skygo","now","prime","infinity","raiplay","tv8"],basket:["nba","skygo","now"],tennis:["skygo","now","supertennis","hbomax","raiplay"],rugby:["skygo","now","tv8","raiplay"],moto:["skygo","now","tv8"],home:["skygo","now","dazn","prime","raiplay","tv8"]};
+const SVC_BY={calcio:["dazn","skygo","now","prime","infinity","raiplay","tv8"],basket:["nba","skygo","now","elt"],"basket-eu":["elt","skygo","now","dazn"],tennis:["skygo","now","supertennis","hbomax","raiplay"],rugby:["skygo","now","tv8","raiplay"],moto:["skygo","now","tv8"],golf:["skygo","now"],home:["skygo","now","dazn","prime","raiplay","tv8"]};
 const TV=SL.TV={win:null,at:null,card:null};
-UI.tv=function(c,sport){
-  const list=(SVC_BY[sport]||SVC_BY.home).concat("custom");
-  let cfg=SL.store.get("tv."+sport,{svc:list[0],url:"",embed:false});if(list.indexOf(cfg.svc)<0)cfg.svc=list[0];
-  const save=()=>SL.store.set("tv."+sport,cfg);
+UI.tv=function(c,sport,variant){
+  /* variant: stessa pagina ma servizi diversi (es. basket europeo: prima EuroLeague TV), scelta ricordata a parte */
+  const list=(SVC_BY[variant?sport+"-"+variant:sport]||SVC_BY[sport]||SVC_BY.home).concat("custom"),skey="tv."+sport+(variant?"-"+variant:"");
+  let cfg=SL.store.get(skey,{svc:list[0],url:"",embed:false});if(list.indexOf(cfg.svc)<0)cfg.svc=list[0];
+  const save=()=>SL.store.set(skey,cfg);
   const svc=()=>SVC[cfg.svc]||SVC[list[0]];
   const url=()=>{const u=cfg.svc==="custom"?cfg.url:svc().u;return/^https:\/\//i.test(u||"")?u:"";};
   const inline=()=>!!url()&&!SL.inFrame&&((svc().frame&&!!SL.ext())||(cfg.svc==="custom"&&cfg.embed));

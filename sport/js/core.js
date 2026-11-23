@@ -1,7 +1,7 @@
 /* Sport LIVE APP — nucleo: dati, orari, preferiti, avvisi, navigazione */
 (function(){
 "use strict";
-const SL=window.SL={sports:{},order:["home","calcio","basket","tennis","rugby","moto"],timers:[],state:{}};
+const SL=window.SL={sports:{},order:["home","calcio","basket","tennis","rugby","moto","golf"],timers:[],state:{}};
 const $=id=>document.getElementById(id);
 SL.$=$;
 SL.h=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
