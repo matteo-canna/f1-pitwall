@@ -8,19 +8,20 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=JetBrains+Mono:wght@400;500;700;800&family=Teko:wght@500;600;700&family=Bungee&family=Fraunces:ital,opsz,wght@1,9..144,800;1,9..144,900&family=Alfa+Slab+One&family=Racing+Sans+One&family=Orbitron:wght@700;900&family=Cinzel:wght@600;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="app.css?v=1.22">
+<link rel="stylesheet" href="app.css?v=1.24">
+<link rel="stylesheet" href="screens.css?v=1.24">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23e5383b'/%3E%3Ccircle cx='32' cy='32' r='13' fill='none' stroke='white' stroke-width='6'/%3E%3Ccircle cx='32' cy='32' r='4' fill='white'/%3E%3C/svg%3E">
 </head>
 <body>
 <header class="top" id="top">
   <a class="logo" href="#/home" aria-label="Sport LIVE APP, adesso in diretta"><span>SPORT</span><b>LIVE</b></a>
   <span class="clock mono" id="clock" aria-live="off"></span>
-  <span class="ver mono" id="appVer" title="Versione della pagina che stai guardando: 1.22 del 23/11/2026">v1.22</span>
+  <span class="ver mono" id="appVer" title="Versione della pagina che stai guardando: 1.24 del 23/11/2026">v1.24</span>
   <nav class="tabs" id="tabs" aria-label="Sport"></nav>
   <div class="topr">
  <button class="tbtn favbtn" id="btnFav" title="Gestisci i preferiti" aria-haspopup="dialog">★ <span>PREFERITI</span><b class="fbadge" id="favBadge" hidden></b></button>
     <button class="tbtn" id="btnTicker" title="Mostra o nascondi la striscia delle notizie" aria-pressed="true">≡ <span>NOTIZIE</span></button>
-    <button class="tbtn" id="btnScreens" title="Più schermi">⧉ <span>SCHERMI</span></button>
+    <button class="tbtn" id="btnScreens" title="Schermi: schermo singolo o più schermi">⧉ <span>SCHERMI</span></button>
     <button class="tbtn icobtn" id="btnSettings" title="Impostazioni" aria-label="Impostazioni">⚙</button>
   </div>
 </header>
@@ -29,10 +30,15 @@
   <div class="tk-view"><div class="tk-track" id="tkTrack"></div></div>
   <button type="button" class="tk-x" id="tkHide" aria-label="Nascondi la striscia delle notizie" title="Nascondi la striscia">✕</button>
 </div>
-<div class="follow" id="followBar" hidden>
-  <span class="logo sm"><span>SPORT</span><b>LIVE</b></span>
-  <span id="followTxt">Schermo secondario · segue la finestra principale</span>
-  <a class="tbtn" id="followHome" href="./">⌂ HOME</a>
+<!-- barra delle finestre: schermo singolo, finestra principale e finestre secondarie con più schermi -->
+<div class="soloBar" id="soloBar" hidden>
+  <span class="logo sm" id="soloLogo" hidden><span>SPORT</span><b>LIVE</b></span>
+  <span class="led ok"></span><span id="soloTxt">—</span><span class="spacer"></span>
+  <button class="tog home" id="soloHome" type="button" hidden>⌂ HOME</button>
+  <button class="tog" id="soloLay" type="button" hidden>▦ DISPOSIZIONE</button>
+  <button class="tog" id="soloHd" type="button" hidden aria-pressed="true">☰ COMANDI</button>
+  <button class="tog" id="soloFs" type="button">⛶ SCHERMO INTERO</button>
+  <button class="tog" id="soloExit" type="button" hidden>LAYOUT COMPLETO</button>
 </div>
 <div class="subbar" id="subbar"></div>
 <main id="main" class="grid" tabindex="-1"></main>
@@ -112,40 +118,84 @@
   </form>
 </dialog>
 
-<dialog id="dlgScreens" aria-labelledby="scrH">
-  <form method="dialog" class="dlg">
-    <div class="dlgh"><h2 id="scrH" class="disp">Più schermi</h2><button class="x" value="close" aria-label="Chiudi">✕</button></div>
-    <p class="hint" id="scrIntro"></p>
-    <div class="scrtools">
-      <label>Schermi <select id="scrN"></select></label>
-      <button type="button" class="btn" id="scrDetect">🖥 RILEVA SCHERMI</button>
-      <button type="button" class="btn" id="scrAuto">✦ DISPOSIZIONE AUTOMATICA</button>
+<!-- SCHERMI: scelta tra schermo singolo e più schermi (come l'app F1) -->
+<dialog id="dlgScr" class="sdlg" aria-labelledby="scrH">
+  <form method="dialog" class="mbox">
+    <div class="ms-head"><div><h2 id="scrH">Schermi</h2><p class="sub" id="scrSub">Come vuoi usare l'app?</p></div><button class="tog sq" value="close" aria-label="Chiudi">×</button></div>
+    <div id="scrChoose">
+      <p class="ms-alert ok" id="scrOn" hidden></p>
+      <p class="ms-alert" id="scrNone" hidden>In questa pagina non ci sono sezioni da disporre. Apri uno sport (Calcio, Basket, Tennis…): lì puoi usare lo schermo singolo o più schermi. La Formula 1 ha il suo pulsante SCHERMI dentro l'app.</p>
+      <div class="scr-opts">
+        <button type="button" class="scr-opt" id="scrOptSingle">
+          <svg viewBox="0 0 160 96" aria-hidden="true"><rect x="2" y="2" width="156" height="86" rx="6" fill="#05070c" stroke="#3b4864" stroke-width="2"/><rect x="10" y="10" width="30" height="70" rx="3" fill="#10B981" opacity=".55"/><rect x="120" y="10" width="30" height="32" rx="3" fill="#06B6D4" opacity=".55"/><rect x="120" y="46" width="30" height="34" rx="3" fill="#F59E0B" opacity=".55"/><rect x="45" y="10" width="70" height="12" rx="3" fill="#8792aa" opacity=".5"/><rect x="45" y="26" width="70" height="40" rx="3" fill="#e5383b"/><path d="M76 39l10 7-10 7z" fill="#fff"/><rect x="45" y="70" width="70" height="10" rx="3" fill="#A855F7" opacity=".55"/><rect x="66" y="88" width="28" height="6" rx="2" fill="#3b4864"/></svg>
+          <b>Schermo singolo</b>
+          <span>La diretta TV grande e al centro, tutte le altre sezioni attorno. Scegli un preset oppure sposta tu le sezioni.</span>
+          <em id="scrSingleTag">UN SOLO MONITOR</em>
+        </button>
+        <button type="button" class="scr-opt" id="scrOptMulti">
+          <svg viewBox="0 0 160 96" aria-hidden="true"><rect x="2" y="14" width="76" height="48" rx="5" fill="#05070c" stroke="#3b4864" stroke-width="2"/><rect x="8" y="20" width="64" height="36" rx="2" fill="#e5383b" opacity=".85"/><path d="M36 32l9 6-9 6z" fill="#fff"/><rect x="82" y="14" width="76" height="48" rx="5" fill="#05070c" stroke="#3b4864" stroke-width="2"/><rect x="88" y="20" width="30" height="36" rx="2" fill="#06B6D4" opacity=".55"/><rect x="121" y="20" width="31" height="17" rx="2" fill="#10B981" opacity=".55"/><rect x="121" y="39" width="31" height="17" rx="2" fill="#A855F7" opacity=".55"/><rect x="30" y="62" width="20" height="8" fill="#3b4864"/><rect x="110" y="62" width="20" height="8" fill="#3b4864"/></svg>
+          <b>Più schermi</b>
+          <span>Una finestra per ogni monitor collegato, tutte sincronizzate. Disposizione automatica o manuale.</span>
+          <em>DUE O PIÙ MONITOR</em>
+        </button>
+      </div>
+      <p class="note scr-note" id="scrNarrow" hidden>Lo schermo singolo richiede uno schermo largo almeno 900 px: usalo da computer o da tablet in orizzontale.</p>
     </div>
-    <div class="scrmap" id="scrMap"></div>
-    <div class="dlgf">
-      <button type="button" class="btn" id="scrCloseAll">✕ CHIUDI FINESTRE</button>
-      <button type="button" class="btn pri" id="scrGo">▶ APRI SUGLI SCHERMI</button>
+    <div id="scrSingle" hidden>
+      <div class="sgl-sec"><span class="sub">PRESET CONSIGLIATI</span></div>
+      <div class="sgl-presets" id="sglPresets" role="radiogroup" aria-label="Preset per schermo singolo"></div>
+      <div class="sgl-sec"><span class="sub">DISPOSIZIONE · <b id="sglName">—</b></span><span class="sub" id="sglHint"></span></div>
+      <div class="sgl-stage"><div class="sgl-screen" id="sglScreen"></div></div>
+      <div class="ms-bar sgl-ctl">
+        <label class="sgl-range"><span>Dimensione TV</span><input type="range" id="sglTv" min="40" max="80" step="1" value="62"><output id="sglTvOut" for="sglTv">—</output></label>
+        <label class="sgl-chk"><input type="checkbox" id="sglHd" checked> Barra comandi in alto</label>
+      </div>
+      <div class="ms-palbar"><span class="sub" id="sglPalH">SEZIONI NON MOSTRATE</span><span class="ms-trash" id="sglTrash">Trascina qui per togliere</span></div>
+      <div class="ms-pal" id="sglPal"></div>
+      <div class="ms-foot"><button class="tog" id="sglBack" type="button">← INDIETRO</button><span class="spacer"></span><button class="tog" id="sglOff" type="button" hidden>ESCI DALLO SCHERMO SINGOLO</button><button class="btn pri" id="sglGo" type="button">APPLICA A QUESTO SCHERMO</button></div>
     </div>
   </form>
 </dialog>
 
-<script src="js/core.js?v=1.22"></script>
-<script src="js/theme.js?v=1.22"></script>
-<script src="js/translate.js?v=1.22"></script>
-<script src="js/ui.js?v=1.22"></script>
-<script src="js/viz.js?v=1.22"></script>
-<script src="js/data.js?v=1.22"></script>
-<script src="js/ticker.js?v=1.22"></script>
-<script src="js/home.js?v=1.22"></script>
-<script src="js/favs.js?v=1.22"></script>
-<script src="js/calcio.js?v=1.22"></script>
-<script src="js/eurolega.js?v=1.22"></script>
-<script src="js/basket.js?v=1.22"></script>
-<script src="js/tennis.js?v=1.22"></script>
-<script src="js/rugby.js?v=1.22"></script>
-<script src="js/f1.js?v=1.22"></script>
-<script src="js/moto.js?v=1.22"></script>
-<script src="js/golf.js?v=1.22"></script>
+<!-- PIÙ SCHERMI (come l'app F1) -->
+<dialog id="dlgMs" class="sdlg" aria-labelledby="msH">
+  <form method="dialog" class="mbox">
+    <div class="ms-head"><div><h2 id="msH">Più schermi</h2><p class="sub">Distribuisci le sezioni della pagina sui tuoi monitor</p></div><div class="tools"><button class="tog" id="msBack" type="button">← SCHERMI</button><button class="tog sq" value="close" aria-label="Chiudi">×</button></div></div>
+    <p class="ms-alert" id="msNote" hidden>Dentro un riquadro non si possono aprire altre finestre. Apri il sito direttamente, con Chrome o Edge da computer.</p>
+    <div class="ms-bar">
+      <span class="ms-status wait" id="msDetect"><i></i><span>Rilevamento schermi…</span></span>
+      <span class="ms-count" id="msCount" hidden><span>Schermi</span><button type="button" id="msMinus" aria-label="Uno schermo in meno">−</button><b id="msNv">2</b><button type="button" id="msPlus" aria-label="Uno schermo in più">+</button></span>
+      <button class="tog" id="msDetectBtn" type="button">↻ RILEVA</button>
+    </div>
+    <div class="ms-bar"><div class="seg" id="msModeSeg" role="group" aria-label="Modalità"><button type="button" data-m="auto" aria-pressed="true">⚡ AUTOMATICO</button><button type="button" data-m="manual" aria-pressed="false">✋ MANUALE</button></div><p class="sub" id="msHint"></p><button class="tog" id="msReset" type="button" hidden>↺ RIPRISTINA AUTOMATICO</button></div>
+    <div id="msBody" hidden>
+      <div class="ms-stage" id="msStage"></div>
+      <div class="ms-palbar"><span class="sub" id="msPalH">SEZIONI</span><span class="ms-trash" id="msTrash">🗑 Trascina qui per togliere</span></div>
+      <div class="ms-pal" id="msPal" hidden></div>
+    </div>
+    <div class="ms-foot"><div class="tools" id="msWins"></div><span class="spacer"></span><span id="msFootMain" class="tools" hidden><button class="tog" id="msClose" type="button" hidden>CHIUDI</button><button class="btn pri" id="msGo" type="button">APRI</button></span></div>
+    <p class="note ms-note">Tutte le finestre restano sincronizzate: sport, competizione, giorno e partita scelti. Se il browser blocca i popup, consentili per questo sito.</p>
+  </form>
+</dialog>
+
+<script src="js/core.js?v=1.24"></script>
+<script src="js/theme.js?v=1.24"></script>
+<script src="js/translate.js?v=1.24"></script>
+<script src="js/ui.js?v=1.24"></script>
+<script src="js/screens.js?v=1.24"></script>
+<script src="js/viz.js?v=1.24"></script>
+<script src="js/data.js?v=1.24"></script>
+<script src="js/ticker.js?v=1.24"></script>
+<script src="js/home.js?v=1.24"></script>
+<script src="js/favs.js?v=1.24"></script>
+<script src="js/calcio.js?v=1.24"></script>
+<script src="js/eurolega.js?v=1.24"></script>
+<script src="js/basket.js?v=1.24"></script>
+<script src="js/tennis.js?v=1.24"></script>
+<script src="js/rugby.js?v=1.24"></script>
+<script src="js/f1.js?v=1.24"></script>
+<script src="js/moto.js?v=1.24"></script>
+<script src="js/golf.js?v=1.24"></script>
 <script>SL.start();</script>
 </body>
 </html>
