@@ -1163,3 +1163,38 @@ html[data-couch="1"] .top .clock{display:inline-block;font-size:16px}
 @media (max-width:1100px){.top .clock,html[data-couch="1"] .top .clock{display:none}}
 /* nomi lunghi nei riquadri della home ("F1 e MotorSport"): vanno a capo invece di essere tagliati */
 .spt-name{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:.98}
+
+/* ---------- ★ Preferiti: pulsante in alto e finestra ---------- */
+.favbtn{border-color:color-mix(in srgb,var(--yellow) 45%,var(--line));color:var(--yellow)}
+.favbtn span{color:var(--text)}
+.fbadge{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;margin-left:5px;border-radius:99px;background:var(--yellow);color:#1a1400;font:800 11px/1 var(--f-mono)}
+.fbadge[hidden]{display:none}
+#dlgFav{max-width:min(900px,calc(100vw - 24px))}
+.favsec{margin-top:16px}
+.favsec h3{font:800 12px/1 var(--f-display);font-stretch:118%;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.favsec h3 small{color:var(--yellow);letter-spacing:0}
+.favmine{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px}
+.fv{display:flex;align-items:stretch;min-width:0;border:1px solid color-mix(in srgb,var(--tc) 45%,var(--line));border-left:4px solid var(--tc);border-radius:10px;background:rgba(255,255,255,.03);overflow:hidden}
+.fv-main{flex:1;display:flex;gap:10px;align-items:center;min-width:0;padding:9px 10px;background:none;border:0;color:var(--text);text-align:left;cursor:pointer}
+.fv-main:hover{background:rgba(255,255,255,.04)}
+.fv-ic .ico{width:26px;height:26px;color:var(--tc)}
+.fv-tx{display:flex;flex-direction:column;min-width:0;gap:1px}
+.fv-tx b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fv-tx small{color:var(--muted);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em}
+.fv-st{font-size:12.5px;margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.3}
+.fv-st.live{color:var(--red);font-weight:700}
+.fv-st .dot{width:7px;height:7px;margin-right:5px}
+.fv-x{flex:none;width:42px;border:0;border-left:1px solid var(--line);background:none;color:var(--muted);font-size:15px;cursor:pointer}
+.fv-x:hover,.fv-x:focus-visible{color:#fff;background:rgba(229,56,59,.3)}
+.favq{width:100%;min-height:46px;padding:0 14px;border-radius:10px;border:1px solid var(--line);background:rgba(0,0,0,.35);color:var(--text);font-size:15px}
+.favq:focus{outline:2px solid var(--yellow);outline-offset:1px}
+.favsug{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;max-height:min(320px,40vh);overflow:auto;padding:2px}
+.chip.fvadd{min-height:34px;padding:0 11px;gap:6px;font-size:12px;border-color:color-mix(in srgb,var(--tc) 50%,var(--line))}
+.chip.fvadd img{width:18px;height:18px;object-fit:contain;border-radius:2px}
+.chip.fvadd .ico{width:16px;height:16px;color:var(--tc)}
+.chip.fvadd:hover{border-color:var(--tc)}
+.favlab{flex-basis:100%;font:800 11px/1 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:4px 0 2px}
+.favempty{color:var(--muted);font-size:13.5px;padding:10px 0}
+html[data-couch="1"] .fv-tx b{font-size:18px}
+html[data-couch="1"] .fv-st{font-size:15px}
+html[data-couch="1"] .chip.fvadd{min-height:44px;font-size:14px}

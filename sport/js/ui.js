@@ -165,7 +165,7 @@ UI.openSettings=function(){
 };
 function couchNow(){$("couchNow").textContent=SL.couch()?"Ora è attiva.":"Ora non è attiva.";}
 function bcLook(){try{SL.chan&&SL.chan.postMessage({type:"look",settings:{style:SL.settings.style,couch:SL.settings.couch,tilt:SL.settings.tilt}});}catch(e){}}
-function favRender(){const L=SL.fav.list;$("favCount").textContent=L.length?"("+L.length+")":"";
+function favRender(){const L=SL.fav.list;$("favCount").textContent=L.length?"("+L.length+")":"";if(!$("favList"))return;
   $("favList").innerHTML=L.length?L.map((x,i)=>'<li class="sp-'+h(x.s)+'">'+(x.s?SL.ico(x.s):"")+" "+h(x.n)+'<button type="button" data-i="'+i+'" aria-label="Togli '+h(x.n)+'">✕</button></li>').join(""):'<li class="muted">Nessun preferito.</li>';}
 $("favList")&&$("favList").addEventListener("click",e=>{const b=e.target.closest("button[data-i]");if(!b)return;const it=SL.fav.list[+b.dataset.i];if(it)SL.fav.toggle(it);favRender();});
 SL.on("fav",()=>{if($("dlgSettings").open)favRender();});
@@ -348,7 +348,7 @@ UI.init=function(){
   $("scrAuto").addEventListener("click",()=>{MS.plan=autoPlan();SL.store.set("msPlan."+UI.sport,MS.plan);renderMap();});
   $("scrGo").addEventListener("click",launch);
   $("scrCloseAll").addEventListener("click",closeAll);
-  $("setResetCards").addEventListener("click",()=>{SL.order.forEach(s=>{SL.store.set("sz."+s,{});SL.store.set("hid."+s,[]);SL.store.sset("msolo."+s,null);});SL.store.set("couchAll",false);$("dlgSettings").close();SL.route();SL.toast("Sezioni e misure ripristinate.");});
+  $("setResetCards").addEventListener("click",()=>{SL.order.forEach(s=>{SL.store.set("sz."+s,{});SL.store.set("sz2."+s,{});SL.store.set("showEmpty."+s,[]);SL.store.set("hid."+s,[]);SL.store.sset("msolo."+s,null);});SL.store.set("couchAll",false);$("dlgSettings").close();SL.route();SL.toast("Sezioni e misure ripristinate.");});
   window.addEventListener("beforeunload",()=>{try{TV.win&&!TV.win.closed&&TV.win.close();}catch(e){}});
   let rt=null;window.addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(()=>SL.emit("resize"),200);});
 };
