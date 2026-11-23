@@ -39,7 +39,6 @@ UI.mount=function(main,defs){
     let s="";
     if(hiddenCouch)s+='<button type="button" class="btn" id="couchAll">＋ ALTRE SEZIONI ('+hiddenCouch+')</button>';
     else if(couch&&all)s+='<button type="button" class="btn" id="couchLess">－ SOLO LE PRINCIPALI</button>';
-    if(hiddenUser.length)s+='<span class="muted">Nascoste:</span>'+hiddenUser.map(d=>'<button type="button" class="chip" data-unhide="'+d.k+'">＋ '+h(d.n)+'</button>').join("");
     extra.innerHTML=s;}
   if(extra.innerHTML)main.appendChild(extra);
   extra.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
@@ -48,7 +47,50 @@ UI.mount=function(main,defs){
     if(b.id==="unsolo"){SL.store.sset("msolo."+UI.sport,null);SL.route();}
     if(b.dataset.unhide){SL.store.set("hid."+UI.sport,UI.hidden().filter(k=>k!==b.dataset.unhide));SL.route();}});
   UI.pack(main);
+  UI.watchEmpty(out,!!solo);
   return out;
+};
+
+/* ---------- sezioni senza dati: si nascondono da sole e finiscono, raggruppate, in una fila di pulsanti
+   nella barra dei filtri. Ogni pulsante riaccende la sua sezione (scelta ricordata su questo dispositivo).
+   Appena una sezione nascosta riceve dati, ricompare da sola. ---------- */
+const KEEP=["need","nolive"]; /* messaggi che spiegano cosa fare: restano sempre */
+UI.forced=()=>SL.store.get("showEmpty."+UI.sport,[]);
+UI.setForced=l=>SL.store.set("showEmpty."+UI.sport,l);
+const bodyEmpty=b=>{if(b.querySelector(".loading"))return false;const k=[...b.children];if(!k.length)return!b.textContent.trim();return k.every(x=>x.classList.contains("empty"));};
+UI.watchEmpty=function(cards,solo){
+  const sport=UI.sport,mid=UI.mountId=(UI.mountId||0)+1,list=Object.values(cards).filter(c=>c.shown&&!c.def.fixed&&KEEP.indexOf(c.def.k)<0);
+  let t=0;const sched=()=>{clearTimeout(t);t=setTimeout(apply,150);};
+  function apply(){if(UI.sport!==sport||UI.mountId!==mid)return;const forced=UI.forced();let changed=false;
+    list.forEach(c=>{const empty=bodyEmpty(c.body),on=forced.indexOf(c.def.k)>=0;c.isEmpty=empty;
+      const hide=!solo&&empty&&!on&&!c.el.classList.contains("full");
+      if(hide!==!!c.autoHidden){c.autoHidden=hide;c.el.hidden=hide;changed=true;}
+      /* sezione riaccesa ma ancora vuota: pulsante per rimetterla nella fila */
+      let x=c.tools.querySelector(".unforce");
+      if(!solo&&empty&&on){if(!x){x=document.createElement("button");x.type="button";x.className="unforce";x.title="Nascondi finché non ci sono dati";x.textContent="NASCONDI SE VUOTA";
+        x.addEventListener("click",e=>{e.stopPropagation();UI.setForced(UI.forced().filter(k=>k!==c.def.k));apply();});c.tools.appendChild(x);}}
+      else if(x)x.remove();
+      c.el.classList.toggle("is-empty",empty);});
+    if(!solo)UI.drawTray();
+    if(changed)SL.emit("resize");}
+  list.forEach(c=>{const mo=new MutationObserver(sched);mo.observe(c.body,{childList:true,subtree:true,characterData:true});SL.onCleanup(()=>mo.disconnect());});
+  SL.onCleanup(()=>clearTimeout(t));
+  sched();
+};
+UI.drawTray=function(){
+  const sub=document.getElementById("subbar");if(!sub)return;
+  const all=Object.values(UI.cards),empty=all.filter(c=>c.autoHidden),hid=UI.defs.filter(d=>UI.hidden().indexOf(d.k)>=0);
+  let tr=sub.querySelector(".etray");
+  if(!empty.length&&!hid.length){if(tr)tr.remove();return;}
+  if(!tr){tr=document.createElement("div");tr.className="etray";sub.appendChild(tr);
+    tr.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+      if(b.dataset.show){const f=UI.forced();if(f.indexOf(b.dataset.show)<0)f.push(b.dataset.show);UI.setForced(f);const c=UI.cards[b.dataset.show];
+        if(c){c.autoHidden=false;c.el.hidden=false;UI.drawTray();SL.emit("resize");setTimeout(()=>{c.el.scrollIntoView({block:"nearest",behavior:"smooth"});c.el.classList.add("flash");setTimeout(()=>c.el.classList.remove("flash"),2400);},60);}}
+      if(b.dataset.unhide){SL.store.set("hid."+UI.sport,UI.hidden().filter(k=>k!==b.dataset.unhide));SL.route();}});}
+  const order=k=>UI.defs.findIndex(d=>d.k===k);
+  tr.innerHTML=(empty.length?'<span class="et-l" title="Sezioni nascoste perché adesso non hanno dati: tornano da sole quando arrivano">Senza dati ora <b>'+empty.length+'</b></span>'+
+      empty.sort((a,b)=>order(a.def.k)-order(b.def.k)).map(c=>'<button type="button" class="chip et-c" data-show="'+h(c.def.k)+'" title="Mostra comunque questa sezione">＋ '+h(c.def.n)+'</button>').join(""):"")+
+    (hid.length?'<span class="et-l">Nascoste da te</span>'+hid.map(d=>'<button type="button" class="chip et-c" data-unhide="'+h(d.k)+'" title="Rimetti questa sezione">＋ '+h(d.n)+'</button>').join(""):"");
 };
 /* disposizione "a muro": la griglia ha righe da 4px e ogni riquadro ne occupa quante ne servono alla sua altezza.
    Così ogni sezione si appoggia subito sotto quella di sopra, senza i buchi delle righe rigide. Si ricalcola da solo quando un riquadro cambia altezza. */
