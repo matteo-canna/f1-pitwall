@@ -671,3 +671,129 @@ html[data-couch="1"][data-frame] .card::before{display:none}
 @media (prefers-reduced-motion:reduce){html[data-frame] .card{transform:none!important}}
 /* con una scheda a schermo intero la prospettiva della griglia va tolta, altrimenti la scheda non copre tutto lo schermo */
 body.has-full .grid{perspective:none}
+
+/* =====================================================================
+   SISTEMA TESTI E PULSANTI + "PELLE" DI OGNI SPORT
+   Struttura e dimensioni uguali ovunque; ogni sport cambia font dei pulsanti, colori e forma.
+   ===================================================================== */
+
+/* ---------- 1. testi: più contrasto, niente scritte minuscole, font leggibile per le frasi ---------- */
+:root{--muted:#a6b0c6;--dim:#7f8aa5;--line:#2b3651;--f-text:"Archivo",system-ui,sans-serif;
+  --btn-h:36px;--chip-h:34px}
+@media (pointer:coarse){:root{--btn-h:44px;--chip-h:42px}}
+html[data-couch="1"]{--btn-h:48px;--chip-h:46px}
+body{font:500 14px/1.45 var(--f-text);font-stretch:100%}
+/* numeri, orari e tabelle restano a spaziatura fissa (allineati) */
+.mono,.clock,.tbl td,.stat .v,.feed li .t,.trow,.mtile .st,.mrow .min,.tk-tag,.cd,.score,.bug .clk,.daynav button.cur{font-family:var(--f-mono)}
+.tbl td.l,.tbl td.l .tn{font-family:var(--f-text);font-weight:600}
+.feed li .x{font-family:var(--f-text)}
+/* dimensioni minime */
+.card>header .sub{font-size:12.5px}
+.tag{font-size:11px;padding:4px 8px}
+.tbl{font-size:13.5px}.tbl th{font-size:11.5px;color:var(--muted)}
+.feed li{font-size:13.5px}
+.note,.legend,.hint{font-size:12.5px;line-height:1.5}
+.stat .lab{font-size:11.5px}
+.mtile .st,.tmatch .hd,.htile .hd,.htile .ft,.mrow .last,.trow.h{font-size:12px}
+.mtile .tn{font-size:13.5px}
+.bench,.scorers{font-size:12.5px}
+.fact small{font-size:11px}.fact b{font-size:14px}
+.tk-it{font-size:13.5px}.tk-sub{font-size:12px}.tk-tag{font-size:11px}
+.empty{font-size:14px}
+html[data-couch="1"] body{font-size:17px}
+html[data-couch="1"] .tag{font-size:13px}
+html[data-couch="1"] .mtile .st,html[data-couch="1"] .htile .hd,html[data-couch="1"] .htile .ft,html[data-couch="1"] .mrow .last{font-size:14px}
+html[data-couch="1"] .note,html[data-couch="1"] .legend{font-size:14.5px}
+
+/* ---------- 2. pelle di ogni sport: font dei pulsanti, colori, forma ---------- */
+/* casa (neutra) */
+.sp-home,body[data-sport="home"]{--f-ui:"Archivo",system-ui,sans-serif;--ui-w:800;--ui-st:normal;--ui-tt:uppercase;--ui-ls:.06em;--ui-stretch:110%;
+  --btn-r:10px;--btn-clip:none;--btn-bw:1px;--sa-ink:#ffffff;--sa2:#ff8f8f;--tint:#e5383b}
+/* calcio: angoli tagliati come le toppe delle maglie, verde prato e bianco gesso */
+.sp-calcio,body[data-sport="calcio"]{--f-ui:"Archivo",system-ui,sans-serif;--ui-w:800;--ui-st:normal;--ui-tt:uppercase;--ui-ls:.07em;--ui-stretch:82%;
+  --btn-r:2px;--btn-clip:polygon(7px 0,calc(100% - 7px) 0,100% 7px,100% calc(100% - 7px),calc(100% - 7px) 100%,7px 100%,0 calc(100% - 7px),0 7px);--btn-bw:1px;--sa-ink:#06130b;--sa2:#e8f5ec;--tint:#2fbf71}
+/* basket: pillola tonda come il pallone, arancio e cuoio */
+.sp-basket,body[data-sport="basket"]{--f-ui:"Archivo",system-ui,sans-serif;--ui-w:900;--ui-st:normal;--ui-tt:uppercase;--ui-ls:.05em;--ui-stretch:122%;
+  --btn-r:999px;--btn-clip:none;--btn-bw:2px;--sa-ink:#1a0b02;--sa2:#ffd2a8;--tint:#f5803e}
+/* tennis: corsivo elegante, angoli alternati, giallo pallina e terra rossa */
+.sp-tennis,body[data-sport="tennis"]{--f-ui:"Fraunces",Georgia,serif;--ui-w:800;--ui-st:italic;--ui-tt:none;--ui-ls:.01em;--ui-stretch:100%;
+  --btn-r:14px 3px 14px 3px;--btn-clip:none;--btn-bw:1px;--sa-ink:#141a02;--sa2:#e07a3f;--tint:#c9dc3c}
+/* rugby: squadrati e robusti, bordo spesso, banda come le maglie a righe, azzurro */
+.sp-rugby,body[data-sport="rugby"]{--f-ui:"Alfa Slab One",Rockwell,serif;--ui-w:400;--ui-st:normal;--ui-tt:uppercase;--ui-ls:.05em;--ui-stretch:100%;
+  --btn-r:3px;--btn-clip:none;--btn-bw:2px;--sa-ink:#04121b;--sa2:#f1f2f1;--tint:#3fa7d6}
+/* moto: parallelogramma "in velocità", font da cronometro, rosso e bianco cordolo */
+.sp-moto,body[data-sport="moto"]{--f-ui:"Orbitron",var(--f-mono);--ui-w:700;--ui-st:normal;--ui-tt:uppercase;--ui-ls:.08em;--ui-stretch:100%;
+  --btn-r:0;--btn-clip:polygon(9px 0,100% 0,calc(100% - 9px) 100%,0 100%);--btn-bw:1px;--sa-ink:#ffffff;--sa2:#f6f6f6;--tint:#e5383b}
+
+/* pannelli leggermente tinti con il colore dello sport */
+:root{--panel:color-mix(in srgb,#101624 92%,var(--tint,#101624))}
+body{--panel:color-mix(in srgb,#101624 91%,var(--tint));--panel2:color-mix(in srgb,#161d2d 88%,var(--tint))}
+html[data-frame] .card{background:color-mix(in srgb,color-mix(in srgb,#05080f 90%,var(--tint)) 84%,transparent)}
+/* anello di focus nel colore dello sport (telecomando e tastiera) */
+:focus-visible{outline:3px solid var(--sa);outline-offset:3px;border-radius:6px}
+
+/* ---------- 3. pulsanti: stessa struttura, forma e font dello sport ---------- */
+.btn,.chip,.tbtn,.seg2 button,.daynav button,.menu button,.seg button,.tk-x,.mbtn{
+  font-family:var(--f-ui);font-weight:var(--ui-w);font-style:var(--ui-st);text-transform:var(--ui-tt);letter-spacing:var(--ui-ls);font-stretch:var(--ui-stretch);font-synthesis:none;
+  transition:background-color .15s,border-color .15s,color .15s,transform .1s,box-shadow .15s}
+.btn,.chip,.tbtn,.menu button{min-height:var(--btn-h);border-radius:var(--btn-r);clip-path:var(--btn-clip);border-width:var(--btn-bw)}
+.chip{min-height:var(--chip-h);padding:0 15px;font-size:13px;color:var(--text);border-color:color-mix(in srgb,var(--sa) 22%,var(--line))}
+.chip .n{font-family:var(--f-mono);font-style:normal;color:var(--muted)}
+.btn{padding:0 16px;font-size:13px}
+.tbtn{padding:0 13px;font-size:12.5px}
+.btn.pri{background:var(--sa);border-color:var(--sa);color:var(--sa-ink)}
+.chip:hover,.btn:hover,.tbtn:hover{border-color:var(--sa);color:var(--text)}
+.chip:active,.btn:active,.tbtn:active,.seg2 button:active,.daynav button:active{transform:translateY(1px)}
+.chip[aria-pressed="true"]{background:var(--sa);border-color:var(--sa);color:var(--sa-ink)}
+.chip[aria-pressed="true"] .n{color:var(--sa-ink);opacity:.75}
+.chip[aria-pressed="true"] .ico{color:var(--sa-ink)}
+/* rugby: banda orizzontale come le maglie a righe sul pulsante attivo */
+body[data-sport="rugby"] .chip[aria-pressed="true"],body[data-sport="rugby"] .btn.pri{background:linear-gradient(180deg,var(--sa) 0 74%,#f1f2f1 74% 84%,var(--sa) 84%)}
+/* moto: pulsante attivo con il bordo a cordolo */
+body[data-sport="moto"] .chip[aria-pressed="true"],body[data-sport="moto"] .btn.pri{background:linear-gradient(var(--sa),var(--sa)) top/100% calc(100% - 4px) no-repeat,repeating-linear-gradient(90deg,#ffffff 0 8px,#7a0f12 8px 16px) bottom/100% 4px no-repeat}
+/* basket: bordo pieno arancio sul pulsante attivo, come la cucitura del pallone */
+body[data-sport="basket"] .chip[aria-pressed="true"]{box-shadow:inset 0 0 0 2px #1a0b02,inset 0 0 0 4px var(--sa)}
+/* calcio: riga di gesso sotto il pulsante attivo */
+body[data-sport="calcio"] .chip[aria-pressed="true"]{box-shadow:inset 0 -3px 0 var(--sa2)}
+/* tennis: rovescio terra rossa sul bordo del pulsante attivo */
+body[data-sport="tennis"] .chip[aria-pressed="true"]{box-shadow:inset 3px 0 0 var(--sa2)}
+
+/* segmenti dentro le schede (2D/3D, Singolare/Doppio, Ospiti/Casa…) */
+.seg2{border-radius:var(--btn-r);clip-path:var(--btn-clip);padding:3px;gap:3px;background:rgba(0,0,0,.35);border-color:color-mix(in srgb,var(--sa) 25%,var(--line))}
+.seg2 button{min-height:30px;padding:0 12px;font-size:12px;border-radius:var(--btn-r);clip-path:var(--btn-clip);color:var(--muted)}
+.seg2 button[aria-pressed="true"]{background:var(--sa);color:var(--sa-ink)}
+@media (pointer:coarse){.seg2 button{min-height:38px}}
+html[data-couch="1"] .seg2 button{min-height:40px;font-size:14px}
+/* giorno precedente/successivo */
+.daynav{border-radius:var(--btn-r);clip-path:var(--btn-clip);border-color:color-mix(in srgb,var(--sa) 25%,var(--line));padding:3px}
+.daynav button{min-height:calc(var(--chip-h) - 8px);min-width:38px;font-size:13px;border-radius:var(--btn-r);color:var(--text)}
+.daynav button.cur{min-width:150px;font-style:normal;letter-spacing:0;text-transform:none}
+.daynav button:not(.cur):hover{background:var(--sa);color:var(--sa-ink)}
+/* menu ⋯ e stelline: area toccabile più grande */
+.mbtn{min-width:36px;min-height:32px;font-size:15px;color:var(--text)}
+.menu button{padding:0 14px;font-size:12.5px;color:var(--text)}
+.menu button[aria-pressed="true"]{background:var(--sa);border-color:var(--sa);color:var(--sa-ink)}
+.star{min-width:30px;min-height:30px;font-size:17px;color:var(--dim);border-radius:50%}
+.star:hover{color:var(--yellow)}
+@media (pointer:coarse){.star{min-width:40px;min-height:40px}.mbtn{min-width:44px;min-height:40px}}
+/* impostazioni: segmenti */
+.seg button{min-height:40px;font-size:12px;border-radius:var(--btn-r)}
+.seg button[aria-pressed="true"]{background:var(--sa);color:var(--sa-ink)}
+/* barra in alto: linguette degli sport con la forma del proprio sport quando sono attive */
+.tabs button{min-height:40px;border-radius:var(--btn-r);font-size:13px}
+.tabs button[aria-pressed="true"]{clip-path:var(--btn-clip);color:var(--sa-ink)}
+.tabs button[aria-pressed="true"] .ico{color:var(--sa-ink)}
+.tbtn{font-size:12.5px;color:var(--text)}
+/* filtro "Live ora": sempre rosso, ma con la forma dello sport */
+.chip.hot[aria-pressed="true"]{color:#fff}
+/* pulsanti grandi su TV */
+html[data-couch="1"] .chip{font-size:15px;padding:0 18px}
+html[data-couch="1"] .btn{font-size:15px}
+html[data-couch="1"] .tabs button{min-height:48px;font-size:16px}
+/* la pelle dello sport vale anche nello stile Regia TV (che altrimenti impone il suo font) */
+html[data-style] body .chip,html[data-style] body .btn,html[data-style] body .tbtn,html[data-style] body .seg2 button,html[data-style] body .menu button,html[data-style] body .seg button{
+  font-family:var(--f-ui);font-weight:var(--ui-w);font-style:var(--ui-st);text-transform:var(--ui-tt);letter-spacing:var(--ui-ls);font-stretch:var(--ui-stretch)}
+html[data-style] body .daynav button.cur{font-family:var(--f-mono);font-style:normal;text-transform:none;letter-spacing:0}
+.tabs button .ln{font-size:11.5px;min-width:20px;padding:2px 6px}
+.photocredit{font-size:11.5px}
+.bench h4,.rounds h4{font-size:12px}
