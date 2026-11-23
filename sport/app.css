@@ -1297,3 +1297,8 @@ html[data-couch="1"] .dstage .dside{opacity:.9}
 /* ---------- versione della pagina, accanto a data e ora ---------- */
 .top .ver{flex:none;padding:6px 9px;border-radius:8px;border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--muted);font-size:11.5px;letter-spacing:.04em;white-space:nowrap}
 html[data-couch="1"] .top .ver{font-size:14px}
+
+/* pulsante NOTIZIE solo in home; IMPOSTAZIONI solo con l'icona, un po' più grande */
+body:not([data-sport="home"]) #btnTicker{display:none}
+.top .tbtn.icobtn{font-size:20px;line-height:1;padding:0 12px;min-width:44px;justify-content:center}
+html[data-couch="1"] .top .tbtn.icobtn{font-size:24px;min-width:52px}
