@@ -1054,18 +1054,12 @@ html[data-couch="1"] .dcol{max-height:calc(100vh - 170px)}
   .dt-note{margin-left:0}
   .dswitch{top:var(--toph,0px)}
 }
-/* riquadri sport: forma propria (non quella dei pulsanti, che per il basket è una pillola) e LIVE nell'angolo */
-.sptile{border-radius:14px}
-.sptile.sp-calcio{border-radius:4px}
-.sptile.sp-basket{border-radius:28px}
-.sptile.sp-tennis{border-radius:24px 4px 24px 4px}
-.sptile.sp-rugby{border-radius:3px;border-width:2px;border-top-width:5px}
-.sptile.sp-moto{border-radius:4px 26px 4px 4px}
-.sptile.sp-golf{border-radius:12px;box-shadow:0 10px 24px -14px #000,inset 0 0 0 3px rgba(6,9,16,.9),inset 0 0 0 4px color-mix(in srgb,var(--sa) 55%,transparent)}
-.spt-live{position:absolute;top:12px;right:12px;margin:0}
-.spt-top{padding-right:4px}
-.sptile:has(.spt-live) .spt-top{padding-right:70px}
-.sptile:has(.spt-live) .spt-top .spt-name{max-width:100%}
+/* riquadri sport: una sola forma per tutti (angoli arrotondati, bordo sottile, fascia colorata in alto);
+   ogni sport tiene solo colore, foto, icona e carattere. LIVE nell'angolo */
+.sptile,.sptile[class*="sp-"]{border-radius:16px;border-width:1px;border-top-width:5px}
+/* LIVE accanto al numero di eventi: il nome dello sport resta sempre intero */
+.spt-count{display:flex;align-items:center;gap:8px}
+.spt-live{margin:0;position:static}
 @media (max-width:760px){
   #hFilter{flex:1 1 100%;min-width:0;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 16px}
   #hFilter::-webkit-scrollbar{display:none}
