@@ -164,6 +164,8 @@ UI.openSettings=function(){
   segInit("setAlerts",S.alerts,v=>{S.alerts=v;SL.saveSettings();});
   segInit("setIntro",S.intro===false?"off":"on",v=>{S.intro=v==="on";SL.saveSettings();SL.toast(S.intro?"La sigla comparirà alla prossima apertura.":"Sigla d'apertura spenta.");});
   segInit("setTilt",S.tilt===false?"off":"on",v=>{S.tilt=v==="on";SL.saveSettings();if(!S.tilt)document.querySelectorAll(".card.tilting").forEach(c=>{c.classList.remove("tilting");c.style.cssText="";});});
+  /* versione della pagina (sul telefono non c'è nella barra in alto) */
+  {const v=$("appVer"),t=v?v.textContent.trim():"",dt=v?((v.title||"").match(/del (\S+)/)||[])[1]:"";$("setVer").textContent=t;$("setVerFull").textContent="Sport LIVE APP "+t+(dt?" del "+dt:"");}
   $("setSound").checked=!!S.sound;$("setSound").onchange=e=>{S.sound=e.target.checked;SL.saveSettings();};
   couchNow();favRender();
   const ext=SL.ext(),dat=SL.extData();
