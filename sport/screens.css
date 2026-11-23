@@ -169,7 +169,7 @@ dialog.sdlg{max-width:min(1080px,calc(100vw - 24px));width:100%;padding:0;backgr
 /* ---------- finestre con più schermi e schermo singolo: la pagina riempie la finestra, niente scorrimento ---------- */
 body.solo #ticker,body.sgl #ticker,body.solo .photocredit,body.sgl .photocredit{display:none!important}
 body.solo,body.sgl{overflow:hidden}
-.grid.sololay,.grid.sgllay{display:grid;gap:10px;padding:10px;overflow:hidden;align-items:stretch;perspective:none}
+.grid.sololay,.grid.sgllay{display:grid;gap:10px!important;padding:10px!important;overflow:hidden;align-items:stretch;perspective:none}
 .grid.sololay>.card,.grid.sololay>.subbar{min-height:0;min-width:0;margin:0;align-self:stretch;overflow:hidden}
 .grid.sololay>.card{display:flex;flex-direction:column}
 .grid.sololay>.card>.body{flex:1 1 auto;min-height:0;overflow:auto}
@@ -183,6 +183,14 @@ body.solo,body.sgl{overflow:hidden}
 .sglz>.card{display:flex;flex-direction:column}
 .sglz>.card>.body{flex:1 1 auto;min-height:0;overflow:auto}
 .sglz>.subbar{overflow:auto;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.sglz>.subbar>*{flex:none}
+/* in una fascia sopra/sotto la TV: filtri e giorni sulla stessa riga (scorrono di lato), partite sotto */
+.sglz.zrow>.subbar{flex-direction:row;flex-wrap:wrap;align-content:flex-start;align-items:center;column-gap:12px}
+.sglz.zrow>.subbar>.row{flex:1 1 180px;min-width:0;flex-wrap:nowrap}
+.sglz.zrow>.subbar>.row:has(>.daynav){flex:0 1 auto}
+.sglz.zrow>.subbar>.row>.muted{display:none}
+.sglz.zrow>.subbar>.row>.chips{flex-wrap:nowrap;overflow-x:auto;min-width:0;scrollbar-width:thin}
+.sglz.zrow>.subbar>.strip{flex:1 1 100%;min-width:0}
 .sglz.zrow>.subbar .sporthead{display:none}
 /* TV nello schermo singolo: spenta mostra comunque l'area nera della diretta */
 .sgllay .card[data-k="tv"]>.body{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
