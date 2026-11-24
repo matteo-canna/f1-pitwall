@@ -33,6 +33,9 @@ UI.mount=function(main,defs){
     el.querySelector(".mbtn").addEventListener("click",ev=>{ev.stopPropagation();UI.menu(c);});
     out[d.k]=c;UI.cards[d.k]=c;
   });
+  /* telefono: prima la partita e i dati, la Diretta TV subito dopo le prime due sezioni */
+  if(!solo&&out.tv&&window.matchMedia&&matchMedia("(max-width:760px)").matches){
+    const vis=[...main.children].filter(e=>e.classList.contains("card")&&!e.hidden&&e.dataset.k!=="tv");const ref=vis[1]||vis[0];if(ref)ref.after(out.tv.el);}
   /* in fondo: sezioni nascoste */
   const extra=document.createElement("div");extra.style.gridColumn="1/-1";extra.className="row";
   if(!solo){
@@ -211,7 +214,7 @@ UI.tv=function(c,sport,variant){
   const svc=()=>SVC[cfg.svc]||SVC[list[0]];
   const url=()=>{const u=cfg.svc==="custom"?cfg.url:svc().u;return/^https:\/\//i.test(u||"")?u:"";};
   const inline=()=>!!url()&&!SL.inFrame&&((svc().frame&&!!SL.ext())||(cfg.svc==="custom"&&cfg.embed));
-  const tvLike=SL.isTVLike();
+  const phone=SL.isPhone(),tvLike=SL.isTVLike()||phone;
   /* due stati: spenta = riquadro compatto e utile (servizi + partite in diretta); accesa = schermo 16:9 */
   c.body.innerHTML='<div class="tvbar"><div class="tvsvc" role="group" aria-label="Servizio">'+list.map(k=>'<button type="button" class="chip" data-svc="'+k+'" aria-pressed="'+(k===cfg.svc)+'">'+h(SVC[k].n)+'</button>').join("")+'</div>'+
     '<div class="tvcustom"><input type="url" placeholder="https://…" aria-label="Indirizzo del sito" value="'+h(cfg.url)+'"><label class="chk emb"><input type="checkbox"'+(cfg.embed?" checked":"")+'> nel riquadro</label></div>'+
@@ -228,7 +231,7 @@ UI.tv=function(c,sport,variant){
     q(".go").textContent=show?"↻ RICARICA":alive?"↻ RIPOSIZIONA":(tvLike?"▶ APRI ":"▶ COLLEGA ")+nm;
     q(".stop").hidden=!(alive||show);q(".fs").hidden=!show;fr.hidden=!show;q(".tvidle").hidden=show;
     c.sub(show?s.n+" nel riquadro":alive?s.n+" in finestra agganciata":"spenta");
-    q(".tvtxt").textContent=tvLike?"Su Smart TV e tablet il video si apre nell'app o nel sito di "+s.n+": torna qui con il tasto indietro.":
+    q(".tvtxt").textContent=tvLike?(phone?"Sul telefono":"Su Smart TV e tablet")+" il video si apre nell'app o nel sito di "+s.n+": torna qui con il tasto indietro.":
       alive?"La diretta è nella finestra di "+s.n+" sopra questo riquadro. Se hai spostato la pagina, premi RIPOSIZIONA.":
       inline()?"Scegli il servizio e premi COLLEGA: "+s.n+" si carica qui dentro, con il tuo abbonamento.":
       s.frame?"Premi COLLEGA: "+s.n+" si apre in una finestra appoggiata qui sopra. Con l'estensione per PC (⚙) si vede dentro il riquadro.":
