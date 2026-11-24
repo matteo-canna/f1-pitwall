@@ -36,7 +36,9 @@ SL.src={};
 const hostOf=u=>{try{return new URL(u).host;}catch(e){return"";}};
 /* proxy dati (Cloudflare Worker, facoltativo): MotoGP e Superbike senza estensione, su ogni dispositivo */
 SL.PROXIED=["api.motogp.pulselive.com","api.pulselive.worldsbk.com"];
-SL.proxyUrl=()=>{const p=String(SL.settings&&SL.settings.proxy||"").trim();return/^https:\/\//i.test(p)?p.replace(/\/+$/,""):"";};
+/* indirizzo predefinito del proxy, valido su tutti i dispositivi (vuoto: ognuno lo imposta in ⚙). Istruzioni: proxy/LEGGIMI.md */
+SL.DEFAULT_PROXY="";
+SL.proxyUrl=()=>{const p=String(SL.settings&&SL.settings.proxy||SL.DEFAULT_PROXY||"").trim();return/^https:\/\//i.test(p)?p.replace(/\/+$/,""):"";};
 SL.viaProxy=url=>{const p=SL.proxyUrl();return p&&!SL.extData()&&SL.PROXIED.indexOf(hostOf(url))>=0?p+"/?u="+encodeURIComponent(url):url;};
 /* dati di MotoGP e Superbike disponibili: estensione per PC oppure proxy impostato */
 SL.motoData=()=>!!(SL.extData()||SL.proxyUrl());
