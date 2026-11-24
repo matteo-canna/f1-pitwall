@@ -123,6 +123,7 @@ function mount(ctx){
     '<div class="hhero"><div><h1><em>●</em> Adesso in diretta</h1><p id="hSub">Carico partite e sessioni di tutti gli sport…</p></div><div class="hstats" id="hStats"></div></div>'+
     '<nav class="sportsel" id="hSports" aria-label="Apri uno sport"></nav>'+
     '<div class="dtools"><h2 class="dt-h">Giorno per giorno</h2><div id="hFilter"></div><div class="chips onlyf" id="hOnly" role="group" aria-label="Mostra solo"><button type="button" class="chip itachip" data-only="ita" aria-pressed="'+(S.only==="ita")+'" title="Solo Nazionale, campionati italiani, club e atleti italiani">'+SL.ico("ita")+'Italia</button><button type="button" class="chip favchip" data-only="fav" aria-pressed="'+(S.only==="fav")+'" title="Solo squadre e atleti che hai segnato con ★">★ Preferiti</button></div>'+
+      '<div class="hlinks"><button type="button" class="chip" data-goto="agenda">'+SL.ico("cal")+'La mia settimana</button><button type="button" class="chip" data-goto="multi">'+SL.ico("grid")+'Vista 2×2</button></div>'+
       (!SL.motoData()&&!SL.isTVLike()?'<span class="muted dt-note">MotoGP e Superbike: con l\'estensione per PC (⚙)</span>':"")+'</div>'+
     /* quattro colonne verticali: Ieri a sinistra, Oggi al centro (più grande e in primo piano), Domani e Dopodomani a destra */
     '<div class="dswitch" id="hSwitch">'+DAYS.map(d=>'<button type="button" data-day="'+d+'" aria-pressed="'+(d===0)+'">'+dayName(d)+'</button>').join("")+'</div>'+
@@ -194,7 +195,7 @@ function mount(ctx){
     $("hSub").innerHTML=h(SL.fmtDayLong(Date.now()))+' · aggiornato alle '+h(SL.fmtTime(LIVE.updated||Date.now()))+'<span class="hs-o"> · orari italiani</span>';
     $("hStats").innerHTML='<span class="hs live"><b>'+n+'</b><small>in diretta</small></span><span class="hs"><b>'+tot+'</b><small>oggi</small></span>'+(tm!=null?'<span class="hs"><b>'+tm+'</b><small>domani</small></span>':"");}
   /* clic: casella → pagina dello sport; "mostra altri" → apre il gruppo */
-  main.addEventListener("click",e=>{const more=e.target.closest(".dmore");if(more){S.open[more.dataset.open]=1;drawCols();return;}
+  main.addEventListener("click",e=>{const gt=e.target.closest("[data-goto]");if(gt){SL.go({sport:gt.dataset.goto});return;}const more=e.target.closest(".dmore");if(more){S.open[more.dataset.open]=1;drawCols();return;}
     const b=e.target.closest(".htile,.sptile");if(!b)return;try{SL.go(JSON.parse(b.dataset.go));}catch(x){}});
   /* telefono e tablet: le colonne scorrono di lato; i pulsanti dei giorni portano alla colonna */
   const cols=$("hCols"),sw=$("hSwitch");
