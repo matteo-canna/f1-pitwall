@@ -16,7 +16,7 @@ function item(ev){
   return{id:"calcio:"+ev.id,sport:"calcio",comp:ev.comp,date:ev.date,state:ev.state,live:ev.live,done:ev.done,status:ev.status,important:ev.important,ev,
     sig:E.score(ev)+"|"+ev.state+"|"+ev.home.red+ev.away.red,
     lines:[{n:ev.home.name,img:ev.home.logo,v:sc?ev.home.score:"",lose:ev.done&&ev.away.winner},{n:ev.away.name,img:ev.away.logo,v:sc?ev.away.score:"",lose:ev.done&&ev.home.winner}],
-    foot:ev.live||ev.done?ev.last:(ev.broadcast||ev.venue),footIco:(ev.live||ev.done)&&ev.last?"calcio":"",
+    foot:ev.broadcast||ev.venue,
     go:{sport:"calcio",c:ev.compK,e:ev.id,d:SL.dayOff(ev.date)||""}};
 }
 M.homeFeed=async function(day,ttl){

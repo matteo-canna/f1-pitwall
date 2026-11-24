@@ -1661,3 +1661,46 @@ body.solo .rmcorner,body.sgl .rmcorner{display:none}
 .rmev span{display:flex;flex-direction:column;min-width:0}
 .rmev b{font-size:14px}
 .rmev small{color:var(--muted);font-size:11.5px}
+
+/* =====================================================================
+   CASELLE DELLA HOME: marcatori e statistiche della partita
+   ===================================================================== */
+/* marcatori sotto il nome della squadra */
+.nsub .scl{display:flex;flex-wrap:wrap;gap:2px 10px;margin-top:3px;font:500 12px/1.3 var(--f-text,inherit);color:var(--text);opacity:.92;text-transform:none;letter-spacing:0;font-style:normal}
+.sc1{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.sc1 .ico{width:12px;height:12px;color:var(--tc);flex:none}
+.sc1 b{font-weight:700}
+.sc1 i{font-style:normal;color:var(--muted);font-size:11px}
+.sc1.red{color:#ff8a85}
+.sc1.kick{color:var(--muted)}
+.rcard{display:inline-block;width:8px;height:11px;border-radius:1.5px;background:var(--red);flex:none}
+.htile:not(.big) .nsub .scl{font-size:11px;gap:1px 8px}
+.htile:not(.big) .sc1 .ico{width:10px;height:10px}
+/* statistiche: valori ai lati, nome al centro (come la grafica TV) */
+.ht-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;padding:0 14px 12px}
+.hx{display:grid;align-items:center;gap:6px;padding:5px 9px;border-radius:8px;background:rgba(255,255,255,.05);font-size:12.5px;min-width:0}
+.hx small{color:var(--muted);font:700 10.5px/1.1 var(--f-mono);letter-spacing:.05em;text-transform:uppercase;text-align:center}
+.hx b{font:800 14px/1 var(--f-mono)}
+.hx.two{grid-template-columns:auto 1fr auto}
+.hx.two small{order:2}.hx.two b:first-of-type{order:1}.hx.two b:last-of-type{order:3;text-align:right}
+.hx.poss{grid-column:1/-1;grid-template-columns:auto auto minmax(60px,1fr) auto}
+.hx.poss .bar{display:block;height:8px;border-radius:99px;background:color-mix(in srgb,var(--muted) 45%,transparent);overflow:hidden}
+.hx.poss .bar>i{display:block;height:100%;background:var(--tc);border-radius:99px}
+.hx.qt{grid-column:1/-1;display:block;overflow-x:auto}
+.hx.qt table{width:100%;border-collapse:collapse;font:700 12.5px/1.2 var(--f-mono)}
+.hx.qt th{color:var(--muted);font-size:10.5px;font-weight:700;padding:2px 6px;text-align:center}
+.hx.qt td{padding:3px 6px;text-align:center}
+.hx.qt .l{text-align:left}
+.hx.qt .t{font-weight:900;color:var(--tc)}
+.hx.lead{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:4px 12px}
+.hx.lead small{min-width:36px;text-align:left}
+.hx.lead span{white-space:nowrap}
+.hx.lead span b{font:700 12.5px/1 var(--f-text,inherit)}
+html[data-couch="1"] .nsub .scl{font-size:14px}
+html[data-couch="1"] .hx{font-size:14.5px}
+html[data-couch="1"] .hx b{font-size:17px}
+.hx.lead em{font-style:normal;color:var(--muted);font-size:11px}
+.hx.fav{grid-template-columns:auto auto 1fr;justify-items:start;grid-column:span 2}
+.hx.fav span{color:var(--muted);font-size:12px}
+/* schede dietro molto strette: solo i marcatori, niente statistiche */
+.dcols.stacked>section.narrow .ht-stats{display:none}
