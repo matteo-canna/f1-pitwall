@@ -1096,6 +1096,9 @@ html[data-frame] .card.hero{box-shadow:0 0 0 1px rgba(0,0,0,.6),0 0 0 3px color-
 
 /* ---------- sezioni senza dati: fila di pulsanti nella barra dei filtri ---------- */
 .etray{display:flex;align-items:center;flex-wrap:wrap;gap:6px 8px;padding-top:10px;border-top:1px dashed rgba(255,255,255,.12)}
+/* in fondo alla pagina, sotto le sezioni, non più dentro i filtri */
+.grid>.etray{grid-column:1/-1;align-self:start;padding:10px 14px;border:1px dashed color-mix(in srgb,var(--sa) 30%,var(--line));border-radius:var(--r,14px);background:rgba(8,11,20,.55)}
+.grid>.etray[hidden]{display:none}
 .et-l{font:800 11px/1 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:inline-flex;align-items:center;gap:6px}
 .et-l b{display:inline-grid;place-items:center;min-width:18px;height:18px;border-radius:99px;background:rgba(255,255,255,.1);color:var(--text);font-size:10.5px}
 .et-l~.et-l{margin-left:8px}
@@ -1446,7 +1449,7 @@ html[data-couch="1"] .top .tbtn.icobtn{font-size:24px;min-width:52px}
   .card>header h2{flex:0 1 auto;min-width:min-content;max-width:72%}
   .card>header .sub{flex:1 1 0}
   /* file di filtri che scorrono di lato: sfumano a destra per far capire che continuano */
-  .subbar .chips{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 26px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 26px),transparent);padding-right:22px}
+  /* (le file di filtri che scorrono hanno sfumature e frecce: vedi "file che scorrono di lato") */
   /* nessuna sezione può allargare la pagina (sul telefono la rimpicciolirebbe tutta e la barra in basso uscirebbe dallo schermo):
      nelle tabelle i nomi vanno a capo; quello che resta più largo scorre dentro la sezione */
   .tbl td.l{white-space:normal}
@@ -1457,3 +1460,30 @@ html[data-couch="1"] .top .tbtn.icobtn{font-size:24px;min-width:52px}
   .gboard td.l{white-space:normal;line-height:1.2}
 }
 @media (pointer:coarse){.pconly{display:none}}
+
+/* =====================================================================
+   SEZIONE FILTRI: file che scorrono di lato (competizioni, giorni, striscia delle partite)
+   Sfumatura e freccia solo dal lato dove c'è altro; niente più pulsanti tagliati di netto.
+   ===================================================================== */
+.hscr{position:relative;display:flex;min-width:0;max-width:100%;flex:1 1 auto}
+.hscr>.chips,.hscr>.strip{flex:1 1 auto;min-width:0;max-width:100%}
+.hscr.fr>.chips,.hscr.fr>.strip{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 44px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 44px),transparent)}
+.hscr.fl>.chips,.hscr.fl>.strip{-webkit-mask-image:linear-gradient(90deg,transparent,#000 44px);mask-image:linear-gradient(90deg,transparent,#000 44px)}
+.hscr.fl.fr>.chips,.hscr.fl.fr>.strip{-webkit-mask-image:linear-gradient(90deg,transparent,#000 44px,#000 calc(100% - 44px),transparent);mask-image:linear-gradient(90deg,transparent,#000 44px,#000 calc(100% - 44px),transparent)}
+.hscr-a{position:absolute;top:50%;z-index:3;width:30px;height:30px;margin-top:-15px;padding:0;border-radius:50%;border:1px solid var(--line);background:rgba(8,11,19,.94);color:var(--text);
+  font:800 19px/1 var(--f-display);display:none;place-items:center;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.55);transition:background-color .15s,color .15s,border-color .15s}
+.hscr-l{left:0}.hscr-r{right:0}
+.hscr.fl>.hscr-l,.hscr.fr>.hscr-r{display:grid}
+.hscr-a:hover{background:var(--sa);border-color:var(--sa);color:var(--sa-ink,#0b0f19)}
+.hscr-strip>.hscr-a{width:32px;height:32px;margin-top:-16px}
+/* sul telefono e sulla TV si scorre col dito o col telecomando: restano solo le sfumature */
+@media (pointer:coarse){.hscr-a{display:none!important}}
+/* barra dei giorni: il giorno o la giornata su una riga sola */
+.daynav{max-width:100%;min-width:0}
+.daynav button.cur{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+@media (max-width:760px){
+  .daynav button.cur{min-width:0;flex:1 1 auto}
+  .daynav{display:flex;width:100%}
+  /* intestazione dello sport: le tre informazioni principali */
+  .sporthead .facts>.fact:nth-child(n+4){display:none}
+}

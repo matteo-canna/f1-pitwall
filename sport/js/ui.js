@@ -49,6 +49,13 @@ UI.mount=function(main,defs){
     if(b.id==="couchLess"){SL.store.set("couchAll",false);SL.route();}
     if(b.id==="unsolo"){SL.store.sset("msolo."+UI.sport,null);SL.route();}
     if(b.dataset.unhide){SL.store.set("hid."+UI.sport,UI.hidden().filter(k=>k!==b.dataset.unhide));SL.route();}});
+  /* sezioni senza dati: il loro riquadro sta in fondo alla pagina, non dentro i filtri */
+  const old=document.getElementById("etray");if(old)old.remove();
+  const tray=document.createElement("div");tray.className="etray";tray.id="etray";tray.hidden=true;main.appendChild(tray);
+  tray.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+    if(b.dataset.show){const f=UI.forced();if(f.indexOf(b.dataset.show)<0)f.push(b.dataset.show);UI.setForced(f);const c=UI.cards[b.dataset.show];
+      if(c){c.autoHidden=false;c.el.hidden=false;UI.drawTray();SL.emit("resize");setTimeout(()=>{c.el.scrollIntoView({block:"nearest",behavior:"smooth"});c.el.classList.add("flash");setTimeout(()=>c.el.classList.remove("flash"),2400);},60);}}
+    if(b.dataset.unhide){SL.store.set("hid."+UI.sport,UI.hidden().filter(k=>k!==b.dataset.unhide));SL.route();}});
   UI.pack(main);
   UI.watchEmpty(out,!!solo);
   /* pagine che montano le sezioni dopo (Live ora): applico di nuovo la disposizione degli schermi */
@@ -83,15 +90,10 @@ UI.watchEmpty=function(cards,solo){
   sched();
 };
 UI.drawTray=function(){
-  const sub=document.getElementById("subbar");if(!sub)return;
+  const tr=document.getElementById("etray");if(!tr)return;
   const all=Object.values(UI.cards),empty=all.filter(c=>c.autoHidden),hid=UI.defs.filter(d=>UI.hidden().indexOf(d.k)>=0);
-  let tr=sub.querySelector(".etray");
-  if(!empty.length&&!hid.length){if(tr)tr.remove();return;}
-  if(!tr){tr=document.createElement("div");tr.className="etray";sub.appendChild(tr);
-    tr.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
-      if(b.dataset.show){const f=UI.forced();if(f.indexOf(b.dataset.show)<0)f.push(b.dataset.show);UI.setForced(f);const c=UI.cards[b.dataset.show];
-        if(c){c.autoHidden=false;c.el.hidden=false;UI.drawTray();SL.emit("resize");setTimeout(()=>{c.el.scrollIntoView({block:"nearest",behavior:"smooth"});c.el.classList.add("flash");setTimeout(()=>c.el.classList.remove("flash"),2400);},60);}}
-      if(b.dataset.unhide){SL.store.set("hid."+UI.sport,UI.hidden().filter(k=>k!==b.dataset.unhide));SL.route();}});}
+  if(!empty.length&&!hid.length){tr.hidden=true;tr.innerHTML="";return;}
+  tr.hidden=false;
   const order=k=>UI.defs.findIndex(d=>d.k===k);
   tr.innerHTML=(empty.length?'<span class="et-l" title="Sezioni nascoste perché adesso non hanno dati: tornano da sole quando arrivano">Senza dati ora <b>'+empty.length+'</b></span>'+
       empty.sort((a,b)=>order(a.def.k)-order(b.def.k)).map(c=>'<button type="button" class="chip et-c" data-show="'+h(c.def.k)+'" title="Mostra comunque questa sezione">＋ '+h(c.def.n)+'</button>').join(""):"")+
@@ -142,6 +144,26 @@ UI.seg=function(c,opts,val,on){const w=document.createElement("div");w.className
 UI.empty=(t)=>'<div class="empty">'+t+'</div>';
 
 /* ---------- sottobarra: competizioni e giorno ---------- */
+/* file che scorrono di lato (filtri e partite): sfumatura e freccia solo dal lato dove c'è altro da vedere,
+   rotellina del mouse per scorrere; sul telefono si scorre col dito */
+UI.hscroll=function(el){
+  if(!el||el._hs||!el.parentNode)return;el._hs=1;
+  const wrap=document.createElement("div");wrap.className="hscr"+(el.classList.contains("strip")?" hscr-strip":"");el.parentNode.insertBefore(wrap,el);wrap.appendChild(el);
+  const arrow=(d,t)=>{const b=document.createElement("button");b.type="button";b.className="hscr-a hscr-"+d;b.tabIndex=-1;b.setAttribute("aria-label",t);b.textContent=d==="l"?"‹":"›";
+    b.addEventListener("click",()=>el.scrollBy({left:(d==="l"?-1:1)*Math.max(160,el.clientWidth*.7),behavior:"smooth"}));wrap.appendChild(b);};
+  arrow("l","Scorri a sinistra");arrow("r","Scorri a destra");
+  const upd=()=>{const max=el.scrollWidth-el.clientWidth;wrap.classList.toggle("fl",max>2&&el.scrollLeft>2);wrap.classList.toggle("fr",max>2&&el.scrollLeft<max-2);};
+  el.addEventListener("scroll",upd,{passive:true});
+  el.addEventListener("wheel",e=>{const max=el.scrollWidth-el.clientWidth;if(max<=2||Math.abs(e.deltaX)>Math.abs(e.deltaY))return;
+    const nx=Math.max(0,Math.min(max,el.scrollLeft+e.deltaY));if(nx!==el.scrollLeft){el.scrollLeft=nx;e.preventDefault();}},{passive:false});
+  if(window.ResizeObserver){const ro=new ResizeObserver(upd);ro.observe(el);SL.onCleanup(()=>ro.disconnect());}
+  const mo=new MutationObserver(()=>requestAnimationFrame(upd));mo.observe(el,{childList:true,subtree:true});SL.onCleanup(()=>mo.disconnect());
+  requestAnimationFrame(upd);setTimeout(upd,400);
+};
+/* nella sezione dei filtri: ogni fila di filtri e la striscia delle partite, anche quelle disegnate dopo */
+UI.hscrollIn=function(box){if(!box)return;
+  const run=()=>box.querySelectorAll(".chips,.strip").forEach(UI.hscroll);run();
+  const mo=new MutationObserver(run);mo.observe(box,{childList:true,subtree:true});SL.onCleanup(()=>mo.disconnect());};
 UI.chips=function(items,cur,on,extraCls){const w=document.createElement("div");w.className="chips "+(extraCls||"");
   w.innerHTML=items.map(it=>'<button type="button" class="chip'+(it.hot?" hot"+(it.c?"":" zero"):"")+'"'+(it.hot?' data-sp="'+h(it.hot)+'"':"")+' data-v="'+h(it.k)+'" aria-pressed="'+(it.k===cur)+'">'+(it.live||it.hot?'<i class="lv" title="in diretta"></i>':"")+(it.ic?SL.ico(it.ic):"")+h(it.n)+(it.c!=null?' <span class="n">'+it.c+'</span>':"")+'</button>').join("");
   w.addEventListener("click",e=>{const b=e.target.closest("button");if(b)on(b.dataset.v);});return w;};

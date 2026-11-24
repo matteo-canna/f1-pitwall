@@ -216,6 +216,7 @@ SL.route=function(){
   try{mod.mount({st,sub,main});}catch(e){console.error(e);main.innerHTML='<div class="empty" style="grid-column:1/-1">Qualcosa è andato storto in questa sezione. <b>Ricarica la pagina.</b></div>';}
   /* Diretta TV in alto a sinistra: la barra di competizioni e partite le si affianca a destra */
   SL.ui.dock(sub,main);
+  if(SL.ui.hscrollIn)SL.ui.hscrollIn(sub);
   if(SL.screens)SL.screens.refresh(); /* schermo singolo, finestra principale o secondaria con più schermi */
   SL.syncOut();
   if(SL.ticker)SL.ticker.page(st.sport);
