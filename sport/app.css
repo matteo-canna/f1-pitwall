@@ -1363,3 +1363,92 @@ html[data-couch="1"] .top .tbtn.icobtn{font-size:24px;min-width:52px}
 .dcols.stacked>section.slim[data-side="right"]>.dch{border-radius:0 16px 16px 0}
 .dcols.stacked>section.slim>.dch .dn{writing-mode:vertical-rl;font-size:15px;letter-spacing:.08em;margin:0 auto}
 @media (prefers-reduced-motion:reduce){.dcols.stacked.anim>section{transition:none}}
+
+/* =====================================================================
+   TELEFONO (fino a 760 px): sport nella barra in basso, barra in alto snella,
+   contenuti più compatti e senza cose che servono solo su PC
+   ===================================================================== */
+.bnav{display:none}
+@media (max-width:760px){
+  /* barra in alto: logo e pochi pulsanti grandi; gli sport passano in basso */
+  .top{padding:8px max(12px,env(safe-area-inset-right,0px)) 8px max(12px,env(safe-area-inset-left,0px));padding-top:max(8px,env(safe-area-inset-top,0px));gap:8px}
+  .top .tabs{display:none}
+  #btnScreens{display:none} /* schermo singolo e più schermi: solo su computer */
+  .topr{gap:8px}
+  .topr .tbtn{min-width:44px;min-height:44px;justify-content:center}
+  .bnav{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));position:fixed;left:0;right:0;bottom:0;z-index:45;
+    padding:4px max(4px,env(safe-area-inset-right,0px)) calc(4px + env(safe-area-inset-bottom,0px)) max(4px,env(safe-area-inset-left,0px));
+    background:rgba(8,11,19,.97);border-top:1px solid var(--line);box-shadow:0 -12px 24px -14px #000}
+  .bnav button{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:52px;padding:7px 0 5px;border:0;border-radius:12px;
+    background:transparent;color:var(--muted);font:800 9.5px/1 var(--f-mono);letter-spacing:.03em;text-transform:uppercase;-webkit-tap-highlight-color:transparent;min-width:0}
+  .bnav button .ico{width:23px;height:23px}
+  .bnav button .bl{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .bnav button[aria-pressed="true"]{color:var(--tabc);background:rgba(255,255,255,.04)}
+  .bnav button[aria-pressed="true"]::before{content:"";position:absolute;top:-4px;left:24%;right:24%;height:3px;border-radius:0 0 3px 3px;background:var(--tabc)}
+  .bnav button:focus-visible{outline:2px solid var(--tabc);outline-offset:-2px}
+  .bnav .ln{position:absolute;top:3px;left:calc(50% + 7px);min-width:16px;padding:0 4px;border-radius:99px;background:var(--red);color:#fff;font-size:9.5px;line-height:15px;text-align:center}
+  .bnav .ln:empty{display:none}
+  body{padding-bottom:calc(66px + env(safe-area-inset-bottom,0px))}
+  body.solo .bnav,body.sgl .bnav{display:none}
+  .toast{bottom:calc(78px + env(safe-area-inset-bottom,0px))}
+  .alerts{bottom:calc(78px + env(safe-area-inset-bottom,0px))}
+  /* niente voci che servono solo su computer */
+  .pconly,.dt-note{display:none}
+
+  /* ---------- home ---------- */
+  html[data-style] .hhero h1{font-size:25px;white-space:nowrap}
+  .hhero p{font-size:12.5px}
+  .hs-o{display:none}
+  .hhero{gap:10px}
+  /* sport: tutti e sei insieme, due per riga */
+  .sportsel{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;overflow:visible;margin:0;padding:0;scroll-snap-type:none}
+  .sptile{flex:none;min-height:0;padding:10px 10px 9px;gap:5px}
+  .sptile .spt-ic{width:24px;height:24px}
+  .sptile .spt-name{font-size:calc(17px*var(--fs))}
+  .sptile .spt-count{font-size:11.5px}
+  .sptile .spt-info{padding-left:6px}
+  .sptile .spt-info b{font-size:12px}
+  .sptile .spt-info small{font-size:9.5px}
+  .sptile .spt-info+.spt-info,.sptile .spt-go{display:none}
+  /* giorni: la fila dei giorni resta in alto, piena (il contenuto non ci passa sotto) */
+  .dswitch{margin:0 -16px;padding:8px 16px;background:var(--bg);box-shadow:0 10px 16px -12px #000;z-index:6}
+  .dswitch button{min-height:44px}
+  /* caselle degli eventi compatte: niente luogo, fascia e righe più strette */
+  .dcol .htile:not(.big) .ht-ft{display:none}
+  .dcol .htile:not(.big) .ht-band{padding:5px 10px}
+  .dcol .htile:not(.big) .ht-body{padding:7px 10px 8px;gap:4px}
+  .dcol .dgrid{gap:8px}
+  .dslot{margin-top:4px}
+
+  /* ---------- pagine sport ---------- */
+  /* tabellone: i nomi lunghi vanno a capo senza coprire il punteggio */
+  .bug{gap:6px}
+  html[data-style] body .bug .tm .nm,html[data-style] body .card.hero .bug .nm{font-size:calc(12px*var(--fs));line-height:1.12;overflow-wrap:anywhere;hyphens:none}
+  .bug .tm img{width:40px;height:40px}
+  html[data-style] body .bug .score,html[data-style] body .card.hero .bug .score{font-size:clamp(26px,8vw,34px)}
+  /* prima la partita e i filtri, la Diretta TV dopo le prime sezioni (spostata in ui.js) */
+  .grid>.card[data-k="tv"]{order:0}
+  .bug .score i{margin:0 3px}
+  /* tabelle: colonne dei giri del golf nascoste, prima colonna ferma quando si scorre di lato */
+  .gboard .rr{display:none}
+  .scroll .tbl td:first-child,.scroll .tbl th:first-child{position:sticky;left:0;z-index:1;background:var(--panel)}
+  .scroll .tbl th:first-child{z-index:2}
+  /* menu ⋯ delle sezioni: bersaglio comodo per il dito */
+  .mbtn{min-width:44px;min-height:40px}
+  /* Diretta TV più compatta */
+  .card[data-k="tv"] .tvsvc .chip{min-height:40px}
+  /* titolo della sezione sempre intero: si accorcia il sottotitolo */
+  .card>header h2{flex:0 1 auto;min-width:min-content;max-width:72%}
+  .card>header .sub{flex:1 1 0}
+  /* file di filtri che scorrono di lato: sfumano a destra per far capire che continuano */
+  .subbar .chips{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 26px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 26px),transparent);padding-right:22px}
+  /* nessuna sezione può allargare la pagina (sul telefono la rimpicciolirebbe tutta e la barra in basso uscirebbe dallo schermo):
+     nelle tabelle i nomi vanno a capo; quello che resta più largo scorre dentro la sezione */
+  .tbl td.l{white-space:normal}
+  .tbl td.l .tn{white-space:normal;flex-wrap:wrap;max-width:100%}
+  .card .body{overflow-x:auto}
+  /* classifica del golf: i nomi vanno a capo invece di spingere fuori i punteggi */
+  .gboard th,.gboard td{padding-left:4px;padding-right:4px}
+  .gboard td.l{white-space:normal;line-height:1.2}
+}
+@media (pointer:coarse){.pconly{display:none}}

@@ -2,7 +2,7 @@
 <html lang="it" data-style="pitwall">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#090d16">
 <title>Sport LIVE APP</title>
 <style id="introCss">
@@ -43,8 +43,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=JetBrains+Mono:wght@400;500;700;800&family=Teko:wght@500;600;700&family=Bungee&family=Fraunces:ital,opsz,wght@1,9..144,800;1,9..144,900&family=Alfa+Slab+One&family=Racing+Sans+One&family=Orbitron:wght@700;900&family=Cinzel:wght@600;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="app.css?v=1.28">
-<link rel="stylesheet" href="screens.css?v=1.28">
+<link rel="stylesheet" href="app.css?v=1.29">
+<link rel="stylesheet" href="screens.css?v=1.29">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23e5383b'/%3E%3Ccircle cx='32' cy='32' r='13' fill='none' stroke='white' stroke-width='6'/%3E%3Ccircle cx='32' cy='32' r='4' fill='white'/%3E%3C/svg%3E">
 </head>
 <body>
@@ -71,7 +71,7 @@
 <header class="top" id="top">
   <a class="logo" href="#/home" aria-label="Sport LIVE APP, adesso in diretta"><span>SPORT</span><b>LIVE</b></a>
   <span class="clock mono" id="clock" aria-live="off"></span>
-  <span class="ver mono" id="appVer" title="Versione della pagina che stai guardando: 1.28 del 23/11/2026">v1.28</span>
+  <span class="ver mono" id="appVer" title="Versione della pagina che stai guardando: 1.29 del 23/11/2026">v1.29</span>
   <nav class="tabs" id="tabs" aria-label="Sport"></nav>
   <div class="topr">
  <button class="tbtn favbtn" id="btnFav" title="Gestisci i preferiti" aria-haspopup="dialog">★ <span>PREFERITI</span><b class="fbadge" id="favBadge" hidden></b></button>
@@ -97,6 +97,8 @@
 </div>
 <div class="subbar" id="subbar"></div>
 <main id="main" class="grid" tabindex="-1"></main>
+<!-- telefono: gli sport in una barra in basso, a portata di pollice -->
+<nav class="bnav" id="bnav" aria-label="Sport"></nav>
 <div class="alerts" id="alerts" aria-live="polite"></div>
 <div class="toast" id="toast" role="status" hidden></div>
 <a class="photocredit" id="photoCredit" target="_blank" rel="noopener" hidden></a>
@@ -112,12 +114,14 @@
           <button type="button" data-v="regia">REGIA TV</button>
         </div>
         <p class="hint">Pit wall: scuro e denso come l'app F1. Regia TV: grafica da sovrimpressione, numeri grandi e colori delle squadre.</p>
+        <div class="pconly">
         <h3>Riquadri 3D</h3>
         <div class="seg" id="setTilt" role="group" aria-label="Inclinazione dei riquadri">
           <button type="button" data-v="on">SI INCLINANO COL MOUSE</button>
           <button type="button" data-v="off">FERMI</button>
         </div>
         <p class="hint">La cornice e lo spessore restano sempre; su TV e tablet i riquadri sono sempre fermi.</p>
+        </div>
         <h3>Modalità divano</h3>
         <div class="seg" id="setCouch" role="group" aria-label="Modalità divano">
           <button type="button" data-v="auto">AUTOMATICA</button>
@@ -144,7 +148,7 @@
         <p class="hint">Tocca la ★ accanto a una squadra, un tennista o un pilota, oppure usa il pulsante ★ PREFERITI in alto. Sono salvati solo su questo dispositivo.</p>
         <p><button type="button" class="btn" id="setFav">★ GESTISCI PREFERITI</button></p>
       </section>
-      <section>
+      <section class="pconly">
         <h3>Estensione per PC</h3>
         <p class="hint" id="extState"></p>
         <p class="hint">Serve su Chrome o Edge per computer: mostra la diretta TV dentro il riquadro e sblocca i dati di MotoGP e Superbike. È la stessa estensione dell'app F1, aggiornata.</p>
@@ -241,24 +245,24 @@
   </form>
 </dialog>
 
-<script src="js/core.js?v=1.28"></script>
-<script src="js/theme.js?v=1.28"></script>
-<script src="js/translate.js?v=1.28"></script>
-<script src="js/ui.js?v=1.28"></script>
-<script src="js/screens.js?v=1.28"></script>
-<script src="js/viz.js?v=1.28"></script>
-<script src="js/data.js?v=1.28"></script>
-<script src="js/ticker.js?v=1.28"></script>
-<script src="js/home.js?v=1.28"></script>
-<script src="js/favs.js?v=1.28"></script>
-<script src="js/calcio.js?v=1.28"></script>
-<script src="js/eurolega.js?v=1.28"></script>
-<script src="js/basket.js?v=1.28"></script>
-<script src="js/tennis.js?v=1.28"></script>
-<script src="js/rugby.js?v=1.28"></script>
-<script src="js/f1.js?v=1.28"></script>
-<script src="js/moto.js?v=1.28"></script>
-<script src="js/golf.js?v=1.28"></script>
+<script src="js/core.js?v=1.29"></script>
+<script src="js/theme.js?v=1.29"></script>
+<script src="js/translate.js?v=1.29"></script>
+<script src="js/ui.js?v=1.29"></script>
+<script src="js/screens.js?v=1.29"></script>
+<script src="js/viz.js?v=1.29"></script>
+<script src="js/data.js?v=1.29"></script>
+<script src="js/ticker.js?v=1.29"></script>
+<script src="js/home.js?v=1.29"></script>
+<script src="js/favs.js?v=1.29"></script>
+<script src="js/calcio.js?v=1.29"></script>
+<script src="js/eurolega.js?v=1.29"></script>
+<script src="js/basket.js?v=1.29"></script>
+<script src="js/tennis.js?v=1.29"></script>
+<script src="js/rugby.js?v=1.29"></script>
+<script src="js/f1.js?v=1.29"></script>
+<script src="js/moto.js?v=1.29"></script>
+<script src="js/golf.js?v=1.29"></script>
 <script>SL.start();</script>
 </body>
 </html>

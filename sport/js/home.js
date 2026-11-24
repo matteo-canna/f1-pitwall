@@ -176,12 +176,13 @@ function mount(ctx){
     let html="";
     const nm=s=>SL.sports[s]?SL.sports[s].name:s;
     /* caselle grandi nella scheda in primo piano (sui telefoni: Oggi) */
-    const cs=$("hCols"),big=d===(cs&&cs.classList.contains("stacked")?front:0);
+    /* sul telefono le caselle grandi solo per le partite in diretta: le altre compatte, meno da scorrere */
+    const cs=$("hCols"),narrow=matchMedia("(max-width:760px)").matches,big=d===(cs&&cs.classList.contains("stacked")?front:0)&&!narrow,bigLive=big||(narrow&&d===0);
     const wait=d===0?SPORTS.filter(s=>!LIVE.loaded[s]&&(S.f==="all"||S.f===s)):[],ko=d===0?SPORTS.filter(s=>LIVE.failed[s]&&(S.f==="all"||S.f===s)):[];
     const note=(wait.length?'<div class="dpending"><span class="spin"></span>Sto ancora caricando: '+wait.map(nm).join(", ")+'</div>':"")+
       (ko.length?'<div class="dpending err">Non raggiungibili adesso: '+ko.map(nm).join(", ")+' · riprovo tra pochi secondi</div>':"");
     if(d===0){const live=all.filter(x=>x.live).sort((a,b)=>(imp(b)-imp(a))||byTime(a,b)),pre=all.filter(x=>x.state==="pre"&&!x.live).sort(sortP),done=all.filter(x=>x.done&&!x.live).sort((a,b)=>(imp(b)-imp(a))||(new Date(b.date)-new Date(a.date)));
-      html=group("live",'<i class="dot"></i> In diretta ora',live,{cls:"g-live",big})+group("pre","Prossime",pre,{slots:true,max:30,big})+group("done","Finite oggi",done,{max:8,big});}
+      html=group("live",'<i class="dot"></i> In diretta ora',live,{cls:"g-live",big:bigLive})+group("pre","Prossime",pre,{slots:true,max:30,big})+group("done","Finite oggi",done,{max:8,big});}
     else if(d<0){const done=all.slice().sort(sortP);html=group("y","Risultati",done,{slots:true,max:30,big});}
     else{const pre=all.slice().sort(sortP);html=group("d"+d,"In programma",pre,{slots:true,max:30,big});}
     if(d===0&&!html&&wait.length){body.innerHTML=note+'<div class="loading">Carico</div>';return;}
@@ -190,7 +191,7 @@ function mount(ctx){
   function draw(){drawSports();drawCols();
     const L=dayItems(0)||[],n=[].concat(...SPORTS.map(s=>LIVE.bySport[s]||[])).filter(x=>x.live).length,tot=[].concat(...SPORTS.map(s=>LIVE.bySport[s]||[])).length;
     const tm=DAYC[1]?[].concat(...SPORTS.map(s=>DAYC[1].res[s]||[])).length:null;
-    $("hSub").textContent=SL.fmtDayLong(Date.now())+" · aggiornato alle "+SL.fmtTime(LIVE.updated||Date.now())+" · orari italiani";
+    $("hSub").innerHTML=h(SL.fmtDayLong(Date.now()))+' · aggiornato alle '+h(SL.fmtTime(LIVE.updated||Date.now()))+'<span class="hs-o"> · orari italiani</span>';
     $("hStats").innerHTML='<span class="hs live"><b>'+n+'</b><small>in diretta</small></span><span class="hs"><b>'+tot+'</b><small>oggi</small></span>'+(tm!=null?'<span class="hs"><b>'+tm+'</b><small>domani</small></span>':"");}
   /* clic: casella → pagina dello sport; "mostra altri" → apre il gruppo */
   main.addEventListener("click",e=>{const more=e.target.closest(".dmore");if(more){S.open[more.dataset.open]=1;drawCols();return;}
@@ -253,6 +254,8 @@ function mount(ctx){
   cols.addEventListener("focusin",e=>{if(!cols.classList.contains("stacked"))return;const s=e.target.closest("section[data-day]");if(!s||s.dataset.side==="main")return;
     let kb=true;try{kb=e.target.matches(":focus-visible");}catch(x){}if(kb)setFront(+s.dataset.day);});
   layoutStage();SL.onPage("resize",layoutStage);
+  /* passando da telefono a schermo largo (o viceversa) cambiano le caselle */
+  {let wasN=matchMedia("(max-width:760px)").matches;SL.onPage("resize",()=>{const n=matchMedia("(max-width:760px)").matches;if(n!==wasN){wasN=n;drawCols();}});}
   requestAnimationFrame(()=>{if(cols.classList.contains("stacked"))return;const t=cols.querySelector('.dcol[data-day="0"]');if(t&&cols.scrollWidth>cols.clientWidth+4)cols.scrollLeft=t.offsetLeft-cols.offsetLeft;});
   SL.onPage("live",()=>{if(SL.state.sport==="home")draw();});
   SL.onPage("flash",id=>{const t=document.querySelector('.htile[data-id="'+CSS.escape(id)+'"]');if(t){t.classList.remove("flash");void t.offsetWidth;t.classList.add("flash");}});

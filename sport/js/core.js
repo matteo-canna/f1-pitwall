@@ -127,6 +127,8 @@ let toastT=null;
 SL.toast=t=>{const el=$("toast");if(!el)return;el.textContent=t;el.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>el.hidden=true,3200);};
 
 /* ---------- stile e modalità divano ---------- */
+/* telefono: schermo piccolo e dito (il video si apre nell'app o in una nuova scheda, niente finestre appoggiate) */
+SL.isPhone=()=>{try{return matchMedia("(pointer:coarse)").matches&&Math.min(screen.width,screen.height)<700;}catch(e){return false;}};
 SL.isTVLike=()=>{const ua=navigator.userAgent||"";
   if(/SMART-TV|SmartTV|Tizen|Web0S|webOS|NetCast|HbbTV|BRAVIA|AFT[A-Z]|CrKey|GoogleTV|Android TV|AppleTV|Viera|Philips|Hisense|VIDAA/i.test(ua))return true;
   const coarse=window.matchMedia&&matchMedia("(pointer:coarse)").matches,big=Math.min(screen.width,screen.height)>=700;
@@ -220,14 +222,22 @@ SL.route=function(){
   document.title=(st.sport==="home"?"Live ora":mod.name)+" · Sport LIVE APP";
 };
 SL.liveCount={};
-SL.setLive=(sport,n)=>{SL.liveCount[sport]=n;const b=document.querySelector('#tabs [data-s="'+sport+'"] .ln');if(b)b.textContent=n?String(n):"";};
+SL.setLive=(sport,n)=>{SL.liveCount[sport]=n;document.querySelectorAll('#tabs [data-s="'+sport+'"] .ln,#bnav [data-s="'+sport+'"] .ln').forEach(b=>{b.textContent=n?String(n):"";});};
+const TABSHORT={home:"Live",moto:"Motori"};
 SL.renderTabs=function(){
   const t=$("tabs");
   if(!t.children.length){
     t.innerHTML=SL.order.map(k=>{const m=SL.sports[k];return'<button type="button" class="sp-'+k+'" data-s="'+k+'" style="--tabc:'+m.color+'" aria-pressed="false">'+SL.ico(k)+SL.h(m.tab||m.name)+'<span class="ln"></span></button>';}).join("");
     t.addEventListener("click",e=>{const b=e.target.closest("button");if(b)SL.go({sport:b.dataset.s});});
   }
+  /* telefono: la stessa scelta in una barra in basso (icona grande e nome corto) */
+  const bn=$("bnav");
+  if(bn&&!bn.children.length){
+    bn.innerHTML=SL.order.map(k=>{const m=SL.sports[k];return'<button type="button" class="sp-'+k+'" data-s="'+k+'" style="--tabc:'+m.color+'" aria-pressed="false" aria-label="'+SL.h(m.name)+'">'+SL.ico(k)+'<span class="bl">'+SL.h(TABSHORT[k]||m.tab||m.name)+'</span><span class="ln"></span></button>';}).join("");
+    bn.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;if(b.dataset.s===SL.state.sport){scrollTo({top:0,behavior:"smooth"});return;}SL.go({sport:b.dataset.s});});
+  }
   t.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.s===SL.state.sport)));
+  if(bn)bn.querySelectorAll("button").forEach(b=>{const on=b.dataset.s===SL.state.sport;b.setAttribute("aria-pressed",String(on));if(on)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current");});
   Object.keys(SL.liveCount).forEach(k=>SL.setLive(k,SL.liveCount[k]));
 };
 
