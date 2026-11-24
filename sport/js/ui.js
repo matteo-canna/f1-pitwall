@@ -56,6 +56,7 @@ UI.mount=function(main,defs){
     if(b.dataset.show){const f=UI.forced();if(f.indexOf(b.dataset.show)<0)f.push(b.dataset.show);UI.setForced(f);const c=UI.cards[b.dataset.show];
       if(c){c.autoHidden=false;c.el.hidden=false;UI.drawTray();SL.emit("resize");setTimeout(()=>{c.el.scrollIntoView({block:"nearest",behavior:"smooth"});c.el.classList.add("flash");setTimeout(()=>c.el.classList.remove("flash"),2400);},60);}}
     if(b.dataset.unhide){SL.store.set("hid."+UI.sport,UI.hidden().filter(k=>k!==b.dataset.unhide));SL.route();}});
+  UI.fitHeads(Object.values(out).map(c=>c.el));
   UI.pack(main);
   UI.watchEmpty(out,!!solo);
   /* pagine che montano le sezioni dopo (Live ora): applico di nuovo la disposizione degli schermi */
@@ -88,6 +89,20 @@ UI.watchEmpty=function(cards,solo){
   list.forEach(c=>{const mo=new MutationObserver(sched);mo.observe(c.body,{childList:true,subtree:true,characterData:true});SL.onCleanup(()=>mo.disconnect());});
   SL.onCleanup(()=>clearTimeout(t));
   sched();
+};
+/* intestazioni delle sezioni: titolo sempre intero. Se titolo, sottotitolo e comandi (Singolare/Doppio, Tutto/Azioni…)
+   non stanno su una riga, i comandi vanno sotto, a sinistra, e ⋯ resta accanto al titolo */
+UI.fitHeads=function(cards){
+  const fit=hd=>{const t=hd.querySelector(":scope>.tools");if(!t)return;
+    if(!t.children.length){hd.classList.remove("hwrap");return;}
+    const h2=hd.querySelector(":scope>h2"),mb=hd.querySelector(":scope>.mbtn");let tw=0;
+    [...t.children].forEach(x=>{if(x.getClientRects().length)tw+=x.getBoundingClientRect().width+4;});
+    const cs=getComputedStyle(hd),pad=parseFloat(cs.paddingLeft)+parseFloat(cs.paddingRight),gap=(parseFloat(cs.columnGap)||8)*3;
+    const need=(h2?h2.scrollWidth:0)+110+tw+(mb?mb.offsetWidth:0)+pad+gap;
+    hd.classList.toggle("hwrap",need>hd.clientWidth);};
+  const heads=cards.map(el=>el.querySelector(":scope>header")).filter(Boolean);
+  if(window.ResizeObserver){const ro=new ResizeObserver(es=>es.forEach(e=>fit(e.target)));heads.forEach(hd=>ro.observe(hd));SL.onCleanup(()=>ro.disconnect());}
+  heads.forEach(hd=>{const t=hd.querySelector(":scope>.tools");if(!t)return;const mo=new MutationObserver(()=>requestAnimationFrame(()=>fit(hd)));mo.observe(t,{childList:true,subtree:true,characterData:true});SL.onCleanup(()=>mo.disconnect());fit(hd);});
 };
 UI.drawTray=function(){
   const tr=document.getElementById("etray");if(!tr)return;
