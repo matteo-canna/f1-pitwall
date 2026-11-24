@@ -22,15 +22,22 @@ const isF=()=>window.isFollower();
 const ICON={tv:"▶",sub:"☰",match:"◉",events:"⚑",stats:"∿",pitch:"▦",table:"≡",momentum:"∿",shots:"◎",cronaca:"✎",multi:"⊞",leaders:"★",box:"▤",wp:"∿",
   games:"⊞",pbp:"✎",today:"⊞",ita:"✚",rank:"≡",cal:"▦",draw:"⑂",form:"↗",lineup:"▦",matches:"⊞",timing:"⏱",gap:"↔",weekend:"▦",results:"≡",
   standings:"≡",latest:"⏱",round:"▦",race:"⚑",next:"⏳",board:"≡",card:"▤",need:"!",nolive:"◌"};
-const PAL=["#06B6D4","#10B981","#A855F7","#F59E0B","#ec4899","#4f8ef7","#f59b42","#3fbf7f","#e879f9","#22d3ee"];
+/* colori delle sezioni: la tavolozza di Sport LIVE (gli sport e gli accenti del sito) */
+const PAL=["#45c8ec","#3fbf7f","#a968f5","#f2c230","#f5803e","#4f8ef7","#c9dc3c","#3fa7d6","#d8b45a","#ff8f8f"];
+/* icone delle sezioni: quelle disegnate del sito (la partita prende l'icona dello sport) */
+const SICO={tv:"var",sub:"news",events:"whistle",stats:"target",pitch:"goal",table:"trophy",momentum:"stopwatch",shots:"target",cronaca:"news",multi:"screens",leaders:"star",
+  box:"card",wp:"stopwatch",pbp:"news",ita:"ita",rank:"trophy",cal:"clock",draw:"trophy",form:"star",lineup:"goal",timing:"stopwatch",gap:"stopwatch",weekend:"flag",
+  results:"flag",standings:"trophy",latest:"clock",round:"clock",race:"flag",next:"clock",board:"trophy",card:"card",need:"target",nolive:"clock"};
+const icoOf=k=>{const sp=SL.sports[UI.sport]&&UI.sport!=="home"?UI.sport:"home",n=SICO[k]||(["match","games","today","matches"].indexOf(k)>=0?sp:null);
+  return n&&SL.icons&&SL.icons.list&&SL.icons.list[n]?SL.ico(n):(ICON[k]||"◆");};
 let UNITS=[],UK={};
 const shortName=n=>{const s=String(n).split(/ · | e /)[0].replace(/^Classifica (del torneo|live|mondiale|piloti)$/,"Classifica");return s.length>15?s.split(" ").slice(0,2).join(" "):s;};
 function units(){
   const defs=UI.defs||[];UNITS=[];UK={};
   if(!defs.length||!defs.some(d=>d.k==="tv"))return UNITS;
   const add=u=>{UNITS.push(u);UK[u.k]=u;};let ci=0;
-  add({k:"sub",n:"Partite e filtri",s:"Filtri",i:ICON.sub,c:"#8792aa",w:1});
-  defs.forEach(d=>add({k:d.k,n:d.n,s:shortName(d.n),i:ICON[d.k]||"◆",c:d.k==="tv"?"#f43f5e":PAL[(ci++)%PAL.length],w:d.k==="tv"?3:(d.sz||2),hero:!!d.hero}));
+  add({k:"sub",n:"Partite e filtri",s:"Filtri",i:icoOf("sub"),c:"#8792aa",w:1});
+  defs.forEach(d=>add({k:d.k,n:d.n,s:shortName(d.n),i:icoOf(d.k),c:d.k==="tv"?"#e5383b":PAL[(ci++)%PAL.length],w:d.k==="tv"?3:(d.sz||2),hero:!!d.hero}));
   return UNITS;}
 /* importanza: la sezione principale, poi la TV, poi l'ordine della pagina */
 const rank=k=>{const u=UK[k];if(!u)return 99;if(u.hero)return-2;if(k==="tv")return-1;return UNITS.indexOf(u);};

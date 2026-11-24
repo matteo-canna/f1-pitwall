@@ -28,6 +28,10 @@ const ICONS={
   stopwatch:'<circle cx="12" cy="13.5" r="7.5"/><path d="M12 13.5v-4M10 2.5h4M18.5 6.5L20 5"/>',
   racket:'<ellipse cx="9.5" cy="9.5" rx="6" ry="6.6" transform="rotate(-45 9.5 9.5)"/><path d="M13.8 13.8l6.7 6.7"/><path d="M6.5 7.5l6 6M9 5.5l4.5 4.5M5 10l4 4" stroke-opacity=".5"/>',
   wheel:'<circle cx="12" cy="12" r="9.5"/><circle cx="12" cy="12" r="2.2" fill="currentColor"/><path d="M12 2.5v7.3M12 14.2v7.3M2.5 12h7.3M14.2 12h7.3M5.3 5.3l5.2 5.2M13.5 13.5l5.2 5.2M18.7 5.3l-5.2 5.2M10.5 13.5l-5.2 5.2" stroke-opacity=".6"/>',
+  /* due monitor (pulsante Schermi): la TV a sinistra */
+  screens:'<path d="M8.6 5.6V4.4c0-.8.6-1.4 1.4-1.4h10.6c.8 0 1.4.6 1.4 1.4v7.3c0 .8-.6 1.4-1.4 1.4h-2.4" stroke-opacity=".75"/><rect x="2" y="7.2" width="14" height="10" rx="1.5"/><path d="M9 17.2v3.1M6 20.5h6"/><path d="M7.4 9.9l3.8 2.3-3.8 2.3z" fill="currentColor" stroke="none"/>',
+  /* striscia delle notizie */
+  news:'<rect x="2.5" y="4.5" width="19" height="15" rx="2.2"/><path d="M6.5 9h11M6.5 12.5h11M6.5 16h7"/>',
   star:'<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" fill="currentColor"/>',
   /* tricolore: colori fissi (le emoji bandiera su Windows diventano "IT") */
   ita:'<rect x="2" y="5.5" width="20" height="13" rx="2.2" fill="#ce2b37" stroke="none"/><rect x="2" y="5.5" width="13.4" height="13" rx="2.2" fill="#f1f2f1" stroke="none"/><rect x="2" y="5.5" width="6.7" height="13" rx="2.2" fill="#009246" stroke="none"/><rect x="6" y="5.5" width="2.7" height="13" fill="#009246" stroke="none"/>'
