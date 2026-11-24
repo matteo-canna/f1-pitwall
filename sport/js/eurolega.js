@@ -53,6 +53,10 @@ EU.standings=async function(k,round){const t=SL.dayKey(Date.now()),R=await EU.ro
     const d=await SL.tryGet(FEED+"v3/competitions/"+COMPS[k].code+"/seasons/"+EU.season(k)+"/rounds/"+r+"/basicstandings",{ttl:600000});
     const T=(d&&d.teams)||[];if(T.some(t=>t.gamesPlayed>0))return{round:r,teams:T};}
   return{round:0,teams:[]};};
+/* squadre di EuroLega ed EuroCup (per la ricerca dei preferiti): dalla classifica più recente */
+EU.clubs=async function(){const out=[];await Promise.all(Object.keys(COMPS).map(async k=>{try{const R=await EU.rounds(k),cur=EU.curRound(R);if(!cur)return;
+  const st=await EU.standings(k,cur.n);st.teams.forEach(t=>{const cl=t.club||{};if(cl.code)out.push({code:cl.code,name:cl.abbreviatedName||cl.name,logo:cl.images&&cl.images.crest||""});});}catch(e){}}));
+  return out;};
 const lq=(ep,ev,ttl)=>SL.tryGet(LIVE+ep+"?gamecode="+ev.code+"&seasoncode="+ev.seasonCode,{ttl});
 
 /* ---------- home, avvisi e fatti ---------- */

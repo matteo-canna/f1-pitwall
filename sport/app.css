@@ -12,7 +12,7 @@
   --r:12px;--gap:12px;--pad:14px;
   color-scheme:dark;
 }
-body[data-sport="home"]{--sa:#e5383b}
+body[data-sport="home"],body[data-sport="agenda"],body[data-sport="multi"],body[data-sport="remote"]{--sa:#e5383b}
 body[data-sport="calcio"]{--sa:#2fbf71}
 body[data-sport="basket"]{--sa:#f5803e}
 body[data-sport="tennis"]{--sa:#c9dc3c}
@@ -383,7 +383,7 @@ html[data-couch="1"][data-style="regia"]{--h2size:18px;--scoresize:76px;--nmsize
 @media (max-width:760px){:root,html[data-style="regia"]{--scoresize:38px;--nmsize:15px;--shsize:24px}}
 
 /* --- identità: font, scala, accenti, striscia, icona --- */
-.sp-home,body[data-sport="home"]{--f-sport:var(--f-display);--f-score:var(--f-display);--fw:900;--fw2:900;--fst:normal;--fs:1;--fs2:1;--ls:.04em;--stretch:118%;--sa:#e5383b;--ic:var(--ic-home);--icload:var(--ic-home);--load:pulse2 1s ease-in-out infinite;
+.sp-home,body[data-sport="home"],body[data-sport="agenda"],body[data-sport="multi"],body[data-sport="remote"]{--f-sport:var(--f-display);--f-score:var(--f-display);--fw:900;--fw2:900;--fst:normal;--fs:1;--fs2:1;--ls:.04em;--stretch:118%;--sa:#e5383b;--ic:var(--ic-home);--icload:var(--ic-home);--load:pulse2 1s ease-in-out infinite;
   --stripe:linear-gradient(90deg,#2fbf71 0 20%,#f5803e 20% 40%,#c9dc3c 40% 60%,#3fa7d6 60% 80%,#e5383b 80%)}
 .sp-calcio,body[data-sport="calcio"]{--f-sport:"Teko","Archivo Narrow",sans-serif;--f-score:"Teko","Archivo Narrow",sans-serif;--fw:600;--fw2:600;--fst:normal;--fs:1.4;--fs2:1.28;--ls:.06em;--stretch:100%;--sa:#2fbf71;--ic:var(--ic-calcio);--icload:var(--ic-calcio);--load:roll .9s ease-in-out infinite alternate;
   --stripe:repeating-linear-gradient(90deg,#2fbf71 0 22px,#23a35c 22px 44px)}
@@ -1520,3 +1520,54 @@ html[data-couch="1"] .top .tbtn.icobtn{font-size:24px;min-width:52px}
   .row.tmh>.muted{grid-column:1/-1;grid-row:2}
   .row.tmh>:last-child{grid-column:3;grid-row:1;justify-self:end}
 }
+
+/* =====================================================================
+   FUNZIONI IN PIÙ (extra.js): nuova versione, Condividi, TV SYNC, preferiti altrove, stato fonti
+   ===================================================================== */
+/* pulsante Schermi dove non c'è niente da disporre */
+#btnScreens.dim{opacity:.45}
+#btnScreens.dim:hover{opacity:.7}
+/* TV SYNC in alto: si accende quando il ritardo è attivo */
+#btnSync .syncv{font:800 11px/1 var(--f-mono);padding:3px 6px;border-radius:99px;background:var(--sa);color:var(--sa-ink,#0b0f19);letter-spacing:0;text-transform:none;font-style:normal}
+#btnSync.on{border-color:var(--sa)}
+.syncbox{display:flex;align-items:center;gap:12px}
+.syncbox input{flex:1;min-width:120px;accent-color:var(--sa)}
+.syncbox output{min-width:64px;text-align:right;font:800 14px/1 var(--f-mono)}
+.syncbox.big output{font-size:22px;min-width:90px}
+.syadj .btn{flex:1}
+/* versione in alto: si tocca per stato fonti e aggiornamenti */
+#appVer[role="button"]{cursor:pointer}
+#appVer[role="button"]:hover{border-color:var(--sa);color:var(--text)}
+/* barra "nuova versione" in basso */
+.updbar{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:95;display:flex;align-items:center;gap:12px;
+  max-width:calc(100vw - 24px);padding:10px 10px 10px 16px;border-radius:14px;background:var(--panel2);border:1px solid var(--sa);box-shadow:0 18px 40px -12px #000;font-size:13px}
+.updbar[hidden]{display:none}
+.updbar .btn{min-height:38px}
+@media (max-width:760px){.updbar{bottom:calc(76px + env(safe-area-inset-bottom,0px));left:12px;right:12px;transform:none;flex-wrap:wrap}}
+/* QR */
+.qrbox{display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px;border-radius:12px;background:#fff;color:#0b0f19;max-width:320px;margin:4px auto}
+.qrbox[hidden]{display:none}
+.qrbox svg{width:100%;max-width:260px;height:auto;display:block}
+.qrbox small{font-size:12px;text-align:center;color:#334}
+.qrbox.big svg{max-width:300px}
+.qrbox .loading{color:#334}
+/* importa preferiti */
+.imlist{display:flex;flex-wrap:wrap;gap:6px;max-height:40vh;overflow:auto}
+.imlist .chip{pointer-events:none}
+.imlist .chip.off{opacity:.5}
+/* stato fonti */
+.srcl{display:flex;flex-direction:column;gap:6px}
+.src{display:grid;grid-template-columns:12px minmax(0,1fr);gap:2px 10px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:rgba(0,0,0,.2)}
+.src i{width:10px;height:10px;border-radius:50%;background:var(--dim)}
+.src.ok i{background:var(--green);box-shadow:0 0 8px var(--green)}
+.src.slow i{background:var(--yellow)}
+.src.ko i{background:var(--red);box-shadow:0 0 8px var(--red)}
+.src.off i{background:transparent;border:2px solid var(--dim)}
+.src span{display:flex;flex-direction:column;min-width:0}
+.src b{font-size:13px}
+.src small{color:var(--muted);font-size:11px}
+.src em{grid-column:2;font-style:normal;font-size:11.5px;color:var(--text);opacity:.85}
+.src.ko em{color:#ff8a85}
+/* dialoghi nuovi: larghezza comoda */
+#dlgShare,#dlgSync,#dlgImp,#dlgRemote{max-width:min(620px,calc(100vw - 24px))}
+#dlgShare .favq,#dlgSettings .favq{width:100%}

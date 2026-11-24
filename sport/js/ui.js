@@ -211,6 +211,7 @@ UI.openSettings=function(){
   const ext=SL.ext(),dat=SL.extData();
   $("extState").innerHTML=ext?(dat?'<span class="tag ok">ESTENSIONE ATTIVA '+h(ext)+'</span> Diretta TV nel riquadro e dati moto disponibili.':'<span class="tag big">ESTENSIONE VECCHIA '+h(ext)+'</span> Funziona la Diretta TV, ma per i dati moto aggiornala con lo zip qui sotto.'):'<span class="tag">ESTENSIONE NON INSTALLATA</span>';
   $("dlgSettings").showModal();
+  SL.emit("settings"); /* TV SYNC, stato fonti, proxy, aggiornamenti: extra.js */
 };
 function couchNow(){$("couchNow").textContent=SL.couch()?"Ora è attiva.":"Ora non è attiva.";}
 function bcLook(){try{SL.chan&&SL.chan.postMessage({type:"look",settings:{style:SL.settings.style,couch:SL.settings.couch,tilt:SL.settings.tilt}});}catch(e){}}
