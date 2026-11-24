@@ -127,7 +127,7 @@ M.mount=function(ctx){
     if(!m){c.body.innerHTML=UI.empty(isLive()?"Nessuna partita in corso adesso: appena ne inizia una compare qui.":"Scegli una partita.");c.sub("");return;}
     const n=Math.max(...m.p.map(p=>p.sets.length),1);
     const rk=id=>{const r=S.rank&&S.rank.find(x=>String(x.athlete&&x.athlete.id)===id);return r?"N. "+r.current+" "+TT:"";};
-    let s='<div class="row" style="justify-content:space-between;margin-bottom:10px"><span class="tag'+(m.big?" big":"")+'">'+h(m.cat.n)+'</span><span class="muted">'+h([m.tourn,m.round,m.court].filter(Boolean).join(" · "))+'</span>'+(m.live?'<span class="tag live">LIVE</span>':'<span class="tag">'+h(m.status)+'</span>')+'</div>';
+    let s='<div class="row tmh" style="justify-content:space-between;margin-bottom:10px"><span class="tag'+(m.big?" big":"")+'">'+h(m.cat.n)+'</span><span class="muted">'+h([m.tourn,m.round,m.court].filter(Boolean).join(" · "))+'</span>'+(m.live?'<span class="tag live">LIVE</span>':'<span class="tag">'+h(m.status)+'</span>')+'</div>';
     s+='<table class="tbl" style="font-size:1.2em"><thead><tr><th class="l">Giocatore</th>'+Array.from({length:n},(_,i)=>'<th>SET '+(i+1)+'</th>').join("")+'</tr></thead><tbody>'+
       m.p.map(p=>'<tr class="'+(p.ita?"ita":"")+'"><td class="l"><span class="tn" style="max-width:none">'+(p.flag?'<img class="flag" src="'+h(p.flag)+'" alt="">':"")+'<b>'+h(p.name)+'</b>'+(p.seed?' <span class="dim">('+p.seed+')</span>':"")+(p.winner?' <span class="tag ok">VINCE</span>':"")+' <span class="dim">'+h(rk(p.id))+'</span>'+SL.star("tennis","player",p.id,p.name)+'</span></td>'+
         Array.from({length:n},(_,i)=>{const s2=p.sets[i]||{};return'<td class="setnum" style="font-size:1.6em;line-height:1;'+(s2.w?"":"color:var(--muted)")+'">'+h(s2.v==null?"":s2.v)+(s2.tb!=null?'<sup style="font-size:.5em">'+h(s2.tb)+'</sup>':"")+'</td>';}).join("")+'</tr>').join("")+'</tbody></table>';
@@ -145,8 +145,8 @@ M.mount=function(ctx){
     const R=d&&d.rankings&&d.rankings[0]&&d.rankings[0].ranks;if(!R){c.body.innerHTML=UI.empty("Ranking non disponibile.");return;}
     S.rank=R;drawIta();drawMatch();
     c.sub((d.rankings[0].headline||"").replace(/(ATP|WTA): Week/,"settimana"));
-    c.body.innerHTML='<div class="scroll"><table class="tbl"><thead><tr><th>#</th><th></th><th class="l">Giocatore</th><th>PUNTI</th><th>ETÀ</th></tr></thead><tbody>'+R.slice(0,100).map(r=>{const a=r.athlete||{},mv=(r.previous||r.current)-r.current;
-      return'<tr class="'+(isIta(a)?"ita":"")+(SL.fav.has(SL.fav.key("tennis","player",String(a.id)))?" me":"")+'"><td>'+r.current+'</td><td>'+(mv?'<span class="'+(mv>0?"up":"dn")+'">'+(mv>0?"▲":"▼")+Math.abs(mv)+'</span>':'<span class="dim">–</span>')+'</td><td class="l"><span class="tn" style="max-width:none">'+(a.flag?'<img class="flag" src="'+h(a.flag.href)+'" alt="'+h(a.flag.alt||"")+'">':"")+h(a.displayName||"")+SL.star("tennis","player",String(a.id),a.displayName||"")+'</span></td><td>'+Number(r.points||0).toLocaleString("it-IT")+'</td><td>'+h(a.age||"")+'</td></tr>';}).join("")+'</tbody></table></div>';}
+    c.body.innerHTML='<div class="scroll"><table class="tbl trank"><thead><tr><th>#</th><th></th><th class="l">Giocatore</th><th>PUNTI</th><th>ETÀ</th></tr></thead><tbody>'+R.slice(0,100).map(r=>{const a=r.athlete||{},mv=(r.previous||r.current)-r.current;
+      return'<tr class="'+(isIta(a)?"ita":"")+(SL.fav.has(SL.fav.key("tennis","player",String(a.id)))?" me":"")+'"><td>'+r.current+'</td><td>'+(mv?'<span class="'+(mv>0?"up":"dn")+'">'+(mv>0?"▲":"▼")+Math.abs(mv)+'</span>':'<span class="dim">–</span>')+'</td><td class="l"><span class="tn" style="max-width:none">'+(a.flag?'<img class="flag" src="'+h(a.flag.href)+'" alt="'+h(a.flag.alt||"")+'">':"")+'<span class="nm">'+h(a.displayName||"")+'</span>'+SL.star("tennis","player",String(a.id),a.displayName||"")+'</span></td><td>'+Number(r.points||0).toLocaleString("it-IT")+'</td><td>'+h(a.age||"")+'</td></tr>';}).join("")+'</tbody></table></div>';}
   function drawIta(){const c=cards.ita;if(!S.rank){c.body.innerHTML='<div class="loading">Carico</div>';return;}
     const I=S.rank.filter(r=>isIta(r.athlete));
     c.sub(I.length+(W?" italiane":" italiani")+" nei primi "+S.rank.length);
@@ -160,9 +160,9 @@ M.mount=function(ctx){
     const all=[].concat((a&&a.events)||[],(b&&b.events)||[]).filter(e=>new Date(e.endDate||e.date)>Date.now()-864e5);all.forEach(e=>{e._tour=TOUR;});
     const seen=new Set(),L=all.filter(e=>{if(seen.has(e.id))return false;seen.add(e.id);return true;}).sort((x,z)=>new Date(x.date)-new Date(z.date)).slice(0,30);
     if(!L.length){c.body.innerHTML=UI.empty("Calendario non disponibile.");return;}
-    c.body.innerHTML='<div class="scroll"><table class="tbl"><thead><tr><th class="l">Date</th><th class="l">Torneo</th><th class="l">Categoria</th><th class="l">Campione uscente</th></tr></thead><tbody>'+L.map(e=>{const k=M.cat(e),pw=(e.previousWinners||[]).find(w=>/singles/i.test(w.type||w.name||""))||(e.previousWinners||[])[0];
+    c.body.innerHTML='<div class="scroll"><table class="tbl tcal"><thead><tr><th class="l nw">Date</th><th class="l">Torneo</th><th class="l">Categoria</th><th class="l ch">Campione uscente</th></tr></thead><tbody>'+L.map(e=>{const k=M.cat(e),pw=(e.previousWinners||[]).find(w=>/singles/i.test(w.type||w.name||""))||(e.previousWinners||[])[0];
       const champ=pw&&(pw.athlete&&pw.athlete.displayName||pw.displayName||pw.name)||"";
-      return'<tr class="'+(big(k)?"me":"")+'"><td class="l">'+h(SL.fmtDay(e.date))+'</td><td class="l">'+h(e.name.replace(/ presented by.*$/i,""))+'</td><td class="l"><span class="tag'+(big(k)?" big":"")+'">'+h(k.n)+'</span></td><td class="l">'+h(champ)+'</td></tr>';}).join("")+'</tbody></table></div>';
+      return'<tr class="'+(big(k)?"me":"")+'"><td class="l nw">'+h(SL.fmtDay(e.date))+'</td><td class="l wr">'+h(e.name.replace(/ presented by.*$/i,""))+(champ?'<small class="chm">Campione uscente: '+h(champ)+'</small>':"")+'</td><td class="l"><span class="tag'+(big(k)?" big":"")+'">'+h(k.n)+'</span></td><td class="l ch nw">'+h(champ)+'</td></tr>';}).join("")+'</tbody></table></div>';
     c.sub("prossimi "+L.length+" tornei");}
   SL.every(load,()=>isLive()||S.matches.some(m=>m.live)?20000:180000);
   SL.every(loadRank,36e5,{delay:800});

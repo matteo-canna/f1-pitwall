@@ -276,7 +276,8 @@ svg{display:block;max-width:100%}
 .tmatch .sets b.w{color:var(--text)}.tmatch .sets b.l{color:var(--dim)}
 .tmatch.ita{border-left:3px solid var(--ita)}
 .tmatch.sel{border-color:var(--sa)}
-.rounds{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(230px,1fr);gap:10px;overflow-x:auto;padding-bottom:6px}
+/* tabellone: i turni affiancati finché ci stanno, poi vanno sotto (niente colonne tagliate a destra) */
+.rounds{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px 10px;padding-bottom:6px}
 .rounds h4{margin:0 0 6px;color:var(--muted);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
 .rounds .col{display:flex;flex-direction:column;gap:6px}
 
@@ -1486,4 +1487,36 @@ html[data-couch="1"] .top .tbtn.icobtn{font-size:24px;min-width:52px}
   .daynav{display:flex;width:100%}
   /* intestazione dello sport: le tre informazioni principali */
   .sporthead .facts>.fact:nth-child(n+4){display:none}
+}
+
+/* =====================================================================
+   INTESTAZIONI DELLE SEZIONI con comandi (vedi UI.fitHeads): comandi su una riga sotto al titolo
+   ===================================================================== */
+.card>header:has(>.tools>*)>h2{flex-shrink:0}
+.card>header.hwrap{flex-wrap:wrap;row-gap:6px}
+.card>header.hwrap>h2{flex:0 1 auto;max-width:calc(100% - 48px)}
+.card>header.hwrap>.sub{flex:1 1 0;min-width:0}
+.card>header.hwrap>.mbtn{margin-left:auto}
+.card>header.hwrap>.tools{order:5;flex:1 1 100%;margin-left:0;justify-content:flex-start;flex-wrap:wrap;gap:6px;padding:2px 0}
+
+/* =====================================================================
+   TENNIS: calendario, ranking e intestazione della partita
+   ===================================================================== */
+.tcal th.nw,.tcal td.nw{white-space:nowrap}
+.tcal td.wr{white-space:normal;min-width:150px;line-height:1.25}
+.tcal .chm{display:none}
+@media (max-width:760px){
+  .tcal .ch{display:none}
+  .tcal .chm{display:block;margin-top:3px;color:var(--muted);font-size:11px;line-height:1.3}
+  .tcal td.wr{min-width:0}
+  /* ranking: via la colonna dei movimenti e l'età, il nome resta su una riga con la sua ★ */
+  .trank th:nth-child(2),.trank td:nth-child(2),.trank th:nth-child(5),.trank td:nth-child(5){display:none}
+  .trank{table-layout:fixed}
+  .trank th:nth-child(1){width:38px}.trank th:nth-child(4){width:66px}
+  .trank td.l .tn{white-space:nowrap;flex-wrap:nowrap;max-width:100%;min-width:0}
+  .trank td.l .tn .nm{min-width:0;overflow:hidden;text-overflow:ellipsis}
+  /* partita: torneo e stato sulla prima riga, campo e turno sotto */
+  .row.tmh{display:grid;grid-template-columns:auto 1fr auto;gap:6px 8px;align-items:center}
+  .row.tmh>.muted{grid-column:1/-1;grid-row:2}
+  .row.tmh>:last-child{grid-column:3;grid-row:1;justify-self:end}
 }
