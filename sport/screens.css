@@ -242,8 +242,8 @@ body.solo,body.sgl{overflow:hidden}
 .sglz.zrow>.subbar>.row{flex:1 1 180px;min-width:0;flex-wrap:nowrap}
 .sglz.zrow>.subbar>.row:has(>.daynav){flex:0 1 auto}
 .sglz.zrow>.subbar>.row>.muted{display:none}
-.sglz.zrow>.subbar>.row>.chips{flex-wrap:nowrap;overflow-x:auto;min-width:0;scrollbar-width:thin}
-.sglz.zrow>.subbar>.strip{flex:1 1 100%;min-width:0}
+.sglz.zrow>.subbar>.row>.chips,.sglz.zrow>.subbar>.row>.hscr>.chips{flex-wrap:nowrap;overflow-x:auto;min-width:0;scrollbar-width:thin}
+.sglz.zrow>.subbar>.strip,.sglz.zrow>.subbar>.hscr-strip{flex:1 1 100%;min-width:0}
 .sglz.zrow>.subbar .sporthead{display:none}
 /* TV nello schermo singolo: spenta mostra comunque l'area nera della diretta */
 .sgllay .card[data-k="tv"]>.body{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
