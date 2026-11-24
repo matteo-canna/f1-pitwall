@@ -30,6 +30,16 @@ const ICONS={
   wheel:'<circle cx="12" cy="12" r="9.5"/><circle cx="12" cy="12" r="2.2" fill="currentColor"/><path d="M12 2.5v7.3M12 14.2v7.3M2.5 12h7.3M14.2 12h7.3M5.3 5.3l5.2 5.2M13.5 13.5l5.2 5.2M18.7 5.3l-5.2 5.2M10.5 13.5l-5.2 5.2" stroke-opacity=".6"/>',
   /* due monitor (pulsante Schermi): la TV a sinistra */
   screens:'<path d="M8.6 5.6V4.4c0-.8.6-1.4 1.4-1.4h10.6c.8 0 1.4.6 1.4 1.4v7.3c0 .8-.6 1.4-1.4 1.4h-2.4" stroke-opacity=".75"/><rect x="2" y="7.2" width="14" height="10" rx="1.5"/><path d="M9 17.2v3.1M6 20.5h6"/><path d="M7.4 9.9l3.8 2.3-3.8 2.3z" fill="currentColor" stroke="none"/>',
+  /* condividi: tre punti collegati */
+  share:'<circle cx="18" cy="5.5" r="2.8"/><circle cx="6" cy="12" r="2.8"/><circle cx="18" cy="18.5" r="2.8"/><path d="M8.5 10.7l7-3.9M8.5 13.3l7 3.9"/>',
+  /* calendario */
+  cal:'<rect x="3" y="4.5" width="18" height="16.5" rx="2.2"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/><path d="M7 13h3M14 13h3M7 17h3" stroke-width="2.4"/>',
+  /* quattro riquadri (vista 2×2) */
+  grid:'<rect x="3" y="3" width="8" height="8" rx="1.6"/><rect x="13" y="3" width="8" height="8" rx="1.6"/><rect x="3" y="13" width="8" height="8" rx="1.6"/><rect x="13" y="13" width="8" height="8" rx="1.6" fill="currentColor" fill-opacity=".35"/>',
+  /* telefono come telecomando */
+  remote:'<rect x="6.5" y="2.5" width="11" height="19" rx="2.4"/><path d="M10.5 18.5h3"/><circle cx="12" cy="9.5" r="2.6"/><path d="M9 6.2a4.6 4.6 0 0 1 6 0" stroke-opacity=".6"/>',
+  /* segnale (stato delle fonti) */
+  signal:'<path d="M4 20v-3M9 20v-7M14 20v-11M19 20V4"/>',
   /* striscia delle notizie */
   news:'<rect x="2.5" y="4.5" width="19" height="15" rx="2.2"/><path d="M6.5 9h11M6.5 12.5h11M6.5 16h7"/>',
   star:'<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" fill="currentColor"/>',
@@ -67,7 +77,7 @@ I.init=function(){
 };
 
 /* ---------- testata di ogni sport: nome + informazioni utili che cambiano (capolista, ultimo vincitore, prossimo evento…) ---------- */
-I.head=function(sport){if(sport==="home"||window.isFollower())return null;const m=SL.sports[sport],h=SL.h;
+I.head=function(sport){if(sport==="home"||window.isFollower()||(SL.sports[sport]&&SL.sports[sport].noHead))return null;const m=SL.sports[sport],h=SL.h;
   const el=document.createElement("div");el.className="sporthead";
   el.innerHTML='<span class="shicon">'+SL.ico(sport)+'</span><div class="shtxt"><h1>'+h(m.name)+'</h1><div class="facts" aria-live="polite"><span class="fact load"><small>Carico le ultime notizie…</small></span></div></div>';
   const st=Object.assign({},SL.state),rid=SL.routeId;

@@ -43,8 +43,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=JetBrains+Mono:wght@400;500;700;800&family=Teko:wght@500;600;700&family=Bungee&family=Fraunces:ital,opsz,wght@1,9..144,800;1,9..144,900&family=Alfa+Slab+One&family=Racing+Sans+One&family=Orbitron:wght@700;900&family=Cinzel:wght@600;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="app.css?v=1.33">
-<link rel="stylesheet" href="screens.css?v=1.33">
+<link rel="stylesheet" href="app.css?v=1.36">
+<link rel="stylesheet" href="screens.css?v=1.36">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23e5383b'/%3E%3Ccircle cx='32' cy='32' r='13' fill='none' stroke='white' stroke-width='6'/%3E%3Ccircle cx='32' cy='32' r='4' fill='white'/%3E%3C/svg%3E">
 </head>
 <body>
@@ -71,12 +71,14 @@
 <header class="top" id="top">
   <a class="logo" href="#/home" aria-label="Sport LIVE APP, adesso in diretta"><span>SPORT</span><b>LIVE</b></a>
   <span class="clock mono" id="clock" aria-live="off"></span>
-  <span class="ver mono" id="appVer" title="Versione della pagina che stai guardando: 1.33 del 24/11/2026">v1.33</span>
+  <span class="ver mono" id="appVer" title="Versione della pagina che stai guardando: 1.36 del 24/11/2026">v1.36</span>
   <nav class="tabs" id="tabs" aria-label="Sport"></nav>
   <div class="topr">
  <button class="tbtn favbtn" id="btnFav" title="Gestisci i preferiti" aria-haspopup="dialog"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#i-star"/></svg><span>PREFERITI</span><b class="fbadge" id="favBadge" hidden></b></button>
     <button class="tbtn" id="btnTicker" title="Mostra o nascondi la striscia delle notizie" aria-pressed="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#i-news"/></svg><span>NOTIZIE</span></button>
     <button class="tbtn" id="btnScreens" title="Schermi: schermo singolo o più schermi" aria-label="Schermi"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#i-screens"/></svg><span>SCHERMI</span></button>
+    <button class="tbtn" id="btnSync" title="TV SYNC: ritarda i dati per allinearli alla tua diretta (niente spoiler)" aria-haspopup="dialog"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#i-stopwatch"/></svg><span>TV SYNC</span><b class="syncv" id="syncV" hidden></b></button>
+    <button class="tbtn" id="btnShare" title="Condividi questa pagina" aria-label="Condividi" aria-haspopup="dialog"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#i-share"/></svg><span>CONDIVIDI</span></button>
     <button class="tbtn icobtn" id="btnSettings" title="Impostazioni" aria-label="Impostazioni">⚙</button>
   </div>
 </header>
@@ -148,6 +150,19 @@
         <p class="hint">Tocca la ★ accanto a una squadra, un tennista o un pilota, oppure usa il pulsante ★ PREFERITI in alto. Sono salvati solo su questo dispositivo.</p>
         <p><button type="button" class="btn" id="setFav">★ GESTISCI PREFERITI</button></p>
       </section>
+      <section>
+        <h3>TV SYNC · niente spoiler</h3>
+        <div class="syncbox"><input type="range" id="setSync" min="0" max="90" step="1" value="0" aria-label="Ritardo dei dati in secondi"><output id="setSyncOut" for="setSync">spento</output></div>
+        <div class="seg" id="setSyncP" role="group" aria-label="Ritardi tipici"><button type="button" data-v="0">NO</button><button type="button" data-v="8">TV 8 s</button><button type="button" data-v="30">30 s</button><button type="button" data-v="45">45 s</button><button type="button" data-v="60">60 s</button></div>
+        <p class="hint">Le dirette in streaming arrivano in ritardo (DAZN, Sky Go, NOW: 30–60 s; TV digitale: pochi secondi). Con il ritardo impostato punteggi, notizie e avvisi arrivano insieme alla tua diretta.</p>
+        <h3>Telecomando dal telefono</h3>
+        <p class="hint">Su TV o monitor grande: mostra un codice QR, inquadralo col telefono e cambi sport e partita da lì.</p>
+        <p><button type="button" class="btn" id="setRemote"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#i-remote"/></svg> MOSTRA IL QR DEL TELECOMANDO</button></p>
+        <h3>Proxy dati · MotoGP e Superbike ovunque</h3>
+        <p class="hint">Facoltativo. Con un proxy gratuito (Cloudflare Worker) MotoGP e Superbike funzionano anche su telefono, tablet, Smart TV, Safari e Firefox, senza estensione. Istruzioni: cartella <b>proxy</b> del sito.</p>
+        <div class="row"><input type="url" id="setProxy" class="favq" placeholder="https://sport-live-proxy.tuonome.workers.dev" autocomplete="off" aria-label="Indirizzo del proxy dati"></div>
+        <p class="row"><button type="button" class="btn" id="setProxyTest">PROVA E SALVA</button><button type="button" class="btn" id="setProxyOff">TOGLI</button><span class="hint" id="setProxyMsg"></span></p>
+      </section>
       <section class="pconly">
         <h3>Estensione per PC</h3>
         <p class="hint" id="extState"></p>
@@ -159,19 +174,73 @@
           <li>Se avevi già l'estensione F1, premi ↻ su di essa; altrimenti "Carica estensione non pacchettizzata" e scegli la cartella <b>f1pw-tv</b>.</li>
           <li>Ricarica questa pagina.</li>
         </ol>
+      </section>
+      <section>
+        <h3>Stato fonti</h3>
+        <div class="srcl" id="srcList"></div>
+        <p class="row"><button type="button" class="btn" id="srcTest"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#i-signal"/></svg> PROVA ORA</button><span class="hint" id="srcMsg"></span></p>
         <h3>Striscia notizie</h3>
-        <p class="hint">Scorre sotto il menu: in home tutti gli sport, nelle pagine solo quello sport. Si mostra o nasconde col pulsante ≡ NOTIZIE in alto o con la ✕ sulla striscia.</p>
-        <h3>Foto di sfondo</h3>
-        <p class="hint">Calcio, basket, tennis e golf: Unsplash. Rugby: David Roberts, CC BY 2.0 (Wikimedia Commons). Moto: TeamEG00, pubblico dominio (Wikimedia Commons).</p>
+        <p class="hint">Scorre sotto il menu: in home tutti gli sport, nelle pagine solo quello sport. Si mostra o nasconde col pulsante NOTIZIE in alto o con la ✕ sulla striscia.</p>
         <h3>Sezioni</h3>
         <p><button type="button" class="btn" id="setResetCards">↺ RIPRISTINA SEZIONI E MISURE</button></p>
         <h3>Versione</h3>
-        <p class="hint"><span id="setVerFull"></span> · se dopo un aggiornamento vedi ancora quella vecchia, ricarica la pagina.</p>
-        <p class="hint">Dati: ESPN (calcio, NBA, tennis ATP e WTA, rugby, IndyCar, golf), siti ufficiali EuroLega / EuroCup e MotoGP / WorldSBK. Fonti gratuite non ufficiali: a volte possono mancare dati o arrivare in ritardo.</p>
+        <p class="hint"><span id="setVerFull"></span>. Quando esce una versione nuova compare un avviso in basso per aggiornare.</p>
+        <p class="row"><button type="button" class="btn" id="setUpd">↻ CONTROLLA AGGIORNAMENTI</button><span class="hint" id="setUpdMsg"></span></p>
+        <h3>Foto e dati</h3>
+        <p class="hint">Foto: Unsplash (calcio, basket, tennis, golf); David Roberts, CC BY 2.0 (rugby); TeamEG00, pubblico dominio (moto), Wikimedia Commons.</p>
+        <p class="hint">Dati: ESPN (calcio, NBA, tennis ATP e WTA, rugby, IndyCar, golf), siti ufficiali EuroLega / EuroCup e MotoGP / WorldSBK, OpenF1 e Jolpica per la F1. Fonti gratuite non ufficiali: a volte possono mancare dati o arrivare in ritardo.</p>
       </section>
     </div>
   </form>
 </dialog>
+
+<dialog id="dlgShare" aria-labelledby="shH">
+  <form method="dialog" class="dlg">
+    <div class="dlgh"><h2 id="shH" class="disp">Condividi</h2><button class="x" value="close" aria-label="Chiudi">✕</button></div>
+    <p class="hint" id="shWhat"></p>
+    <div class="row"><input type="text" class="favq" id="shUrl" readonly aria-label="Link da condividere"></div>
+    <label class="chk"><input type="checkbox" id="shLook"><span>Stesso stile grafico (<b id="shLookN"></b>)</span></label>
+    <label class="chk"><input type="checkbox" id="shSync"><span>Stesso ritardo TV SYNC (<b id="shSyncN"></b>): watch party, tutti vedono i punteggi insieme</span></label>
+    <p class="row"><button type="button" class="btn pri" id="shCopy">COPIA IL LINK</button><button type="button" class="btn" id="shNative" hidden>CONDIVIDI…</button><button type="button" class="btn" id="shQrB">MOSTRA QR</button></p>
+    <div class="qrbox" id="shQr" hidden></div>
+  </form>
+</dialog>
+
+<dialog id="dlgSync" aria-labelledby="syH">
+  <form method="dialog" class="dlg">
+    <div class="dlgh"><h2 id="syH" class="disp">TV SYNC</h2><button class="x" value="close" aria-label="Chiudi">✕</button></div>
+    <p class="hint">Ritarda punteggi, notizie e avvisi per allinearli alla diretta che stai guardando: niente gol "spoilerati" prima di vederli.</p>
+    <div class="syncbox big"><input type="range" id="sySl" min="0" max="90" step="1" value="0" aria-label="Ritardo dei dati in secondi"><output id="syOut" for="sySl">spento</output></div>
+    <div class="seg" id="syP" role="group" aria-label="Ritardi tipici"><button type="button" data-v="0">NO</button><button type="button" data-v="8">TV 8 s</button><button type="button" data-v="30">STREAMING 30 s</button><button type="button" data-v="45">45 s</button><button type="button" data-v="60">60 s</button></div>
+    <p class="row syadj"><button type="button" class="btn" data-d="-5">− 5 s</button><button type="button" class="btn" data-d="-1">− 1 s</button><button type="button" class="btn" data-d="1">+ 1 s</button><button type="button" class="btn" data-d="5">+ 5 s</button></p>
+    <p class="hint">Come regolarlo: quando in TV vedi un gol o un punto, guarda quanti secondi prima era comparso qui e imposta quel ritardo. Vale su questo dispositivo e nelle finestre degli altri schermi.</p>
+  </form>
+</dialog>
+
+<dialog id="dlgImp" aria-labelledby="imH">
+  <form method="dialog" class="dlg">
+    <div class="dlgh"><h2 id="imH" class="disp">★ Importa preferiti</h2><button class="x" value="close" aria-label="Chiudi">✕</button></div>
+    <p class="hint" id="imTxt"></p>
+    <div class="imlist" id="imList"></div>
+    <p class="row"><button type="button" class="btn pri" id="imMerge">AGGIUNGI AI MIEI</button><button type="button" class="btn" id="imRepl">SOSTITUISCI I MIEI</button><button class="btn" value="close">ANNULLA</button></p>
+  </form>
+</dialog>
+
+<dialog id="dlgRemote" aria-labelledby="rmH">
+  <form method="dialog" class="dlg">
+    <div class="dlgh"><h2 id="rmH" class="disp">Telecomando dal telefono</h2><button class="x" value="close" aria-label="Chiudi">✕</button></div>
+    <p class="hint">Inquadra il codice col telefono: si apre il telecomando di questo schermo. Il QR resta piccolo in un angolo finché il telecomando è attivo.</p>
+    <div class="qrbox big" id="rmQrBig"></div>
+    <p class="hint" id="rmLink"></p>
+    <p class="row"><button class="btn pri" value="close">FATTO</button><button type="button" class="btn" id="rmOff">SPEGNI IL TELECOMANDO</button></p>
+    <p class="hint">I comandi passano da un servizio pubblico gratuito (ntfy.sh) su un canale dal nome casuale: viaggiano solo comandi come "apri Calcio", nessun dato personale.</p>
+  </form>
+</dialog>
+
+<!-- telecomando attivo: QR piccolo nell'angolo -->
+<button type="button" class="rmcorner" id="rmCorner" hidden aria-label="Telecomando attivo: mostra il QR"></button>
+<!-- versione nuova disponibile -->
+<div class="updbar" id="updBar" role="status" hidden><span id="updTxt"></span><button type="button" class="btn pri" id="updGo">AGGIORNA</button><button type="button" class="tk-x" id="updX" aria-label="Più tardi">✕</button></div>
 
 <dialog id="dlgFav" aria-labelledby="favH">
   <form method="dialog" class="dlg favdlg">
@@ -181,7 +250,13 @@
     <section class="favsec"><h3>Aggiungi</h3>
       <input type="search" class="favq" id="favQ" placeholder="Cerca una squadra, un tennista, un pilota…" autocomplete="off" aria-label="Cerca da aggiungere ai preferiti">
       <div class="favsug" id="favSug"></div>
-      <p class="hint">Trovi chi gioca o corre tra ieri e dopodomani. Per tutti gli altri tocca la ★ accanto al nome nelle pagine degli sport (classifiche, ranking, tabelloni).</p></section>
+      <p class="hint">Trovi chi gioca o corre tra ieri e dopodomani; scrivendo un nome cerchi anche tra le squadre dei campionati principali, NBA, EuroLega, i primi 200 del tennis e i piloti di F1.</p></section>
+    <section class="favsec"><h3>Su un altro dispositivo</h3>
+      <p class="hint">Porta i tuoi preferiti su telefono, tablet o Smart TV: apri il link (o inquadra il QR) sull'altro dispositivo.</p>
+      <p class="row"><button type="button" class="btn" id="favLink">COPIA IL LINK</button><button type="button" class="btn" id="favQrB">MOSTRA QR</button><button type="button" class="btn" id="favPasteB">INCOLLA UN CODICE</button></p>
+      <div class="qrbox" id="favQr" hidden></div>
+      <div class="row" id="favPasteRow" hidden><input type="text" class="favq" id="favPaste" placeholder="Incolla qui il link o il codice dei preferiti" autocomplete="off" aria-label="Link o codice dei preferiti"><button type="button" class="btn pri" id="favPasteGo">IMPORTA</button></div>
+    </section>
   </form>
 </dialog>
 
@@ -245,24 +320,27 @@
   </form>
 </dialog>
 
-<script src="js/core.js?v=1.33"></script>
-<script src="js/theme.js?v=1.33"></script>
-<script src="js/translate.js?v=1.33"></script>
-<script src="js/ui.js?v=1.33"></script>
-<script src="js/screens.js?v=1.33"></script>
-<script src="js/viz.js?v=1.33"></script>
-<script src="js/data.js?v=1.33"></script>
-<script src="js/ticker.js?v=1.33"></script>
-<script src="js/home.js?v=1.33"></script>
-<script src="js/favs.js?v=1.33"></script>
-<script src="js/calcio.js?v=1.33"></script>
-<script src="js/eurolega.js?v=1.33"></script>
-<script src="js/basket.js?v=1.33"></script>
-<script src="js/tennis.js?v=1.33"></script>
-<script src="js/rugby.js?v=1.33"></script>
-<script src="js/f1.js?v=1.33"></script>
-<script src="js/moto.js?v=1.33"></script>
-<script src="js/golf.js?v=1.33"></script>
+<script src="js/core.js?v=1.36"></script>
+<script src="js/theme.js?v=1.36"></script>
+<script src="js/translate.js?v=1.36"></script>
+<script src="js/ui.js?v=1.36"></script>
+<script src="js/screens.js?v=1.36"></script>
+<script src="js/viz.js?v=1.36"></script>
+<script src="js/data.js?v=1.36"></script>
+<script src="js/ticker.js?v=1.36"></script>
+<script src="js/home.js?v=1.36"></script>
+<script src="js/favs.js?v=1.36"></script>
+<script src="js/calcio.js?v=1.36"></script>
+<script src="js/eurolega.js?v=1.36"></script>
+<script src="js/basket.js?v=1.36"></script>
+<script src="js/tennis.js?v=1.36"></script>
+<script src="js/rugby.js?v=1.36"></script>
+<script src="js/f1.js?v=1.36"></script>
+<script src="js/moto.js?v=1.36"></script>
+<script src="js/golf.js?v=1.36"></script>
+<script src="js/extra.js?v=1.36"></script>
+<script src="js/views.js?v=1.36"></script>
+<script src="js/remote.js?v=1.36"></script>
 <script>SL.start();</script>
 </body>
 </html>

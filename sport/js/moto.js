@@ -47,7 +47,7 @@ M.homeFeed=async function(day,ttl){
   try{const evs=await indySeason(ttl);evs.filter(e=>SL.dayKey(e.date)===tgt||(day===0&&indyState(e)==="in")).forEach(e=>{const st=indyState(e),R=indyRows(e);
     out.push({id:"moto:indy:"+e.id,sport:"moto",comp:"IndyCar · "+e.name,date:e.date,state:st,live:st==="in",done:st==="post",status:st==="pre"?SL.when(e.date):st==="in"?"IN GARA":"FINALE",important:R.slice(0,1).some(r=>r.ita||favR(r.name)),
       sig:(R[0]&&R[0].id)+"|"+st,indy:R,lines:st==="pre"||!R.length?[{n:"Gara",ico:"flag",v:SL.fmtTime(e.date)}]:R.slice(0,3).map(r=>({pos:r.pos,n:r.name,img:r.flag,ita:r.ita,v:r.win?"vince":""})),foot:"IndyCar",go:{sport:"moto",s:"indy"}});});}catch(e){}
-  if(!SL.extData())return out;
+  if(!SL.motoData())return out;
   try{
     if(day===0){const d=await live(ttl<20000?5000:60000);if(d&&d.head&&ltToday(d)){const R=ltRiders(d),st=ltState(d),hd=d.head;
       out.push({id:"moto:gp:"+hd.event_id+":"+hd.session_id,sport:"moto",comp:"MotoGP · "+hd.event_tv_name,date:Date.now(),state:st,live:st==="in",done:st==="post",
@@ -82,7 +82,7 @@ M.facts=async function(st){const s=(st&&st.s)||"";
   const [f,m]=await Promise.all([SL.f1.facts().catch(()=>[]),motoFacts().catch(()=>[])]);
   return f.concat(m.slice(0,2));};
 async function motoFacts(){
-  if(!SL.extData())return[{l:"MotoGP e Superbike",v:"risultati e classifiche con l'estensione per PC"}].concat(await indyFacts(3));
+  if(!SL.motoData())return[{l:"MotoGP e Superbike",v:"risultati e classifiche con l'estensione o il proxy (⚙)"}].concat(await indyFacts(3));
   const out=[];
   try{
     const evs=await events(),cur=currentEvent(evs),i=evs.indexOf(cur),now=Date.now();
@@ -123,12 +123,12 @@ M.mount=function(ctx){
   ctx.sub.appendChild(r);
   if(ser==="f1"){mountF1(ctx);return;}      /* l'app F1 Pit Wall, dentro la pagina */
   if(ser==="indy"){mountIndy(ctx);return;} /* IndyCar non ha bisogno dell'estensione */
-  if(!SL.extData()&&ser!=="live"){
+  if(!SL.motoData()&&ser!=="live"){
     const cards=UI.mount(ctx.main,[{k:"tv",n:"Diretta TV",sz:2,fixed:true},{k:"need",n:"Dati moto",sz:2}]);UI.tv(cards.tv,"moto");
     const tvLike=SL.isTVLike();
     cards.need.body.innerHTML='<div class="empty" style="text-align:left;line-height:1.6"><b>MotoGP e Superbike non permettono ad altri siti di leggere i loro dati.</b><br>'+
-      '<b>Formula 1</b> e <b>IndyCar</b> invece funzionano ovunque: toccale qui sopra.<br><br>'+(tvLike?"Su Smart TV e tablet MotoGP e Superbike non si possono mostrare. Aprile da un PC con Chrome o Edge e l'estensione dell'app.":"Installa (o aggiorna) l'estensione per Chrome/Edge da <b>Impostazioni ⚙</b>: sblocca live timing, risultati e classifiche. È la stessa estensione della Diretta TV dell'app F1.")+
-      '<br><br>'+(SL.ext()?'<span class="tag big">Hai la versione '+h(SL.ext())+': aggiornala con lo zip nuovo.</span>':"")+(!tvLike?' <button type="button" class="btn pri" id="motoSet">⚙ APRI IMPOSTAZIONI</button>':"")+'</div>';
+      '<b>Formula 1</b> e <b>IndyCar</b> invece funzionano ovunque: toccale qui sopra.<br><br>'+(tvLike?"Su Smart TV, telefono e tablet servono il <b>proxy dati</b>: si imposta una volta in <b>Impostazioni ⚙ → Proxy dati</b> (le istruzioni sono nel sito, cartella proxy).":"Installa (o aggiorna) l'estensione per Chrome/Edge da <b>Impostazioni ⚙</b>: sblocca live timing, risultati e classifiche. È la stessa estensione della Diretta TV dell'app F1.")+
+      '<br><br>'+(SL.ext()?'<span class="tag big">Hai la versione '+h(SL.ext())+': aggiornala con lo zip nuovo.</span>':"")+' <button type="button" class="btn pri" id="motoSet">⚙ APRI IMPOSTAZIONI</button>'+'</div>';
     const b=cards.need.body.querySelector("#motoSet");if(b)b.onclick=()=>UI.openSettings();
     return;}
   if(ser==="live")mountLive(ctx);else if(ser==="gp")mountGP(ctx);else mountSBK(ctx);
@@ -138,7 +138,7 @@ M.mount=function(ctx){
 async function mountLive(ctx){
   const rid=SL.routeId,note=document.createElement("div");note.className="row";ctx.sub.appendChild(note);
   note.appendChild(UI.liveNote("Cerco chi è in pista adesso…"));
-  const ext=!!SL.extData();
+  const ext=!!SL.motoData();
   const [lt,sb,ie]=await Promise.all([ext?SL.tryGet(GP+"timing-gateway/livetiming-lite",{ttl:5000}):null,ext?SL.tryGet(SBK+"wsbk-results/v1/sessions/latest",{ttl:20000}):null,indySeason(30000).catch(()=>[])]);
   const indyLive=(ie||[]).find(e=>indyState(e)==="in");
   const f1Live=(await SL.f1.sessions(30000).catch(()=>[])).find(s=>SL.f1.state(s)==="in");

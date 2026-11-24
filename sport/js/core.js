@@ -31,17 +31,42 @@ SL.countdown=ms=>{if(ms<=0)return"ora";const s=Math.floor(ms/1000),dd=Math.floor
 
 /* ---------- rete: cache breve, richieste uniche, nessun crash se una fonte cade ---------- */
 const cache=new Map(),inflight=new Map();
+/* stato delle fonti (pannello "Stato fonti" nelle Impostazioni): per indirizzo del server */
+SL.src={};
+const hostOf=u=>{try{return new URL(u).host;}catch(e){return"";}};
+/* proxy dati (Cloudflare Worker, facoltativo): MotoGP e Superbike senza estensione, su ogni dispositivo */
+SL.PROXIED=["api.motogp.pulselive.com","api.pulselive.worldsbk.com"];
+/* indirizzo predefinito del proxy, valido su tutti i dispositivi (vuoto: ognuno lo imposta in ⚙). Istruzioni: proxy/LEGGIMI.md */
+SL.DEFAULT_PROXY="";
+SL.proxyUrl=()=>{const p=String(SL.settings&&SL.settings.proxy||SL.DEFAULT_PROXY||"").trim();return/^https:\/\//i.test(p)?p.replace(/\/+$/,""):"";};
+SL.viaProxy=url=>{const p=SL.proxyUrl();return p&&!SL.extData()&&SL.PROXIED.indexOf(hostOf(url))>=0?p+"/?u="+encodeURIComponent(url):url;};
+/* dati di MotoGP e Superbike disponibili: estensione per PC oppure proxy impostato */
+SL.motoData=()=>!!(SL.extData()||SL.proxyUrl());
+/* TV SYNC (anti-spoiler): la pagina mostra i dati com'erano N secondi fa, allineati alla diretta in TV.
+   Per ogni indirizzo tengo le risposte degli ultimi N secondi e restituisco quella giusta. */
+const hist=new Map();
+SL.syncMs=()=>Math.max(0,Math.min(90,+(SL.settings&&SL.settings.sync)||0))*1000;
+function remember(url,v){const D=SL.syncMs();if(!D){hist.delete(url);return;}
+  let H=hist.get(url);if(!H)hist.set(url,H=[]);H.push({t:Date.now(),v});
+  const cut=Date.now()-D;let i=0;while(i+1<H.length&&H[i+1].t<=cut)i++;if(i)H.splice(0,i);if(H.length>30)H.splice(0,H.length-30);}
+function late(url,v){const D=SL.syncMs();if(!D)return v;const H=hist.get(url);if(!H||!H.length)return v;
+  const cut=Date.now()-D;let b=null;for(const e of H){if(e.t<=cut)b=e;else break;}return(b||H[0]).v;}
+SL.syncReset=()=>hist.clear();
 SL.get=async function(url,opt){
   opt=opt||{};const ttl=opt.ttl==null?8000:opt.ttl,now=Date.now(),c=cache.get(url);
-  if(c&&now-c.t<ttl)return c.v;
+  if(c&&now-c.t<ttl)return late(url,c.v);
   if(inflight.has(url))return inflight.get(url);
   const p=(async()=>{
     const ctl=typeof AbortController!=="undefined"?new AbortController():null;const to=setTimeout(()=>ctl&&ctl.abort(),opt.timeout||15000);
+    const host=hostOf(url),real=SL.viaProxy(url),t0=performance.now(),S=SL.src[host]=SL.src[host]||{n:0,e:0};
     try{
-      const r=await fetch(url,{signal:ctl?ctl.signal:undefined,cache:"no-store",credentials:"omit"});
+      const r=await fetch(real,{signal:ctl?ctl.signal:undefined,cache:"no-store",credentials:"omit"});
       if(!r.ok)throw new Error("HTTP "+r.status);
-      const v=await r.json();cache.set(url,{t:Date.now(),v});SL.netOk(url);return v;
-    }catch(e){SL.netErr(url,e);if(c)return c.v;throw e;}
+      const v=await r.json();cache.set(url,{t:Date.now(),v});remember(url,v);
+      S.ok=true;S.ms=Math.round(performance.now()-t0);S.t=Date.now();S.okT=S.t;S.n++;S.msg="";S.proxy=real!==url;
+      SL.netOk(url);return late(url,v);
+    }catch(e){S.ok=false;S.t=Date.now();S.e++;S.msg=e&&e.name==="AbortError"?"tempo scaduto":(e&&e.message)||"errore";S.proxy=real!==url;
+      SL.netErr(url,e);if(c)return late(url,c.v);throw e;}
     finally{clearTimeout(to);inflight.delete(url);}
   })();
   inflight.set(url,p);return p;
@@ -67,7 +92,7 @@ SL.clearTimers=()=>{SL.timers.forEach(t=>t.stop());SL.timers=[];(SL.cleanups||[]
 SL.cleanups=[];SL.onCleanup=f=>SL.cleanups.push(f);
 
 /* ---------- percorso (#/sport?c=..&e=..&d=..) ---------- */
-SL.parseHash=()=>{const h=location.hash.replace(/^#\/?/,"");const [p,q]=h.split("?");const sp=new URLSearchParams(q||"");const st={sport:SL.order.indexOf(p)>=0?p:"home"};sp.forEach((v,k)=>st[k]=v);return st;};
+SL.parseHash=()=>{const h=location.hash.replace(/^#\/?/,"");const [p,q]=h.split("?");const sp=new URLSearchParams(q||"");const st={sport:SL.order.indexOf(p)>=0||(SL.sports[p]&&SL.sports[p].page)?p:"home"};sp.forEach((v,k)=>st[k]=v);return st;};
 SL.hashOf=st=>{const q=new URLSearchParams();Object.keys(st).forEach(k=>{if(k!=="sport"&&st[k]!=null&&st[k]!=="")q.set(k,st[k]);});const s=q.toString();return"#/"+st.sport+(s?"?"+s:"");};
 SL.go=function(patch,replace){
   const st=Object.assign({},patch.sport&&patch.sport!==SL.state.sport?{}:SL.state,patch);
@@ -219,7 +244,7 @@ SL.route=function(){
   if(SL.ui.hscrollIn)SL.ui.hscrollIn(sub);
   if(SL.screens)SL.screens.refresh(); /* schermo singolo, finestra principale o secondaria con più schermi */
   SL.syncOut();
-  if(SL.ticker)SL.ticker.page(st.sport);
+  if(SL.ticker)SL.ticker.page(mod.tickerAs||st.sport);
   document.title=(st.sport==="home"?"Live ora":mod.name)+" · Sport LIVE APP";
 };
 SL.liveCount={};

@@ -40,14 +40,18 @@ function drawMine(){const L=SL.fav.list,box=$("favMine"),items=allItems();
         '<span class="fv-ic">'+SL.ico(f.s||"star")+'</span><span class="fv-tx"><b>'+h(f.n)+'</b><small>'+h(SPN[f.s]||"")+'</small>'+st+'</span></button>'+
       '<button type="button" class="fv-x" data-del="'+h(f.k)+'" aria-label="Togli '+h(f.n)+' dai preferiti" title="Togli dai preferiti">✕</button></div>';}).join("");}
 
+let IDX=null,idxAsk=false;
 function drawSug(){const q=SL.norm($("favQ").value),box=$("favSug"),seen=new Set(),C=[];
   allItems().forEach(it=>people(it).forEach(p=>{const id=p.s+"|"+SL.norm(p.n);if(seen.has(id))return;seen.add(id);if(!isFav(p))C.push(p);}));
+  /* scrivendo un nome cerco anche tra squadre dei campionati principali, NBA, EuroLega, primi 200 del tennis, piloti di F1 */
+  if(q&&q.length>=2&&SL.extra&&SL.extra.favIndex){if(!IDX&&!idxAsk){idxAsk=true;SL.extra.favIndex().then(L=>{IDX=L;if($("dlgFav").open)drawSug();}).catch(()=>{idxAsk=false;});}
+    (IDX||[]).forEach(p=>{const id=p.s+"|"+SL.norm(p.n);if(seen.has(id))return;seen.add(id);if(!isFav(p))C.push(p);});}
   let L=q?C.filter(p=>SL.norm(p.n).indexOf(q)>=0):C.filter(p=>p.ita||/^(italia|italy)$/i.test(p.n)||(SL.espn.itaClubs&&p.s==="calcio"&&SL.espn.itaClubs.has(p.k.split(":")[2])));
   const order=Object.keys(SPN);L.sort((a,b)=>(order.indexOf(a.s)-order.indexOf(b.s))||a.n.localeCompare(b.n));
   const more=L.length>60;L=L.slice(0,60);
   if(!C.length){box.innerHTML='<div class="favempty">Carico gli eventi dei prossimi giorni…</div>';return;}
-  box.innerHTML=(q?"":'<div class="favlab">Italiani in campo nei prossimi giorni</div>')+(L.length?L.map(p=>'<button type="button" class="chip fvadd sp-'+h(p.s)+'" data-k="'+h(p.k)+'" data-n="'+h(p.n)+'" data-s="'+h(p.s)+'" style="--tc:'+COL[p.s]+'">'+
-      (p.img?'<img src="'+h(p.img)+'" alt="" loading="lazy">':SL.ico(p.s))+'＋ '+h(p.n)+'</button>').join(""):'<div class="favempty">Nessun nome trovato'+(q?' per "'+h($("favQ").value)+'"':"")+' tra gli eventi da ieri a dopodomani.</div>')+
+  box.innerHTML=(q?"":'<div class="favlab">Italiani in campo nei prossimi giorni</div>')+(q&&q.length>=2&&!IDX?'<div class="favlab">Cerco anche tra tutte le squadre e gli atleti…</div>':"")+(L.length?L.map(p=>'<button type="button" class="chip fvadd sp-'+h(p.s)+'" data-k="'+h(p.k)+'" data-n="'+h(p.n)+'" data-s="'+h(p.s)+'" style="--tc:'+COL[p.s]+'">'+
+      (p.img?'<img src="'+h(p.img)+'" alt="" loading="lazy">':SL.ico(p.s))+'＋ '+h(p.n)+'</button>').join(""):'<div class="favempty">Nessun nome trovato'+(q?' per "'+h($("favQ").value)+'"':"")+(IDX?' tra eventi, squadre e atleti.':' tra gli eventi da ieri a dopodomani.')+'</div>')+
     (more?'<div class="favlab">…e altri: scrivi qualche lettera per restringere.</div>':"");}
 
 function draw(){drawMine();drawSug();}

@@ -144,6 +144,8 @@ SC.soloSet=(k,v)=>{if(isF())SC.urlSz[k]=v;else{const lp=leadPlan();if(lp){lp.sz=
   SC.refresh();toast((UK[k]?UK[k].n:k)+": misura "+SZNAME[v]+" in questa finestra.");};
 /* chiamata dopo ogni disegno della pagina (anche quando una pagina monta le sezioni dopo) */
 SC.refresh=function(){
+  {const bs=$("btnScreens");if(bs){units();const no=!UNITS.length;bs.classList.toggle("dim",no);bs.setAttribute("aria-disabled",String(no));
+    bs.title=no?"Schermi: disponibile dentro una pagina sport (Calcio, Basket, Tennis…)":"Schermi: schermo singolo o più schermi";}}
   const b=document.body;b.classList.remove("solo","sgl","sgl-nohd","lead");
   const top=$("top");if(top)top.hidden=isF(); /* la barra in alto torna (le finestre secondarie non la hanno) */
   const main=$("main");if(main){main.classList.remove("sololay","sgllay");main.style.gridTemplateAreas=main.style.gridTemplateColumns=main.style.gridTemplateRows=main.style.height="";}
@@ -449,6 +451,8 @@ function scrOpen(step){
   if(isF()){toast("Questa è una finestra secondaria: gestisci gli schermi dalla finestra principale.");return;}
   units();
   const none=!UNITS.length,on=SC.sglOn();
+  /* home, F1 e pagine senza sezioni: niente finestra vuota, solo la spiegazione */
+  if(none){toast(UI.sport==="moto"?"La Formula 1 ha il suo pulsante SCHERMI dentro l'app; per MotoGP, Superbike e IndyCar aprile qui sopra.":"Schermi si usa dentro una pagina sport: apri Calcio, Basket, Tennis… e premi di nuovo SCHERMI.");return;}
   $("scrOn").hidden=!on;if(on)setT($("scrOn"),"✓ Schermo singolo attivo · "+sglName(sglCfg()));
   $("scrNone").hidden=!none;
   const narrow=innerWidth<900;$("scrOptSingle").disabled=narrow||none;$("scrOptMulti").disabled=none;$("scrNarrow").hidden=!narrow||none;
