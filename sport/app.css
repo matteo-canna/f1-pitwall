@@ -1297,6 +1297,11 @@ html[data-couch="1"] .top .ver{font-size:14px}
 /* pulsante NOTIZIE solo in home; IMPOSTAZIONI solo con l'icona, un po' più grande */
 body:not([data-sport="home"]) #btnTicker{display:none}
 .top .tbtn.icobtn{font-size:20px;line-height:1;padding:0 12px;min-width:44px;justify-content:center}
+/* icone dei pulsanti in alto: stessa misura per Preferiti, Notizie e Schermi (con o senza scritta) */
+.topr .tbtn{justify-content:center;min-width:44px}
+.topr .tbtn .ico{width:18px;height:18px;flex:none}
+html[data-couch="1"] .topr .tbtn .ico{width:22px;height:22px}
+#btnTicker[aria-pressed="false"] .ico{opacity:.55}
 html[data-couch="1"] .top .tbtn.icobtn{font-size:24px;min-width:52px}
 
 /* ---------- Oggi: sport ancora in arrivo o non raggiunti ---------- */

@@ -3,7 +3,9 @@
 
 /* ---------- colori e pulsanti usati dalle finestre (come nell'app F1) ---------- */
 .sdlg,.soloBar{--accent:#e5383b;--cyan:#45c8ec;--green:#3fbf7f;--yellow:#f2c230;--dim:#566078}
-dialog.sdlg{max-width:min(1080px,calc(100vw - 24px));width:100%;padding:0;background:var(--panel,#101624)}
+/* la finestra è larga quanto il suo contenuto (prima il contenuto restava a sinistra con una fascia vuota a destra) */
+dialog.sdlg{max-width:min(980px,calc(100vw - 24px));width:100%;padding:0;background:var(--panel,#101624);overflow:hidden}
+dialog#dlgScr{max-width:min(1080px,calc(100vw - 24px))}
 .sdlg .mbox{display:flex;flex-direction:column;max-height:calc(100vh - 24px);overflow:auto}
 .sdlg .sub{color:var(--muted);font-size:12.5px;line-height:1.45}
 .sdlg .note{color:var(--muted);font-size:12px}
@@ -20,7 +22,7 @@ dialog.sdlg{max-width:min(1080px,calc(100vw - 24px));width:100%;padding:0;backgr
 .sdlg .seg button[aria-pressed="true"]{background:var(--red,#e5383b);color:#fff}
 #dlgScr .ms-foot,#dlgMs .ms-foot{background:var(--panel,#101624)}
 #dlgScr .ms-head h2,#dlgMs .ms-head h2{font:900 20px/1.1 var(--f-display);font-stretch:118%;letter-spacing:.04em;text-transform:uppercase}
-.sdlg .mbox{width:min(980px,100%);display:flex;flex-direction:column}
+.sdlg .mbox{width:100%;display:flex;flex-direction:column}
 .ms-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:18px 20px 10px}
 .ms-head h2{font:800 20px/1.1 var(--f-display);font-stretch:118%;letter-spacing:.04em;text-transform:uppercase}
 .ms-head .sub{margin-top:4px}
@@ -81,7 +83,6 @@ dialog.sdlg{max-width:min(1080px,calc(100vw - 24px));width:100%;padding:0;backgr
 .ms-sz button:disabled{opacity:.35}
 .ms-sz b{min-width:14px;text-align:center;font-size:10px;color:var(--uc)}
 .ms-cell.full{box-shadow:inset 0 0 0 2px var(--uc)}
-#dlgScr{width:min(1080px,100%)}
 .scr-opts{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:8px 20px 8px}
 .scr-opt{display:grid;grid-template-rows:auto auto 1fr auto;gap:8px;text-align:left;background:#0b101a;border:1px solid var(--line);border-radius:14px;padding:16px 16px 14px;cursor:pointer;color:var(--text);transition:border-color .15s,transform .15s,background .15s}
 .scr-opt:hover:not(:disabled){border-color:var(--cyan);background:#0e1524;transform:translateY(-1px)}
@@ -111,7 +112,7 @@ dialog.sdlg{max-width:min(1080px,calc(100vw - 24px));width:100%;padding:0;backgr
 .sgl-pre .sgl-tvc{background:#e5383b;border:0;border-radius:2px}
 @media (max-width:980px){.sgl-presets{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .sgl-stage{padding:14px;margin:2px 20px 0;border-radius:14px;background:radial-gradient(80% 120% at 50% 100%,#111a2b 0%,#070a11 80%);border:1px solid var(--line)}
-.sgl-screen{display:flex;flex-direction:column;gap:3px;width:min(100%,calc(min(40vh,400px) * var(--ar,1.78)));aspect-ratio:var(--ar,1.78);margin:0 auto;background:#05070c;border:2px solid #2b3550;border-radius:10px;padding:5px;box-shadow:0 10px 30px rgba(0,0,0,.45)}
+.sgl-screen{display:flex;flex-direction:column;gap:3px;width:min(100%,calc(clamp(150px,calc(100vh - 540px),400px) * var(--ar,1.78)));aspect-ratio:var(--ar,1.78);margin:0 auto;background:#05070c;border:2px solid #2b3550;border-radius:10px;padding:5px;box-shadow:0 10px 30px rgba(0,0,0,.45)}
 .sgl-hd,.sgl-sb{flex:0 0 auto;border-radius:3px;font:700 8.5px var(--f-mono);letter-spacing:.07em;color:#566078;display:flex;align-items:center;padding:0 6px;overflow:hidden;white-space:nowrap}
 .sgl-hd{height:calc(var(--hdp) * 100%);background:#0d1220;border:1px solid #1d2638}
 .sgl-sb{height:calc(var(--sbp) * 100%);min-height:11px;background:#070a11;border:1px solid #1d2638}
