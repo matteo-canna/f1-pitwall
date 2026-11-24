@@ -46,6 +46,18 @@ E.norm=function(e,sport,league,compName){
   (c.details||[]).forEach(d=>{const t=d.team&&String(d.team.id);const w=t===home.id?"home":t===away.id?"away":null;if(d.redCard&&w)red[w]++;
     if(d.scoringPlay){const who=(d.athletesInvolved||[])[0];last=(who?who.shortName||who.displayName:"")+" "+(d.clock&&d.clock.displayValue||"");}});
   home.red=red.home;away.red=red.away;
+  /* tutti i marcatori (calcio), cartellini, mete e calci (rugby): per le caselle della home */
+  const goals=[],cards=[],plays=[],yel={home:0,away:0};
+  const nm=d=>{const a=(d.athletesInvolved||[])[0];return a?(a.shortName||a.displayName||""):"";};
+  (c.details||[]).forEach(d=>{const t=d.team&&String(d.team.id);const w=t===home.id?"home":t===away.id?"away":null;if(!w)return;const m=d.clock&&d.clock.displayValue||"";
+    if(sport==="rugby"){const k=String(d.type&&d.type.text||"").toLowerCase();const kind=/try/.test(k)?"meta":/conversion/.test(k)?"trasf":/drop/.test(k)?"drop":/penalty/.test(k)?"piazz":"";if(kind)plays.push({side:w,n:nm(d),m,kind});return;}
+    if(d.scoringPlay)goals.push({side:w,n:nm(d),m,pen:!!d.penaltyKick,og:!!d.ownGoal});
+    if(d.redCard)cards.push({side:w,n:nm(d),m,red:true});else if(d.yellowCard)yel[w]++;});
+  /* statistiche e migliori (tiri, possesso, angoli; punti, rimbalzi, assist) */
+  const sideStats=w=>{const x=(c.competitors||[]).find(k=>k.homeAway===w)||{},o={};(x.statistics||[]).forEach(t=>{o[t.name]=t.displayValue;});
+    const L=(x.leaders||[]).map(l=>{const y=(l.leaders||[])[0];return y?{k:l.name,n:y.athlete&&(y.athlete.shortName||y.athlete.displayName)||"",v:y.displayValue}:null;}).filter(Boolean);return{st:o,lead:L};};
+  const sh=sideStats("home"),sa=sideStats("away");
+  home.stats=sh.st;away.stats=sa.st;home.lead=sh.lead;away.lead=sa.lead;
   const state=ty.state||"pre";
   let clock="";
   if(state==="in"){clock=sport==="calcio"?(ty.shortDetail||st.displayClock||"").replace(/^HT$/,"Intervallo"):sport==="basket"?(ty.shortDetail||""):(st.displayClock||ty.shortDetail||"");
@@ -53,7 +65,7 @@ E.norm=function(e,sport,league,compName){
   const status=state==="pre"?SL.when(e.date):state==="in"?clock:(SL.tr.status(ty.description)||ty.description||"Finale");
   const comp=compName||(SL.cfg.soccerNames[league])||"";
   const ev={id:String(e.id),sport,league,comp,date:e.date,state,live:state==="in",done:state==="post",status,clock,period:st.period||0,
-    detail:SL.tr.status(ty.shortDetail||ty.detail||""),home,away,last,venue:(c.venue&&c.venue.fullName)||"",name:e.name||"",note:(c.notes&&c.notes[0]&&c.notes[0].headline)||"",
+    detail:SL.tr.status(ty.shortDetail||ty.detail||""),home,away,last,goals,cards,plays,yel,odds:((c.odds||[])[0]||{}).details||"",venue:(c.venue&&c.venue.fullName)||"",name:e.name||"",note:(c.notes&&c.notes[0]&&c.notes[0].headline)||"",
     broadcast:""}; /* le emittenti ESPN sono americane: inutili in Italia */
   ev.ita=E.isIta(ev);ev.fav=E.isFav(ev);ev.important=ev.fav||ev.ita; /* Nazionale o club italiani nelle coppe */
   return ev;
