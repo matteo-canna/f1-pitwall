@@ -74,6 +74,28 @@ E.isIta=function(ev){const nat=ev.home.name==="Italia"||ev.away.name==="Italia"|
   ev.itaNat=nat&&(ev.sport==="calcio"||ev.sport==="rugby");
   if(ev.sport==="calcio"&&ev.league!=="ita.1"&&!/^ita\./.test(ev.league)&&(E.itaClubs.has(ev.home.id)||E.itaClubs.has(ev.away.id)))return true;
   return nat;};
+/* ---------- marcatori e classifica: usati da home, multi-partita, avvisi, striscia, preferiti, agenda ---------- */
+const sur=n=>String(n||"").replace(/^[A-ZÀ-Ý]\.\s*/,"");
+/* gol di una squadra raggruppati per giocatore: [{n, m:["45' rig.","51'"]}] */
+E.goalsBy=(ev,w)=>{const by=[];(ev.goals||[]).filter(g=>g.side===w).forEach(g=>{let x=by.find(y=>y.n===g.n);if(!x)by.push(x={n:g.n,m:[]});x.m.push(g.m+(g.pen?" rig.":g.og?" aut.":""));});return by;};
+/* testo dei marcatori di una squadra: "Varela 45' rig., 51', Robinson 59'" (short: solo cognomi) */
+E.goalsText=(ev,w,short)=>E.goalsBy(ev,w).map(x=>(short?sur(x.n):x.n)+" "+x.m.join(", ")).join(", ");
+E.lastGoal=ev=>{const g=(ev.goals||[]).slice(-1)[0];return g?sur(g.n)+" "+g.m+(g.pen?" (rig.)":g.og?" (aut.)":""):"";};
+/* riga compatta per liste: "⚽ Monza: Varela 45' rig., 51' · Fiorentina: Kean 80'" con espulsi */
+E.scoreLine=function(ev){if(!ev||!(ev.live||ev.done))return"";const h=SL.h,out=[];
+  if(ev.sport==="calcio"){["home","away"].forEach(w=>{const g=E.goalsText(ev,w,true),r=(ev.cards||[]).filter(c=>c.side===w&&c.red).map(c=>sur(c.n)+" "+c.m);
+      if(g||r.length)out.push('<b>'+h(ev[w].short||ev[w].name)+'</b> '+h(g)+(r.length?' <span class="rcl"><i class="rcard"></i>'+h(r.join(", "))+'</span>':""));});
+    return out.length?SL.ico("calcio")+out.join(" · "):"";}
+  if(ev.sport==="rugby"){["home","away"].forEach(w=>{const T=(ev.plays||[]).filter(x=>x.side===w&&x.kind==="meta");if(T.length)out.push('<b>'+h(ev[w].short||ev[w].name)+'</b> '+h(T.map(x=>sur(x.n)+" "+x.m).join(", ")));});
+    return out.length?SL.ico("rugby")+"Mete: "+out.join(" · "):"";}
+  return"";};
+/* classifica di un campionato: squadra → {pos, pts} (una richiesta all'ora) */
+const TABLED={"ita.1":1,"eng.1":1,"esp.1":1,"ger.1":1,"fra.1":1,"uefa.champions":1,"uefa.europa":1,"uefa.europa.conf":1};
+E.table=async function(league){if(!TABLED[league])return null;const d=await SL.tryGet(SL.ESPN2+"soccer/"+league+"/standings",{ttl:36e5});if(!d)return null;
+  const m={};E.entries(d).forEach(x=>{const id=String(x.team&&x.team.id||"");if(id)m[id]={pos:E.stat(x,"rank"),pts:E.stat(x,"points"),gp:E.stat(x,"gamesPlayed")};});return m;};
+E.attachTable=async function(evs){const L=[...new Set(evs.map(ev=>ev.league).filter(l=>TABLED[l]))];
+  const T={};await Promise.all(L.map(async l=>{T[l]=await E.table(l).catch(()=>null);}));
+  evs.forEach(ev=>{const t=T[ev.league];if(!t)return;ev.home.rank=t[ev.home.id]||null;ev.away.rank=t[ev.away.id]||null;});return evs;};
 E.isFav=ev=>SL.fav.has(SL.fav.key(ev.sport,"team",ev.home.id))||SL.fav.has(SL.fav.key(ev.sport,"team",ev.away.id));
 E.score=ev=>(ev.home.score==null?"-":ev.home.score)+"-"+(ev.away.score==null?"-":ev.away.score);
 

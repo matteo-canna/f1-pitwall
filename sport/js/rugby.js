@@ -84,7 +84,7 @@ M.mount=function(ctx){
       return'<button type="button" class="mrow'+(ev.id===S.sel?" sel":"")+(ita?" ":"")+'" data-ev="'+ev.id+'"'+(ita?' style="border-left:3px solid var(--ita)"':"")+'><span class="min'+(ev.live?" live":"")+'">'+h(ev.live?ev.clock||"LIVE":ev.done?SL.fmtDay(ev.date):SL.fmtDay(ev.date))+'</span>'+
         '<span class="tt"><img class="logo-t" src="'+h(ev.home.logo)+'" alt="" loading="lazy"><span>'+h(ev.home.name)+'</span></span><span class="s">'+(sc?h(ev.home.score):"")+'</span>'+
         '<span class="tt"><img class="logo-t" src="'+h(ev.away.logo)+'" alt="" loading="lazy"><span>'+h(ev.away.name)+'</span></span><span class="s">'+(sc?h(ev.away.score):"")+'</span>'+
-        '<span class="last">'+h([comp==="ita"?ev.comp:"",ev.state==="pre"?SL.fmtTime(ev.date):"",ev.venue].filter(Boolean).join(" · "))+'</span></button>';};
+        '<span class="last">'+(E.scoreLine(ev)||h([comp==="ita"?ev.comp:"",ev.state==="pre"?SL.fmtTime(ev.date):"",ev.venue].filter(Boolean).join(" · ")))+'</span></button>';};
     let s='<div class="mlist">';
     if(live.length)s+='<div class="grp-h">In diretta</div>'+live.map(row).join("");
     s+='<div class="grp-h">Prossime</div>'+(next.length?next.map(row).join(""):'<div class="muted">Nessuna partita in calendario per ora.</div>');
@@ -96,8 +96,10 @@ M.mount=function(ctx){
   function drawMatch(){const c=cards.match,ev=sel();if(!ev)return;const [ch,ca]=V.pair(ev.home.color,ev.away.color);
     const tm=t=>'<div class="tm">'+(t.logo?'<img src="'+h(t.logo)+'" alt="">':"")+'<div class="nm">'+h(t.name)+' '+SL.star("rugby","team",t.id,t.name)+'</div><div class="rec">'+h(t.rec||"")+'</div></div>';
     let s='<div class="bug">'+tm(ev.home)+'<div class="mid"><div class="score">'+(ev.state!=="pre"?h(ev.home.score)+'<i>–</i>'+h(ev.away.score):'<span style="font-size:.55em">'+h(SL.fmtTime(ev.date))+'</span>')+'</div><div class="clk">'+(ev.live?'<span class="tag live">'+h(ev.clock||"LIVE")+'</span>':ev.done?'<span class="tag">FINALE</span>':'<span class="tag">'+h(SL.when(ev.date))+'</span>')+'</div></div>'+tm(ev.away)+'</div>';
-    const tl=SL.store.sget("rgtl."+ev.id,null);
-    if(tl&&tl.ev.length){s+='<h4 class="muted" style="margin:12px 0 4px;font-size:11px;letter-spacing:.08em">PUNTI SEGNATI (visti in diretta)</h4><ul class="feed">'+tl.ev.slice().reverse().map(x=>'<li class="'+(x.d>=5?"goal":"")+'"><span class="t">'+h(x.c||"")+'</span><span>'+SL.ico(x.d>=5?"rugby":"posts")+'</span><span class="x"><b>'+h(KIND(x.d))+'</b> '+h(x.s==="h"?ev.home.name:ev.away.name)+'<small>'+h(x.sc)+'</small></span></li>').join("")+'</ul>';}
+    const tl=SL.store.sget("rgtl."+ev.id,null),P=ev.plays||[];
+    if(P.length){const KN={meta:"Meta",trasf:"Trasformazione",piazz:"Piazzato",drop:"Drop"},KP={meta:5,trasf:2,piazz:3,drop:3};
+      s+='<h4 class="muted" style="margin:12px 0 4px;font-size:11px;letter-spacing:.08em">PUNTI SEGNATI</h4><ul class="feed">'+P.slice().reverse().map(x=>'<li class="'+(x.kind==="meta"?"goal":"")+'"><span class="t">'+h(x.m)+'</span><span>'+SL.ico(x.kind==="meta"?"rugby":"posts")+'</span><span class="x"><b>'+h(KN[x.kind])+'</b> · '+h(x.n)+' <span class="muted">(+'+KP[x.kind]+')</span><small>'+h(ev[x.side].name)+'</small></span></li>').join("")+'</ul>';}
+    else if(tl&&tl.ev.length){s+='<h4 class="muted" style="margin:12px 0 4px;font-size:11px;letter-spacing:.08em">PUNTI SEGNATI (visti in diretta)</h4><ul class="feed">'+tl.ev.slice().reverse().map(x=>'<li class="'+(x.d>=5?"goal":"")+'"><span class="t">'+h(x.c||"")+'</span><span>'+SL.ico(x.d>=5?"rugby":"posts")+'</span><span class="x"><b>'+h(KIND(x.d))+'</b> '+h(x.s==="h"?ev.home.name:ev.away.name)+'<small>'+h(x.sc)+'</small></span></li>').join("")+'</ul>';}
     else if(ev.live)s+='<p class="note">I punti segnati compaiono qui mentre segui la partita: i dati gratuiti danno solo il punteggio, l\'app ricava mete, trasformazioni e piazzati dai cambi.</p>';
     if(ev.state==="pre")s+='<p class="note" style="text-align:center">Calcio d\'inizio tra <b class="cdown">'+h(SL.countdown(new Date(ev.date)-Date.now()))+'</b></p>';
     const gi=(S.sum&&S.sum.gameInfo)||{};s+='<p class="note" style="text-align:center">'+[ev.comp,(gi.venue&&gi.venue.fullName)||ev.venue,gi.attendance?"Spettatori "+Number(gi.attendance).toLocaleString("it-IT"):""].filter(Boolean).map(h).join(" · ")+'</p>';

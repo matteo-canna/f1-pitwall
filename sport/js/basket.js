@@ -111,7 +111,9 @@ function mountNBA(ctx,liveMode,euLive){
       return'<button type="button" class="mrow'+(ev.id===S.sel?" sel":"")+'" data-ev="'+ev.id+'"><span class="min'+(ev.live?" live":"")+'">'+h(ev.live?ev.clock:ev.done?"FIN":SL.fmtTime(ev.date))+'</span>'+
         '<span class="tt"><img class="logo-t" src="'+h(ev.away.logo)+'" alt="" loading="lazy"><span>'+h(ev.away.name)+'</span></span><span class="s">'+(sc?h(ev.away.score):"")+'</span>'+
         '<span class="tt"><img class="logo-t" src="'+h(ev.home.logo)+'" alt="" loading="lazy"><span>'+h(ev.home.name)+'</span></span><span class="s">'+(sc?h(ev.home.score):"")+'</span>'+
-        '<span class="last">'+h(ev.away.rec&&ev.home.rec?ev.away.rec+" · "+ev.home.rec:ev.venue)+'</span></button>';}).join("")+'</div>';}
+        '<span class="last">'+(function(){const top=t=>{const p=(t.lead||[]).find(x=>x.k==="points");return p?'<b>'+h(String(p.n).replace(/^[A-Z]\.\s*/,""))+'</b> '+h(p.v):"";};
+          const a=top(ev.away),b=top(ev.home);if((ev.live||ev.done)&&(a||b))return SL.ico("basket")+"Migliori: "+[a,b].filter(Boolean).join(" · ");
+          return h(ev.away.rec&&ev.home.rec?ev.away.rec+" · "+ev.home.rec:ev.venue);})()+'</span></button>';}).join("")+'</div>';}
 
   async function loadGame(first){const ev=sel();if(!ev){["match","wp","shots","leaders","box","pbp"].forEach(k=>cards[k].body.innerHTML=UI.empty(liveMode?"Nessuna partita in corso adesso: appena ne inizia una compare qui.":"Scegli una partita."));return;}
     try{S.sum=await E.summary("basketball","nba",ev.id,ev.live?8000:600000);}catch(e){if(first)cards.match.body.innerHTML=UI.empty("Dati della partita non disponibili ora.");return;}

@@ -32,7 +32,7 @@ F1.items=async function(day,ttl){
   const key=SL.dayKey(SL.addDays(Date.now(),day)),[S,M]=await Promise.all([F1.sessions(ttl&&ttl<60000?60000:36e5),F1.meetings()]);
   const L=S.filter(s=>SL.dayKey(s.date_start)===key||(day===0&&F1.state(s)==="in"));
   return Promise.all(L.map(async s=>{const st=F1.state(s),m=M[s.meeting_key],sn=F1.sesName(s),gp=F1.gpName(m)||s.location;
-    const top=st==="post"?(await F1.result(s.session_key).catch(()=>[])).slice(0,3):[];
+    const all=st==="post"?await F1.result(s.session_key).catch(()=>[]):[],ib=all.slice(3).find(r=>r.ita),top=all.slice(0,3).concat(ib?[ib]:[]);
     const won=/Gara|Sprint$/.test(sn)?"vince":/Qualifiche/.test(sn)?"pole":"";
     return{id:"moto:f1:"+s.session_key,sport:"moto",comp:"F1 · "+gp,date:s.date_start,state:st,live:st==="in",done:st==="post",
       status:st==="in"?sn.toUpperCase():st==="post"?(top.length?sn.toUpperCase():"FINITA"):SL.when(s.date_start),
