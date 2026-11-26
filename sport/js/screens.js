@@ -452,7 +452,7 @@ function scrOpen(step){
   units();
   const none=!UNITS.length,on=SC.sglOn();
   /* home, F1 e pagine senza sezioni: niente finestra vuota, solo la spiegazione */
-  if(none){toast(UI.sport==="moto"?"La Formula 1 ha il suo pulsante SCHERMI dentro l'app; per MotoGP, Superbike e IndyCar aprile qui sopra.":"Schermi si usa dentro una pagina sport: apri Calcio, Basket, Tennis… e premi di nuovo SCHERMI.");return;}
+  if(none){toast(UI.sport==="calcio"?"Apri una partita o una competizione del calcio (o TUTTE LE SEZIONI): lì Schermi dispone diretta e sezioni.":UI.sport==="moto"?"La Formula 1 ha il suo pulsante SCHERMI dentro l'app; per MotoGP, Superbike e IndyCar aprile qui sopra.":"Schermi si usa dentro una pagina sport: apri Calcio, Basket, Tennis… e premi di nuovo SCHERMI.");return;}
   $("scrOn").hidden=!on;if(on)setT($("scrOn"),"✓ Schermo singolo attivo · "+sglName(sglCfg()));
   $("scrNone").hidden=!none;
   const narrow=innerWidth<900;$("scrOptSingle").disabled=narrow||none;$("scrOptMulti").disabled=none;$("scrNarrow").hidden=!narrow||none;

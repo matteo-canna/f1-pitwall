@@ -79,13 +79,81 @@ const DEFS=[
 /* in "Live ora" le altre partite in corso sono importanti: subito dopo la partita scelta */
 const DEFS_LIVE=DEFS.slice(0,2).concat(DEFS.filter(d=>d.k==="multi"),DEFS.slice(2).filter(d=>d.k!=="multi"));
 M.defs=DEFS;
+/* ---------- home del calcio: le schede dei giorni e le partite in diretta e in arrivo ----------
+   Si apre toccando "Calcio" (#/calcio senza competizione, giorno o partita). Toccando una partita si va alla pagina
+   con tutte le sezioni e la Diretta TV. */
+const isHub=st=>!st.c&&!st.e&&!st.d;
+const HUBDAYS=[-1,0,1,2,3,4,5];
+function mountHub(ctx){
+  const st=ctx.st,main=ctx.main,rid=SL.routeId;
+  const S={f:COMPS.some(c=>c.k===st.f)?st.f:"all",only:["ita","fav"].indexOf(SL.store.get("calcio.only",""))>=0?SL.store.get("calcio.only",""):""};
+  const C={}; /* giorno → partite (oggi: dal raccoglitore della home, se pronto) */
+  /* sottobarra: competizioni (filtrano questa pagina), Italia e Preferiti, pagina completa */
+  const r1=document.createElement("div");r1.className="row";
+  const r2=document.createElement("div");r2.className="row chub-acts";
+  ctx.sub.append(r1,r2);
+  const drawChips=()=>{r1.innerHTML="";const liveBy={};(SL.live.bySport.calcio||[]).forEach(x=>{if(x.live)liveBy[x.ev.compK]=(liveBy[x.ev.compK]||0)+1;});
+    r1.appendChild(UI.chips([UI.liveChip("calcio"),{k:"all",n:"Tutte",live:Object.keys(liveBy).length>0}].concat(COMPS.map(c=>({k:c.k,n:c.n,live:!!liveBy[c.k]}))),S.f,v=>{
+      if(v==="live"){SL.go({c:"live"});return;}S.f=v;SL.setQuiet({f:v==="all"?"":v});drawChips();draw();}));};
+  drawChips();
+  r2.innerHTML='<div class="chips onlyf" role="group" aria-label="Mostra solo"><button type="button" class="chip itachip" data-only="ita" aria-pressed="'+(S.only==="ita")+'">'+SL.ico("ita")+'Italia</button><button type="button" class="chip favchip" data-only="fav" aria-pressed="'+(S.only==="fav")+'">★ Preferiti</button></div>'+
+    '<button type="button" class="btn pri" id="chubAll">TUTTE LE SEZIONI E DIRETTA TV →</button>';
+  r2.addEventListener("click",e=>{const b=e.target.closest("[data-only]");if(b){S.only=S.only===b.dataset.only?"":b.dataset.only;SL.store.set("calcio.only",S.only);
+      r2.querySelectorAll("[data-only]").forEach(x=>x.setAttribute("aria-pressed",String(x.dataset.only===S.only)));draw();return;}
+    if(e.target.closest("#chubAll"))SL.go({c:S.f!=="all"?S.f:"ita.1"});});
+  main.innerHTML='<div class="home chub"><div id="cDeck"></div>'+
+    '<div class="chub-lists"><section class="chub-l" id="cLive"></section><section class="chub-l" id="cNext"></section></div></div>';
+  const $=id=>main.querySelector("#"+id);
+  const keep=x=>(S.f==="all"||x.ev.compK===S.f)&&(!S.only||(S.only==="ita"?SL.homeIta(x):SL.homeFav(x)));
+  const dayList=d=>{const r=d===0&&SL.live.loaded.calcio?SL.live.bySport.calcio:C[d];return r?r.filter(keep):null;};
+  const cname=()=>S.f==="all"?"":" in "+(COMPS.find(c=>c.k===S.f)||{}).n;
+  const dw=d=>d===0?"oggi":d<0?"ieri":d===1?"domani":"dopodomani";
+  const deck=SL.dayDeck({box:$("cDeck"),id:"c",items:dayList,icon:()=>"calcio",
+    empty:d=>(S.only==="ita"?"Nessuna partita dell'Italia o delle italiane ":S.only==="fav"?"Nessuna partita delle tue squadre ":"Nessuna partita ")+dw(d)+cname()+"."});
+  /* righe delle liste: orario o minuto, competizione, squadre con classifica, punteggio, marcatori */
+  const row=it=>{const ev=it.ev,sc=ev.state!=="pre",rk=t=>t.rank&&t.rank.pos?'<i class="rk">'+t.rank.pos+'°<span> · '+t.rank.pts+' pt</span></i>':"";
+    const tm=(t,w)=>'<span class="cr-tm'+(ev.done&&!t.winner&&ev[w==="home"?"away":"home"].winner?" l":"")+'"><img src="'+h(t.logo)+'" alt="" loading="lazy"><span class="cr-n">'+h(t.name)+(t.red?'<i class="rcard"></i>':"")+'</span>'+(sc?"":rk(t))+'<b class="cr-s">'+(sc?h(t.score):"")+'</b></span>';
+    const sl=E.scoreLine(ev);
+    return'<button type="button" class="crow'+(ev.live?" live":"")+(it.important?" fav":"")+'" data-go="'+h(JSON.stringify(it.go))+'">'+
+      '<span class="cr-t">'+(ev.live?'<i class="dot"></i>'+h(ev.clock||"LIVE"):ev.done?"FINALE":h(SL.fmtTime(ev.date)))+'</span>'+
+      '<span class="cr-m"><small class="cr-c">'+h(ev.comp)+(ev.venue?" · "+h(ev.venue):"")+'</small>'+tm(ev.home,"home")+tm(ev.away,"away")+(sl?'<span class="cr-sc">'+sl+'</span>':"")+'</span></button>';};
+  function drawLists(){const all=[];HUBDAYS.forEach(d=>{const L=dayList(d);if(L)L.forEach(x=>all.push(x));});
+    const seen=new Set(),A=all.filter(x=>{if(seen.has(x.id))return false;seen.add(x.id);return true;});
+    const live=A.filter(x=>x.live).sort((a,b)=>(b.important-a.important)||(new Date(a.date)-new Date(b.date)));
+    const next=A.filter(x=>x.state==="pre"&&new Date(x.date)>Date.now()-6e5).sort((a,b)=>new Date(a.date)-new Date(b.date)).slice(0,14);
+    const loading=!(SL.live.loaded.calcio||C[0]);
+    /* senza partite in corso: riquadro basso a tutta larghezza e le prossime su due colonne */
+    main.querySelector(".chub-lists").classList.toggle("quiet",!loading&&!live.length);
+    $("cLive").innerHTML='<h2 class="dt-h"><i class="dot"></i> In diretta ora'+(live.length?' <span class="c">'+live.length+'</span>':"")+'</h2>'+
+      (loading?'<div class="loading">Carico</div>':live.length?'<div class="crl">'+live.map(row).join("")+'</div>':'<p class="muted chub-none">Nessuna partita in corso adesso'+h(cname())+'.'+(next[0]?' La prossima: <b>'+h(next[0].ev.home.name+" – "+next[0].ev.away.name)+'</b>, '+h(SL.when(next[0].date))+'.':"")+'</p>');
+    /* prossime: raggruppate per giorno */
+    let html='<h2 class="dt-h">'+SL.ico("clock")+' Prossime partite</h2>',last="";
+    if(next.length){html+='<div class="crl">';next.forEach(it=>{const k=SL.relDay(it.date);if(k!==last){last=k;html+='<div class="crd">'+h(k==="Oggi"||k==="Domani"?k+" · "+SL.fmtDay(it.date):SL.fmtDayLong(it.date))+'</div>';}html+=row(it);});html+='</div>';}
+    else html+=Object.keys(C).length<3?'<div class="loading">Carico</div>':'<p class="muted chub-none">Nessuna partita in programma nei prossimi giorni'+h(cname())+'.</p>';
+    $("cNext").innerHTML=html;}
+  function draw(){if(rid!==SL.routeId)return;deck.drawCols();drawLists();}
+  draw();
+  main.addEventListener("click",e=>{if(e.target.closest(".dmore"))return;const b=e.target.closest(".htile[data-go],.crow[data-go]");if(!b)return;try{SL.go(JSON.parse(b.dataset.go));}catch(x){}});
+  SL.onPage("live",()=>{drawChips();draw();});
+  SL.onPage("fav",draw);
+  SL.onPage("flash",id=>{const t=main.querySelector('.htile[data-id="'+CSS.escape(id)+'"]');if(t){t.classList.remove("flash");void t.offsetWidth;t.classList.add("flash");}});
+  /* gli altri giorni: prima quelli delle schede, poi i successivi per le "prossime" */
+  (async()=>{for(const d of HUBDAYS){if(rid!==SL.routeId)return;if(d===0&&SL.live.loaded.calcio)continue;
+    try{C[d]=await M.homeFeed(d,d===0?15000:1800000);}catch(e){C[d]=[];}draw();}})();
+  /* oggi si aggiorna col raccoglitore; se non è ancora partito, ogni minuto da qui */
+  SL.every(async()=>{if(SL.live.loaded.calcio)return;try{C[0]=await M.homeFeed(0,15000);draw();}catch(e){}},60000,{delay:60000});
+}
+
 M.mount=function(ctx){
+  if(isHub(ctx.st)){UI.defs=[];mountHub(ctx);return;}
   const st=ctx.st;let compK=st.c||"ita.1";if(compK!=="all"&&compK!=="live"&&!compOf(compK))compK="ita.1";
   const liveMode=compK==="live",day=liveMode?0:(+st.d||0);
   const dayKey=SL.dayKey(SL.addDays(Date.now(),day));
   /* sottobarra */
   const r1=document.createElement("div");r1.className="row";
   const liveBy={};(SL.live.bySport.calcio||[]).forEach(x=>{if(x.live)liveBy[x.ev.compK]=(liveBy[x.ev.compK]||0)+1;});
+  const back=document.createElement("button");back.type="button";back.className="chip chub-back";back.innerHTML="‹ "+SL.ico("calcio")+"Home calcio";back.title="Torna alla home del calcio: giorni, dirette e prossime partite";
+  back.addEventListener("click",()=>SL.go({c:"",e:"",d:""}));r1.appendChild(back);
   r1.appendChild(UI.chips([UI.liveChip("calcio"),{k:"all",n:"Tutte",live:Object.keys(liveBy).length>0}].concat(COMPS.map(c=>({k:c.k,n:c.n,live:!!liveBy[c.k]}))),compK,v=>SL.go({c:v,e:"",d:""})));
   const r2=document.createElement("div");r2.className="row";
   if(liveMode)r2.appendChild(UI.liveNote("Solo le partite in corso adesso, in tutte le competizioni. Si aggiorna da sola."));

@@ -1724,3 +1724,45 @@ html[data-couch="1"] .hx b{font-size:17px}
 .agsc{display:block;margin-top:4px;font-size:11.5px;line-height:1.4;color:var(--text);opacity:.85;white-space:normal}
 .agsc .ico{width:12px;height:12px;vertical-align:-2px;margin-right:4px;color:var(--tc)}
 .agsc .rcard{margin-right:3px}
+
+/* =====================================================================
+   HOME DEL CALCIO (#/calcio): schede dei giorni e liste delle partite
+   ===================================================================== */
+.chub{gap:18px}
+.chub-acts{justify-content:space-between;gap:8px 12px}
+.chub-acts .btn.pri{margin-left:auto}
+.chub-back{font-weight:800}
+.chub-back .ico{width:14px;height:14px;margin:0 5px 0 2px}
+.chub-lists{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(460px,100%),1fr));gap:16px;align-items:start}
+.chub-l{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:var(--r,14px);border:1px solid var(--line);background:rgba(8,11,20,.72);backdrop-filter:blur(4px);min-width:0}
+.chub-l .dt-h{display:flex;align-items:center;gap:8px}
+.chub-l .dt-h .ico{width:18px;height:18px;color:var(--sa)}
+.chub-l .dt-h .c{font:800 12px/1 var(--f-mono);padding:3px 7px;border-radius:99px;background:var(--red);color:#fff}
+.chub-none{padding:4px 2px;line-height:1.5}
+.crl{display:flex;flex-direction:column;gap:8px}
+.crd{font:800 11px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+.crow{display:grid;grid-template-columns:64px minmax(0,1fr);gap:4px 12px;align-items:center;width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--line);border-left:3px solid var(--sa);background:var(--panel2);color:var(--text);text-align:left;cursor:pointer;transition:border-color .15s,transform .1s}
+.crow:hover{border-color:var(--sa)}
+.crow:active{transform:translateY(1px)}
+.crow.live{border-left-color:var(--red);background:color-mix(in srgb,var(--red) 6%,var(--panel2))}
+.crow.fav{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--yellow) 45%,transparent)}
+.cr-t{display:flex;flex-direction:column;align-items:center;gap:3px;font:800 15px/1 var(--f-mono);text-align:center}
+.cr-t small{font:700 10px/1 var(--f-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.crow.live .cr-t{color:var(--red);flex-direction:row;justify-content:center;font-size:13px}
+.cr-t .dot{width:7px;height:7px}
+.cr-m{display:flex;flex-direction:column;gap:4px;min-width:0}
+.cr-c{color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cr-tm{display:grid;grid-template-columns:22px minmax(0,auto) auto 1fr;align-items:center;gap:8px;min-width:0}
+.cr-tm img{width:22px;height:22px;object-fit:contain}
+.cr-n{font-weight:700;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:5px}
+.cr-tm .rk{font-style:normal}
+.cr-s{grid-column:4;justify-self:end;font:900 18px/1 var(--f-mono)}
+.cr-tm.l{opacity:.6}
+.chub-lists.quiet{grid-template-columns:1fr}
+.chub-lists.quiet #cNext .crl{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(440px,100%),1fr));gap:8px 12px}
+.chub-lists.quiet #cNext .crd{grid-column:1/-1}
+.cr-sc{font-size:12px;line-height:1.45;color:var(--text);opacity:.9;margin-top:2px}
+.cr-sc .ico{width:12px;height:12px;vertical-align:-2px;margin-right:4px;color:var(--sa)}
+html[data-couch="1"] .cr-n{font-size:17px}
+html[data-couch="1"] .cr-s{font-size:22px}
+@media (max-width:760px){.chub-acts .btn.pri{margin-left:0;width:100%;justify-content:center}.crow{grid-template-columns:54px minmax(0,1fr)}.cr-tm .rk span{display:none}}

@@ -100,6 +100,9 @@ SL.go=function(patch,replace){
   if(replace)history.replaceState(null,"",h);else history.pushState(null,"",h);
   SL.route();
 };
+/* apre la pagina iniziale di uno sport; se ci sei già torna in cima */
+SL.goSport=function(s){const h="#/"+s;if(SL.state.sport===s&&location.hash===h){scrollTo({top:0,behavior:"smooth"});return;}
+  if(SL.state.sport===s){history.pushState(null,"",h);SL.route();scrollTo(0,0);return;}SL.go({sport:s});};
 /* aggiorna l'indirizzo senza ridisegnare (es. partita selezionata) */
 SL.setQuiet=function(patch){Object.assign(SL.state,patch);history.replaceState(null,"",SL.hashOf(SL.state));SL.syncOut();};
 
@@ -254,13 +257,13 @@ SL.renderTabs=function(){
   const t=$("tabs");
   if(!t.children.length){
     t.innerHTML=SL.order.map(k=>{const m=SL.sports[k];return'<button type="button" class="sp-'+k+'" data-s="'+k+'" style="--tabc:'+m.color+'" aria-pressed="false">'+SL.ico(k)+SL.h(m.tab||m.name)+'<span class="ln"></span></button>';}).join("");
-    t.addEventListener("click",e=>{const b=e.target.closest("button");if(b)SL.go({sport:b.dataset.s});});
+    t.addEventListener("click",e=>{const b=e.target.closest("button");if(b)SL.goSport(b.dataset.s);});
   }
   /* telefono: la stessa scelta in una barra in basso (icona grande e nome corto) */
   const bn=$("bnav");
   if(bn&&!bn.children.length){
     bn.innerHTML=SL.order.map(k=>{const m=SL.sports[k];return'<button type="button" class="sp-'+k+'" data-s="'+k+'" style="--tabc:'+m.color+'" aria-pressed="false" aria-label="'+SL.h(m.name)+'">'+SL.ico(k)+'<span class="bl">'+SL.h(TABSHORT[k]||m.tab||m.name)+'</span><span class="ln"></span></button>';}).join("");
-    bn.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;if(b.dataset.s===SL.state.sport){scrollTo({top:0,behavior:"smooth"});return;}SL.go({sport:b.dataset.s});});
+    bn.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;SL.goSport(b.dataset.s);});
   }
   t.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.s===SL.state.sport)));
   if(bn)bn.querySelectorAll("button").forEach(b=>{const on=b.dataset.s===SL.state.sport;b.setAttribute("aria-pressed",String(on));if(on)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current");});
