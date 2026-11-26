@@ -21,13 +21,22 @@ function item(ev){
 }
 M.homeFeed=async function(day,ttl){
   const key=SL.dayKey(SL.addDays(Date.now(),day)),out=[],seen=new Set();
-  await Promise.all(COMPS.map(async c=>{const l=await E.soccerDay(c,key,ttl);l.forEach(ev=>{if(seen.has(ev.id))return;seen.add(ev.id);out.push(item(ev));});}));
+  const evs=[];
+  await Promise.all(COMPS.map(async c=>{const l=await E.soccerDay(c,key,ttl);l.forEach(ev=>{if(seen.has(ev.id))return;seen.add(ev.id);evs.push(ev);});}));
+  /* posizione e punti in classifica (campionati e coppe con il girone unico) */
+  try{await E.attachTable(evs);}catch(e){}
+  evs.forEach(ev=>out.push(item(ev)));
   return out;
 };
 M.onChange=function(p,it){
   const a=p.ev,b=it.ev,t=b.home.name+" "+E.score(b)+" "+b.away.name;
   const hs=+b.home.score||0,as=+b.away.score||0,ph=+a.home.score||0,pa=+a.away.score||0;
-  if(hs>ph||as>pa)return{id:"g:"+b.id+":"+E.score(b),big:"GOL",title:t,text:(hs>ph?b.home.name:b.away.name)+(b.last?" · "+b.last.replace("⚽ ",""):"")+" · "+b.comp,color:"var(--green)"};
+  if(hs>ph||as>pa){
+    /* chi ha segnato, minuto, rigore o autogol, doppietta/tripletta */
+    const g=(b.goals||[]).slice(-1)[0],side=hs>ph?"home":"away",team=b[side].name;let who="",big="GOL";
+    if(g){const n=(b.goals||[]).filter(x=>x.n===g.n&&!x.og).length;who=g.n+" "+g.m+(g.pen?" su rigore":g.og?" (autogol)":"")+(n===2&&!g.og?" · DOPPIETTA":n===3&&!g.og?" · TRIPLETTA":n>3&&!g.og?" · "+n+"° gol":"");big=g.pen?"RIGORE":g.og?"AUTOGOL":n===2?"DOPPIETTA":n>=3?"TRIPLETTA":"GOL";}
+    else if(b.last)who=b.last.replace("⚽ ","");
+    return{id:"g:"+b.id+":"+E.score(b),big,title:t,text:team+(who?" · "+who:"")+" · "+b.comp,color:"var(--green)"};}
   if(hs<ph||as<pa)return{id:"v:"+b.id+":"+E.score(b),big:"VAR",title:t,text:"Gol annullato · "+b.comp,color:"var(--yellow)"};
   if(b.home.red+b.away.red>a.home.red+a.away.red)return{id:"r:"+b.id+":"+(b.home.red+b.away.red),big:"ROSSO",title:t,text:"Espulsione · "+b.comp,color:"var(--red)"};
   if(a.state==="pre"&&b.state==="in")return{id:"k:"+b.id,big:"VIA",title:b.home.name+" – "+b.away.name,text:"Calcio d'inizio · "+b.comp,color:"var(--cyan)"};
@@ -137,7 +146,7 @@ M.mount=function(ctx){
         s+='<button type="button" class="mrow'+(ev.id===S.sel?" sel":"")+'" data-ev="'+ev.id+'"><span class="min'+(ev.live?" live":"")+'">'+h(ev.live?ev.clock:ev.done?"FIN":SL.fmtTime(ev.date))+'</span>'+
           '<span class="tt"><img class="logo-t" src="'+h(ev.home.logo)+'" alt="" loading="lazy"><span>'+h(ev.home.name)+'</span>'+(ev.home.red?'<i class="rc"></i>'.repeat(ev.home.red):"")+'</span><span class="s">'+(sc?h(ev.home.score):"")+'</span>'+
           '<span class="min" style="grid-row:auto;display:none"></span><span class="tt"><img class="logo-t" src="'+h(ev.away.logo)+'" alt="" loading="lazy"><span>'+h(ev.away.name)+'</span>'+(ev.away.red?'<i class="rc"></i>'.repeat(ev.away.red):"")+'</span><span class="s">'+(sc?h(ev.away.score):"")+'</span>'+
-          (ev.last&&(ev.live||ev.done)?'<span class="last">'+SL.ico("calcio")+" "+h(ev.last)+'</span>':"")+'</button>';});});
+          (function(){const sl=E.scoreLine(ev);return sl?'<span class="last scl2">'+sl+'</span>':"";})()+'</button>';});});
     c.body.innerHTML=s+"</div>";
   }
 

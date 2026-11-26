@@ -117,6 +117,8 @@ SL.homeTile=function(it,opt){
   const teamOf=l=>it.f1&&it.f1.top?((it.f1.top.find(r=>r.name===l.n)||{}).team||""):"";
   const kind=sp==="tennis"?"tn":L.some(l=>l.pos!=null)?"lb":"tm";
   const subOf=l=>{const sd=sideOf(it,l),sc=sd&&(it.live||it.done)?scorersOf(it,sd):"";if(sc)return sc;
+    const rk=sd&&sd.rank&&sd.rank.pos?'<span class="rk">'+sd.rank.pos+'° · '+sd.rank.pts+' pt</span>':"";
+    if(rk&&it.state==="pre")return rk+(big&&sd.form?" "+formHtml(sd.form):"");
     if(!big)return"";if(l.sub)return l.sub;const t=teamOf(l);if(t)return h(t);if(!sd)return"";return sd.form?formHtml(sd.form):sd.rec?h(sd.rec):"";};
   const name=l=>{const sb=subOf(l);return'<span class="n">'+h(l.n)+(l.ita?' '+SL.ico("ita"):"")+(sb?'<small class="nsub">'+sb+'</small>':"")+'</span>';};
   const pic=l=>l.img?'<img class="lg" src="'+h(l.img)+'" alt="" loading="lazy">':l.ico?SL.ico(l.ico,"lg"):'<span class="lg"></span>';

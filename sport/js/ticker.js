@@ -29,10 +29,17 @@ function line(it){
   if(a.v||b.v)return h(a.n)+" <b>"+h(a.v||"")+"</b> – "+h(b.n)+" <b>"+h(b.v||"")+"</b>";
   return h(a.n)+" – "+h(b.n);
 }
+/* sotto il risultato: ultimo marcatore (in diretta) o tutti i marcatori (finita) */
+function subOf(x){const ev=x.ev,E=SL.espn;if(!ev||!E||!E.goalsText)return x.comp;
+  if(x.sport==="calcio"){if(x.live){const g=E.lastGoal(ev);return(g?"⚽ "+g+" · ":"")+x.comp;}
+    if(x.done){const a=E.goalsText(ev,"home",true),b=E.goalsText(ev,"away",true);return(a||b?"⚽ "+[a,b].filter(Boolean).join(" · ")+" · ":"")+x.comp;}}
+  if(x.sport==="basket"&&(x.live||x.done)){const top=t=>{const p=(t.lead||[]).find(y=>y.k==="points");return p?String(p.n).replace(/^[A-Z]\.\s*/,"")+" "+p.v:"";};
+    const s=[top(ev.away||{}),top(ev.home||{})].filter(Boolean).join(" · ");return(s?s+" · ":"")+x.comp;}
+  return x.comp;}
 function eventItems(sport,limit){
   const L=(SL.live.bySport[sport]||[]).slice(),now=Date.now(),out=[];
-  L.filter(x=>x.live).sort((a,b)=>(b.important-a.important)).forEach(x=>out.push({s:sport,tag:x.status&&x.status!=="LIVE"?"LIVE "+x.status:"LIVE",cls:"live",txt:line(x),sub:x.comp,go:x.go,imp:x.important}));
-  L.filter(x=>x.done&&now-new Date(x.date)<10*36e5).sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,limit).forEach(x=>out.push({s:sport,tag:x.tk||"FINALE",cls:"fin",txt:line(x),sub:x.comp,go:x.go,imp:x.important}));
+  L.filter(x=>x.live).sort((a,b)=>(b.important-a.important)).forEach(x=>out.push({s:sport,tag:x.status&&x.status!=="LIVE"?"LIVE "+x.status:"LIVE",cls:"live",txt:line(x),sub:subOf(x),go:x.go,imp:x.important}));
+  L.filter(x=>x.done&&now-new Date(x.date)<10*36e5).sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,limit).forEach(x=>out.push({s:sport,tag:x.tk||"FINALE",cls:"fin",txt:line(x),sub:subOf(x),go:x.go,imp:x.important}));
   L.filter(x=>x.state==="pre"&&new Date(x.date)-now<12*36e5).sort((a,b)=>new Date(a.date)-new Date(b.date)).slice(0,limit).forEach(x=>out.push({s:sport,tag:x.tk||"ORE "+SL.fmtTime(x.date),cls:"pre",txt:line(x),sub:x.comp,go:x.go,imp:x.important}));
   return out;
 }

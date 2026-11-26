@@ -35,9 +35,14 @@ function drawMine(){const L=SL.fav.list,box=$("favMine"),items=allItems();
   box.innerHTML=L.slice().sort((a,b)=>(order.indexOf(a.s)-order.indexOf(b.s))||a.n.localeCompare(b.n)).map(f=>{const ev=eventOf(f,items);
     const st=!ev?'<span class="fv-st muted">Nessun evento da ieri a dopodomani</span>':
       '<span class="fv-st'+(ev.live?" live":"")+'">'+(ev.live?'<i class="dot"></i>LIVE · ':ev.done?"Ultima: ":SL.when(ev.date)+" · ")+h(summary(ev))+(ev.done&&ev.status?" · "+h(ev.status):"")+'</span>';
+    /* sotto: i marcatori della squadra preferita (calcio), le mete (rugby), il migliore (NBA) */
+    let more="";if(ev&&ev.ev&&(ev.live||ev.done)){const e=ev.ev,id=f.k.split(":")[2],w=e.home&&String(e.home.id)===id?"home":e.away&&String(e.away.id)===id?"away":null;
+      if(w&&f.s==="calcio"){const g=SL.espn.goalsText(e,w,true);more=g?"⚽ "+g:"";}
+      else if(w&&f.s==="rugby"){const T=(e.plays||[]).filter(x=>x.side===w&&x.kind==="meta");more=T.length?"Mete: "+T.map(x=>x.n+" "+x.m).join(", "):"";}
+      else if(w&&f.s==="basket"){const p=((e[w]||{}).lead||[]).find(x=>x.k==="points");more=p?"Migliore: "+p.n+" "+p.v+" pt":"";}}
     return'<div class="fv sp-'+h(f.s)+'" style="--tc:'+(COL[f.s]||"#888")+'">'+
       '<button type="button" class="fv-main"'+(ev?' data-go="'+h(JSON.stringify(ev.go||{sport:f.s}))+'"':' data-go="'+h(JSON.stringify({sport:f.s}))+'"')+' title="Apri">'+
-        '<span class="fv-ic">'+SL.ico(f.s||"star")+'</span><span class="fv-tx"><b>'+h(f.n)+'</b><small>'+h(SPN[f.s]||"")+'</small>'+st+'</span></button>'+
+        '<span class="fv-ic">'+SL.ico(f.s||"star")+'</span><span class="fv-tx"><b>'+h(f.n)+'</b><small>'+h(SPN[f.s]||"")+'</small>'+st+(more?'<span class="fv-more">'+h(more)+'</span>':"")+'</span></button>'+
       '<button type="button" class="fv-x" data-del="'+h(f.k)+'" aria-label="Togli '+h(f.n)+' dai preferiti" title="Togli dai preferiti">✕</button></div>';}).join("");}
 
 let IDX=null,idxAsk=false;

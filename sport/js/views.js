@@ -15,6 +15,12 @@ const titleOf=it=>{const L=it.lines||[];if(L.length>=2&&L.every(l=>l.pos==null))
   const c=String(it.comp||"").split(" · ");return c.length>1?c.slice(-2).join(" · "):(it.comp||SPN[it.sport]||"");};
 const compOf=it=>{const L=it.lines||[];return L.length>=2&&L.every(l=>l.pos==null)?(it.comp||""):(SPN[it.sport]||"");};
 const isMine=it=>SL.homeFav(it)||SL.homeIta(it);
+/* eventi finiti o in corso: risultato e marcatori (o primi classificati) */
+function resultOf(it){if(!(it.done||it.live))return"";const L=it.lines||[],num=v=>v!==""&&v!=null&&!isNaN(+v);let r="";
+  if(L.length>=2&&L.every(l=>l.pos==null)&&num(L[0].v)&&num(L[1].v))r='<em class="agres">'+h(L[0].v)+' – '+h(L[1].v)+'</em>';
+  else if(L.some(l=>l.pos!=null))r='<em class="agres">'+h(L.filter(l=>l.pos!=null).slice(0,3).map(l=>l.pos+". "+String(l.n).replace(/^\(\d+\)\s*/,"")).join(" · "))+'</em>';
+  const sl=it.ev&&SL.espn.scoreLine?SL.espn.scoreLine(it.ev):"";
+  return r+(sl?'<span class="agsc">'+sl+'</span>':"");}
 
 /* ---------- calendario .ics ---------- */
 const icsEsc=s=>String(s||"").replace(/\\/g,"\\\\").replace(/;/g,"\\;").replace(/,/g,"\\,").replace(/\r?\n/g,"\\n");
@@ -69,7 +75,7 @@ SL.sports.agenda={name:"La mia settimana",page:true,noHead:true,tickerAs:"home",
       html+='<section class="agday">'+head+(L.length?L.map(it=>{const fav=SL.homeFav(it),ita=SL.homeIta(it);
         return'<div class="agev sp-'+it.sport+(it.live?" live":"")+(clash.has(it.id)?" clash":"")+'" style="--tc:'+COL[it.sport]+'">'+
           '<span class="agt">'+(it.live?'<i class="dot"></i>LIVE':it.allDay?"tutto il giorno":it.tbd?"da definire":h(SL.fmtTime(it.date)))+'</span>'+
-          '<button type="button" class="agmain" data-go="'+h(JSON.stringify(it.go||{sport:it.sport}))+'">'+SL.ico(it.sport)+'<span><b>'+(fav?'<em class="agfav">★</em>':"")+h(titleOf(it))+(ita?' '+SL.ico("ita"):"")+'</b><small>'+h(compOf(it))+(it.done?" · "+h(it.status||"finita"):"")+'</small>'+
+          '<button type="button" class="agmain" data-go="'+h(JSON.stringify(it.go||{sport:it.sport}))+'">'+SL.ico(it.sport)+'<span><b>'+(fav?'<em class="agfav">★</em>':"")+h(titleOf(it))+(ita?' '+SL.ico("ita"):"")+'</b><small>'+h(compOf(it))+(it.done?" · "+h(it.status||"finita"):"")+'</small>'+resultOf(it)+
           (clash.has(it.id)?'<em class="agclash" title="In contemporanea con un altro evento della lista">SI SOVRAPPONE</em>':"")+'</span></button>'+
           '<button type="button" class="btn agone" data-ics="'+h(it.id)+'" title="Aggiungi questo evento al calendario" aria-label="Aggiungi al calendario: '+h(titleOf(it))+'">'+SL.ico("cal")+'</button></div>';}).join(""):
         '<p class="muted agnone">'+(mode==="all"?"Nessun evento.":mode==="fav"?"Nessun evento dei tuoi preferiti.":"Nessun evento dei preferiti o dell'Italia.")+'</p>')+'</section>';});

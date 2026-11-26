@@ -73,7 +73,7 @@ SL.sports.remote={name:"Telecomando",page:true,noHead:true,tickerAs:"home",mount
   send({c:"ping"});SL.every(()=>{if(!tv)send({c:"ping"});},8000,{delay:8000});
   const drawLive=()=>{const L=[].concat(...["calcio","basket","tennis","rugby","moto","golf"].map(s=>SL.live.bySport[s]||[])).filter(x=>x.live).sort((a,b)=>b.important-a.important).slice(0,10);
     $("rmLive").innerHTML=L.length?L.map(it=>{const l=it.lines||[];const t=l.length>=2&&l.every(x=>x.pos==null)?l.slice(0,2).map(x=>x.n+(x.v!=null&&x.v!==""?" "+x.v:"")).join(" – "):(it.comp||"");
-      return'<button type="button" class="rmev sp-'+it.sport+'" data-go="'+h(JSON.stringify(it.go||{sport:it.sport}))+'">'+SL.ico(it.sport)+'<span><b>'+h(t)+'</b><small>'+h(it.comp||"")+' · '+h(it.status||"LIVE")+'</small></span></button>';}).join(""):
+      return'<button type="button" class="rmev sp-'+it.sport+'" data-go="'+h(JSON.stringify(it.go||{sport:it.sport}))+'">'+SL.ico(it.sport)+'<span><b>'+h(t)+'</b><small>'+h(it.comp||"")+' · '+h(it.status||"LIVE")+(it.sport==="calcio"&&it.ev&&SL.espn.lastGoal(it.ev)?' · ⚽ '+h(SL.espn.lastGoal(it.ev)):"")+'</small></span></button>';}).join(""):
       '<p class="muted">'+(["calcio","basket","tennis"].some(s=>SL.live.loaded[s])?"Nessun evento in diretta adesso.":"Carico…")+'</p>';};
   drawLive();SL.onPage("live",drawLive);
   main.addEventListener("click",e=>{
