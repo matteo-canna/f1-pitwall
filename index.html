@@ -674,6 +674,13 @@ body.sgl .top .gp{max-width:262px}
 body.sgl .top .tv input{width:84px}
 body.sgl .top .seg button{padding-left:10px;padding-right:10px}
 body.sgl .top .logo{padding:6px 10px;font-size:18px}
+/* accesso account OpenF1 */
+.of-login{display:grid;gap:8px;margin-top:6px}
+.of-login input[type=email],.of-login input[type=password]{width:100%;background:#0b101a;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--text);font:600 13px var(--f-mono)}
+.of-login input:focus-visible{outline:2px solid var(--cyan);outline-offset:1px}
+.of-rem{display:flex;gap:8px;align-items:flex-start;font-size:11.5px;color:var(--muted);line-height:1.4}
+.of-rem input{accent-color:var(--cyan);margin-top:2px}
+.chip.pro.sp{border-color:#10B981;color:#10B981}
 /* aperta dentro Sport LIVE (sezione F1 e MotorSport): niente collegamento a Sport LIVE, ci sei già */
 html.embed .sportlink{display:none!important}
 </style>
@@ -1004,9 +1011,19 @@ html.embed .sportlink{display:none!important}
 <!-- modali -->
 <div class="modal" id="apiModal" hidden role="dialog" aria-modal="true" aria-labelledby="apiH">
   <div class="mbox">
-    <div class="panel-h"><h2 id="apiH">Configurazione API key OpenF1</h2><button class="tog sq mclose" type="button" aria-label="Chiudi">×</button></div>
+    <div class="panel-h"><h2 id="apiH">Dati live OpenF1</h2><button class="tog sq mclose" type="button" aria-label="Chiudi">×</button></div>
     <div class="pad">
-      <label class="note" for="apiKey">Chiave personale (resta solo su questo dispositivo)</label>
+      <p class="note">I dati in tempo reale durante le sessioni sono riservati all'account <b>sponsor</b> di OpenF1 (a pagamento, da openf1.org). Senza account l'app usa i dati gratuiti, che arrivano solo a sessione finita.</p>
+      <div class="sect"><span>ACCEDI CON L'ACCOUNT OPENF1</span></div>
+      <div class="of-login">
+        <input id="apiUser" type="email" autocomplete="username" placeholder="Email o username OpenF1" aria-label="Email o username OpenF1">
+        <input id="apiPass" type="password" autocomplete="current-password" placeholder="Password" aria-label="Password OpenF1">
+        <label class="of-rem"><input type="checkbox" id="apiRem" checked> Ricorda su questo dispositivo: serve per rinnovare da solo il codice, che scade ogni ora</label>
+        <div class="tools"><button class="btn" id="apiLogin" type="button">ACCEDI</button><button class="tog" id="apiOut" type="button" hidden>ESCI DALL'ACCOUNT</button></div>
+        <p class="testbox" id="apiLoginRes" hidden></p>
+      </div>
+      <div class="sect"><span>OPPURE INCOLLA UN CODICE DI ACCESSO (TOKEN)</span></div>
+      <label class="note" for="apiKey">Codice personale (resta solo su questo dispositivo, scade dopo un'ora)</label>
       <div class="urlrow" style="margin-top:6px"><input id="apiKey" type="password" autocomplete="off" placeholder="Incolla la tua chiave OpenF1" style="flex:1;min-width:0;background:transparent;border:0"><button id="apiEye" type="button">MOSTRA</button><button id="apiClr" type="button">CANCELLA</button></div>
       <div class="sect"><span>FREQUENZA DI POLLING</span></div>
       <div class="tools" id="pollSeg"><button class="tog" data-p="8" type="button">8.0s Free Safe</button><button class="tog" data-p="3" type="button">3.0s Fast</button><button class="tog" data-p="1.5" type="button">1.5s Pro Real-Time</button></div>
@@ -1167,7 +1184,13 @@ const CAL=[
 ];
 const CIRC={};
 CAL.forEach(a=>{CIRC[a[0]]={id:a[0],round:a[1],name:a[2],circuit:a[3],city:a[4],cc:a[5],dates:a[6],sprint:!!a[7],laps:a[8],base:a[9],pit:a[10],air:a[11],trk:a[12],hum:a[13],wind:a[14],geo:a[15],vtop:a[16],km:GEOLEN[a[15]]/1000};});
-const NEXT_GP="las_vegas";
+/* GP del weekend in corso o del prossimo, dalle date del calendario (fine weekend = domenica sera) */
+const NEXT_GP=(()=>{
+  const M={gen:0,feb:1,mar:2,apr:3,mag:4,giu:5,lug:6,ago:7,set:8,ott:9,nov:10,dic:11},now=new Date();let last="las_vegas";
+  for(const a of CAL){if(a[1]==="ARC")continue;const m=String(a[6]).match(/(\d+)\s*([A-Za-z]{3})\s*$/);if(!m||M[m[2].toLowerCase()]==null)continue;
+    last=a[0];if(now<=new Date(2026,M[m[2].toLowerCase()],+m[1],23,59,59))return a[0];}
+  return last;
+})();
 
 const KIND={fp1:"fp",fp2:"fp",fp3:"fp",sq:"q",q:"q",sprint:"sprint",race:"race"};
 const SLABEL={fp1:"FP1",fp2:"FP2",fp3:"FP3",sq:"SPRINT QUALI",sprint:"SPRINT",q:"QUALI",race:"RACE"};
@@ -1693,7 +1716,7 @@ function renderShared(){
   const names=["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"];
   setT($("tWind"),String(Math.round(e.wind)));setT($("tWdir"),"km/h ("+names[Math.round(e.dir/22.5)%16]+")");setT($("tGust"),e.gust.toFixed(1)+" km/h");
   $("wArrow").setAttribute("transform","rotate("+Math.round(e.dir)+" 21 21)");
-  setT($("tPress"),e.press+" hPa");setT($("tGrip"),Math.round(e.grip)+"% GRIP");setW($("mGrip"),e.grip);
+  setT($("tPress"),isFinite(+e.press)&&e.press!==null&&e.press!==""?Math.round(+e.press)+" hPa":"— hPa");setT($("tGrip"),Math.round(e.grip)+"% GRIP");setW($("mGrip"),e.grip);
   setT($("tAero"),s.wx==="dry"?"X-MODE ENABLED":"X-MODE DISABLED");
   $$("#wxSeg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.w===s.wx));
   let lapTxt,pct;
@@ -1711,7 +1734,11 @@ function renderPit(){
     const c=ord[i],r=rows[c.id],d=DRIVERS[c.id];key+=c.id+",";
     setT(r.pos,String(i+1));
     let gap="—",int="—",mom="",cat="",iv=-1;
-    if(D.liveOn){
+    if(D.liveOn&&!live.isRace){
+      /* qualifica e prove reali: miglior giro e distacco dal primo */
+      const b=live.best[d.num],lb=live.best[DRIVERS[lead.id].num];
+      gap=b?fmtLap(b):"—";int=i===0?(b?(s.kind==="q"?"POLE":"P1"):"—"):(b&&lb&&b>=lb?"+"+(b-lb).toFixed(3):"—");
+    }else if(D.liveOn){
       gap=i===0?"LEADER":fmtGapLive(live.gap[d.num]);const lv=live.int[d.num];int=i===0?"—":fmtGapLive(lv);iv=typeof lv==="number"?lv:-1;
       if(iv>0&&iv<0.8)mom="DR/MOM";
     }else if(race){
@@ -1735,9 +1762,11 @@ function renderPit(){
     }
     setT(r.gap,gap);setT(r.int,int);setT(r.mom,mom);setC(r.mom,mom==="DR/MOM"?"mom":mom?"pit":"");
     const t=tele(s,c,1);
-    setT(r.ty,c.tyre);setC(r.ty,"ty ty-"+c.tyre);setT(r.age,Math.floor(t.age)+"L");setW(r.wear,t.wear);
+    const lty=D.liveOn&&live.tyre[d.num]||c.tyre;
+    setT(r.ty,lty);setC(r.ty,"ty ty-"+lty);setT(r.age,Math.floor(t.age)+"L");setW(r.wear,t.wear);
     setT(r.pit,String(c.pitStops));
-    setT(r.last,fmtLap(c.lastLap));setC(r.last,c.lastCls>1?"k"+c.lastCls:"");setT(r.cat,cat);
+    if(D.liveOn&&!live.isRace){const ll=live.lastLap[d.num];setT(r.last,ll?fmtLap(ll):"—");setC(r.last,ll&&ll===live.best[d.num]?"k2":"");}
+    else{setT(r.last,fmtLap(c.lastLap));setC(r.last,c.lastCls>1?"k"+c.lastCls:"");}setT(r.cat,cat);
     r.tr.classList.toggle("elim",s.kind==="q"&&i>=16);
     let hide=false;
     if(flt==="top")hide=i>=10;
@@ -2096,12 +2125,30 @@ async function initShared(){
    ===================================================================== */
 const API="https://api.openf1.org/v1";
 const live={on:false,active:false,status:"SIM",note:"",last:null,key:store.get("key",""),poll:store.get("poll",8),
-  weather:null,pos:{},gap:{},int:{},hasPos:false,car:null,carNum:0,radio:[],radioVer:0,rc:[],rcFlag:null,timer:0,busy:false,session:null};
+  weather:null,pos:{},gap:{},int:{},hasPos:false,car:null,carNum:0,radio:[],radioVer:0,rc:[],rcFlag:null,timer:0,busy:false,session:null,
+  best:{},lastLap:{},lastN:{},tyre:{},lapsSince:0,skey:null,isRace:true,sess:null,gp:null,acct:store.get("ofUser",""),exp:store.get("keyExp",0)};
 if([8,3,1.5].indexOf(live.poll)<0)live.poll=8;
 function apiGet(path){
   const h=live.key?{Authorization:"Bearer "+live.key}:{};
   return fetch(API+path,{headers:h,cache:"no-store"}).then(r=>{if(!r.ok){const e=new Error("HTTP "+r.status);e.status=r.status;throw e;}return r.json();});
 }
+/* account OpenF1: il codice di accesso (token) si ottiene con email e password e scade dopo un'ora */
+async function ofToken(user,pass){
+  const r=await fetch("https://api.openf1.org/token",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded","Accept":"application/json"},body:new URLSearchParams({username:user,password:pass}).toString(),cache:"no-store"});
+  if(!r.ok){const e=new Error("HTTP "+r.status);e.status=r.status;throw e;}
+  const j=await r.json();if(!j||!j.access_token){const e=new Error("risposta senza token");e.status=0;throw e;}
+  return{token:j.access_token,exp:Date.now()+Math.max(300,+j.expires_in||3600)*1000};
+}
+function ofSet(t){live.key=t.token;live.exp=t.exp;store.set("key",live.key);store.set("keyExp",live.exp);updateLiveUI();}
+let ofBusy=false;
+async function ofRenew(force){
+  const u=store.get("ofUser",""),pw=store.get("ofPass","");if(!u||!pw||ofBusy)return false;
+  if(!force&&live.exp&&Date.now()<live.exp-6*60000)return true;
+  ofBusy=true;try{ofSet(await ofToken(u,pw));return true;}catch(e){live.note="rinnovo accesso non riuscito"+(e&&e.status?" (HTTP "+e.status+")":"");return false;}finally{ofBusy=false;}
+}
+setInterval(()=>{if(live.acct)ofRenew(false);},60000);
+const LIVE_SESS={"Practice 1":"fp1","Practice 2":"fp2","Practice 3":"fp3","Qualifying":"q","Sprint Qualifying":"sq","Sprint Shootout":"sq","Sprint":"sprint","Race":"race"};
+const TYRE1={SOFT:"S",MEDIUM:"M",HARD:"H",INTERMEDIATE:"I",WET:"W"};
 function lastPer(arr){const m={};if(Array.isArray(arr))for(const r of arr)if(r&&r.driver_number!=null)m[r.driver_number]=r;return m;}
 function liveStandby(note){live.active=false;live.status="STANDBY_NEXT_GP";live.note=note||"";live.weather=null;live.hasPos=false;live.car=null;}
 async function pollLive(){
@@ -2112,28 +2159,58 @@ async function pollLive(){
     const now=Date.now(),t0=s?Date.parse(s.date_start)-30*60000:0,t1=s?Date.parse(s.date_end)+30*60000:0;
     if(!s||!(now>=t0&&now<=t1)){liveStandby(s?"nessuna sessione in corso (ultima: "+(s.session_name||"")+" "+(s.circuit_short_name||"")+")":"nessuna sessione");}
     else{
+      /* la sessione reale decide GP e tipo di sessione mostrati */
+      const gp=rpGp(s),sess=LIVE_SESS[s.session_name]||null,isRace=sess==="race"||sess==="sprint";
+      live.gp=gp;live.sess=sess;live.isRace=isRace;
+      if(live.skey!==s.session_key){live.skey=s.session_key;live.best={};live.lastLap={};live.lastN={};live.tyre={};live.lapsSince=0;live.gap={};live.int={};live.pos={};live.hasPos=false;liveDrivers();}
+      if(gp&&sess&&(ctl.gp!==gp||ctl.session!==sess)&&!ctl.replay&&canControl())mutate(c=>resetCtl(c,gp,sess));
       const since=encodeURIComponent(new Date(now-25000).toISOString());
-      const jobs=[apiGet("/weather?session_key=latest"),apiGet("/position?session_key=latest"),apiGet("/intervals?session_key=latest&date%3E"+since),apiGet("/race_control?session_key=latest")];
+      const J={weather:apiGet("/weather?session_key=latest"),pos:apiGet("/position?session_key=latest"),rc:apiGet("/race_control?session_key=latest"),st:apiGet("/stints?session_key=latest")};
+      if(isRace)J.iv=apiGet("/intervals?session_key=latest&date%3E"+since);
+      else J.laps=apiGet("/laps?session_key=latest"+(live.lapsSince?"&date_start%3E"+encodeURIComponent(new Date(live.lapsSince).toISOString()):""));
       if(live.key){
         const num=DRIVERS[sel].num;
-        jobs.push(apiGet("/car_data?session_key=latest&driver_number="+num+"&date%3E"+encodeURIComponent(new Date(now-6000).toISOString())).then(a=>({num,a})));
-        jobs.push(apiGet("/team_radio?session_key=latest"));
+        J.car=apiGet("/car_data?session_key=latest&driver_number="+num+"&date%3E"+encodeURIComponent(new Date(now-6000).toISOString())).then(a=>({num,a}));
+        J.radio=apiGet("/team_radio?session_key=latest");
       }
-      const r=await Promise.allSettled(jobs);
-      if(r[0].status==="fulfilled"&&r[0].value.length)live.weather=r[0].value[r[0].value.length-1];
-      if(r[1].status==="fulfilled"){const m=lastPer(r[1].value);live.pos={};for(const k in m)live.pos[k]=m[k].position;live.hasPos=Object.keys(live.pos).length>0;}
-      if(r[2].status==="fulfilled"){const m=lastPer(r[2].value);for(const k in m){live.gap[k]=m[k].gap_to_leader;live.int[k]=m[k].interval;}}
-      if(r[3].status==="fulfilled")applyRaceControl(r[3].value);
-      if(r[4]&&r[4].status==="fulfilled"&&r[4].value.a.length){live.car=r[4].value.a[r[4].value.a.length-1];live.carNum=r[4].value.num;}
-      if(r[5]&&r[5].status==="fulfilled"&&Array.isArray(r[5].value)){live.radio=r[5].value.slice(-6).reverse().map(x=>({code:(DRIVERS[NUM2ID[x.driver_number]]||{code:"#"+x.driver_number}).code,url:x.recording_url}));live.radioVer++;}
-      if(r.some(x=>x.status==="rejected"&&x.reason&&x.reason.status===429))live.note="rate limit: rallento";else live.note="";
-      live.active=true;live.status="CONNECTED";
+      const ks=Object.keys(J),rr=await Promise.allSettled(ks.map(k=>J[k])),R={};ks.forEach((k,i)=>R[k]=rr[i]);
+      const ok=k=>R[k]&&R[k].status==="fulfilled";
+      if(ok("weather")&&R.weather.value.length)live.weather=R.weather.value[R.weather.value.length-1];
+      if(ok("pos")){const m=lastPer(R.pos.value);live.pos={};for(const k in m)live.pos[k]=m[k].position;live.hasPos=Object.keys(live.pos).length>0;}
+      if(ok("iv")){const m=lastPer(R.iv.value);for(const k in m){live.gap[k]=m[k].gap_to_leader;live.int[k]=m[k].interval;}}
+      if(ok("laps")&&Array.isArray(R.laps.value)){
+        for(const l of R.laps.value){if(!l||l.driver_number==null)continue;const n=l.driver_number,d=+l.lap_duration;
+          if(d>0){if(!l.is_pit_out_lap&&(!live.best[n]||d<live.best[n]))live.best[n]=d;if(!live.lastN[n]||l.lap_number>=live.lastN[n]){live.lastN[n]=l.lap_number;live.lastLap[n]=d;}}}
+        live.lapsSince=now-5*60000;
+      }
+      if(ok("st")&&Array.isArray(R.st.value)){const m={};for(const x of R.st.value)if(x&&x.driver_number!=null&&(!m[x.driver_number]||x.stint_number>=m[x.driver_number].stint_number))m[x.driver_number]=x;
+        for(const k in m)live.tyre[k]=TYRE1[String(m[k].compound||"").toUpperCase()]||"";}
+      if(ok("rc"))applyRaceControl(R.rc.value);
+      if(ok("car")&&R.car.value.a.length){live.car=R.car.value.a[R.car.value.a.length-1];live.carNum=R.car.value.num;}
+      if(ok("radio")&&Array.isArray(R.radio.value)){live.radio=R.radio.value.slice(-6).reverse().map(x=>({code:(DRIVERS[NUM2ID[x.driver_number]]||{code:"#"+x.driver_number}).code,url:x.recording_url}));live.radioVer++;}
+      const rej=rr.filter(x=>x.status==="rejected").map(x=>x.reason&&x.reason.status);
+      if(rej.indexOf(401)>=0&&live.acct){ofRenew(true);live.note="rinnovo accesso…";}
+      else if(rej.indexOf(401)>=0||rej.indexOf(403)>=0)live.note=live.key?"codice scaduto o non valido: accedi di nuovo":"dati live riservati all'account OpenF1 sponsor";
+      else if(rej.indexOf(429)>=0)live.note="rate limit: rallento";else live.note="";
+      live.active=live.hasPos||Object.keys(live.best).length>0||isRace&&Object.keys(live.gap).length>0;
+      live.status=live.active?"CONNECTED":"STANDBY_NEXT_GP";
+      if(!live.active&&!live.note)live.note="sessione "+(s.session_name||"")+" in corso: in attesa dei primi dati";
     }
   }catch(e){
     live.last=new Date();
-    liveStandby(e&&e.status===429?"rate limit HTTP 429":e&&e.status===401?"chiave rifiutata (HTTP 401)":e&&e.status?"errore "+e.message:"OpenF1 non raggiungibile da questa pagina");
+    if(e&&e.status===401&&live.acct)ofRenew(true);
+    liveStandby(e&&e.status===429?"rate limit HTTP 429":e&&(e.status===401||e.status===403)?(live.key?"codice scaduto o non valido: accedi di nuovo":"dati live riservati all'account OpenF1 sponsor"):e&&e.status?"errore "+e.message:"OpenF1 non raggiungibile da questa pagina");
   }
   live.busy=false;updateLiveUI();dirty=true;lastSlow=0;
+}
+/* piloti della sessione reale: se un numero non è nella griglia, lo aggancia per sigla */
+async function liveDrivers(){
+  try{const a=await apiGet("/drivers?session_key=latest");if(!Array.isArray(a))return;let ch=false;
+    for(const d of a){if(!d||d.driver_number==null||NUM2ID[d.driver_number]!=null)continue;
+      const i=DRIVERS.findIndex(x=>x.code===String(d.name_acronym||"").toUpperCase());
+      if(i>=0){delete NUM2ID[DRIVERS[i].num];DRIVERS[i].num=d.driver_number;NUM2ID[d.driver_number]=i;ch=true;}}
+    if(ch&&typeof refreshDriverDom==="function")refreshDriverDom();
+  }catch(e){}
 }
 /* direzione gara reale: messaggi nel feed e stato pista dalla bandiera o safety car più recente */
 function rcFlagOf(m){
@@ -2154,7 +2231,8 @@ function applyRaceControl(arr){
 function setLive(on){if(on&&ctl.replay)rpExit();
   live.on=on;clearInterval(live.timer);
   if(on){
-    if(ctl.gp!==NEXT_GP&&canControl())mutate(c=>resetCtl(c,NEXT_GP,"race"));
+    if(ctl.gp!==NEXT_GP&&canControl())mutate(c=>resetCtl(c,NEXT_GP,ctl.session||"race"));
+    if(live.acct)ofRenew(false);
     live.status="STANDBY_NEXT_GP";live.note="collegamento…";pollLive();live.timer=setInterval(pollLive,live.poll*1000);
   }else{live.active=false;live.status="SIM";live.weather=null;live.hasPos=false;live.car=null;live.radio=[];live.rc=[];live.rcFlag=null;live.radioVer++;}
   updateLiveUI();dirty=true;
@@ -2165,7 +2243,8 @@ function updateLiveUI(){
   led.className="led"+(live.status==="CONNECTED"?" ok":live.on?" wait":"");
   tx.textContent=!live.on?"SIM":live.status==="CONNECTED"?"CONNECTED · "+hh+(live.note?" · "+live.note:""):"STANDBY NEXT GP"+(hh?" · check "+hh:"")+(live.note?" · "+live.note:"");
   $("liveSync").hidden=!live.on;
-  const a=$("apiBtn");a.textContent=live.key?"API KEY · PRO ("+live.poll.toFixed(1)+"s)":"API KEY · PUBLIC ("+live.poll.toFixed(1)+"s)";a.className="chip"+(live.key?" pro":"");
+  const a=$("apiBtn");a.textContent=live.acct?"OPENF1 · SPONSOR ("+live.poll.toFixed(1)+"s)":live.key?"API KEY · PRO ("+live.poll.toFixed(1)+"s)":"API KEY · PUBLIC ("+live.poll.toFixed(1)+"s)";a.className="chip"+(live.key?" pro":"")+(live.acct?" sp":"");
+  if($("apiOut")){$("apiOut").hidden=!live.acct;setT($("apiLogin"),live.acct?"ACCEDI DI NUOVO":"ACCEDI");}
   $$("#pollSeg button").forEach(x=>x.setAttribute("aria-pressed",+x.dataset.p===live.poll));
   const eg=$("epGrid");eg.innerHTML=["/car_data","/team_radio","/location"].map(n=>'<div class="mini"><span>'+n+'</span><b class="'+(live.key?"k2":"")+'">'+(live.key?(n==="/location"?"SBLOCCATO · non usato":"SBLOCCATO"):"RICHIEDE CHIAVE")+'</b></div>').join("");
 }
@@ -2178,8 +2257,20 @@ function openModal(id){lastFocus=document.activeElement;const m=$(id);m.hidden=f
 function closeModals(){$$(".modal").forEach(m=>{m.hidden=true;});if(lastFocus&&lastFocus.focus)lastFocus.focus();}
 $$(".modal").forEach(m=>m.addEventListener("click",e=>{if(e.target===m||e.target.closest(".mclose"))closeModals();}));
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModals();});
-$("apiBtn").addEventListener("click",()=>{$("apiKey").value=live.key;$("apiRes").hidden=true;openModal("apiModal");});
-$("apiKey").addEventListener("input",e=>{live.key=e.target.value.trim();store.set("key",live.key);updateLiveUI();});
+$("apiBtn").addEventListener("click",()=>{$("apiKey").value=live.key;$("apiRes").hidden=true;$("apiUser").value=live.acct||store.get("ofUser","");$("apiLoginRes").hidden=true;updateLiveUI();openModal("apiModal");});
+$("apiKey").addEventListener("input",e=>{live.key=e.target.value.trim();store.set("key",live.key);live.exp=0;store.set("keyExp",0);updateLiveUI();});
+$("apiLogin").addEventListener("click",async()=>{
+  const u=$("apiUser").value.trim(),pw=$("apiPass").value,box=$("apiLoginRes");box.hidden=false;
+  if(!u||!pw){box.className="testbox ko";box.textContent="Scrivi email (o username) e password del tuo account OpenF1.";return;}
+  box.className="testbox";box.textContent="Accesso in corso…";
+  try{const t=await ofToken(u,pw);ofSet(t);live.acct=u;store.set("ofUser",u);if($("apiRem").checked)store.set("ofPass",pw);else store.set("ofPass","");
+    $("apiKey").value=live.key;$("apiPass").value="";
+    box.className="testbox ok";box.textContent="Accesso riuscito: codice valido fino alle "+new Date(t.exp).toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"})+($("apiRem").checked?", poi si rinnova da solo.":". Senza \"Ricorda\" dovrai accedere di nuovo tra un'ora.")+" Ora premi CONNETTI LIVE.";
+    if(live.poll>3){live.poll=3;store.set("poll",3);if(live.on){clearInterval(live.timer);live.timer=setInterval(pollLive,live.poll*1000);}}
+    updateLiveUI();
+  }catch(e){box.className="testbox ko";box.textContent=e&&(e.status===401||e.status===400||e.status===403)?"Email o password non corrette, oppure l'account non è sponsor (HTTP "+e.status+").":e&&e.status?"Accesso non riuscito: HTTP "+e.status+".":"Accesso non riuscito: richiesta bloccata o rete assente"+(inClaude?" (dentro Claude le chiamate esterne sono bloccate: usa il sito GitHub)":"")+".";}
+});
+$("apiOut").addEventListener("click",()=>{live.acct="";live.key="";live.exp=0;["ofUser","ofPass","key","keyExp"].forEach(k=>store.set(k,""));$("apiKey").value="";$("apiLoginRes").hidden=true;updateLiveUI();toast("Uscito dall'account OpenF1 su questo dispositivo.");});
 $("apiEye").addEventListener("click",()=>{const i=$("apiKey"),show=i.type==="password";i.type=show?"text":"password";$("apiEye").textContent=show?"NASCONDI":"MOSTRA";});
 $("apiClr").addEventListener("click",()=>{$("apiKey").value="";live.key="";store.set("key","");updateLiveUI();});
 $("pollSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;live.poll=+b.dataset.p;store.set("poll",live.poll);if(live.on){clearInterval(live.timer);live.timer=setInterval(pollLive,live.poll*1000);}updateLiveUI();});
