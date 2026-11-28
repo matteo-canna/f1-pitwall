@@ -683,6 +683,14 @@ body.sgl .top .logo{padding:6px 10px;font-size:18px}
 .chip.pro.sp{border-color:#10B981;color:#10B981}
 /* aperta dentro Sport LIVE (sezione F1 e MotorSport): niente collegamento a Sport LIVE, ci sei già */
 html.embed .sportlink{display:none!important}
+/* etichetta "SIMULATO" accanto al titolo */
+.simtag{display:inline-block;vertical-align:middle;margin-left:8px;font:800 9.5px/1 var(--f-mono);letter-spacing:.07em;color:#ff4d4f;background:rgba(255,77,79,.10);border:1px solid rgba(255,77,79,.6);border-radius:5px;padding:3px 6px;white-space:nowrap;text-transform:uppercase;cursor:help}
+.simwrap{display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px;min-width:0}
+.simwrap>h2{min-width:0;max-width:100%}
+.simwrap>.simtag{margin-left:0}
+.tile-h>span:first-child:has(+ .simtag:not([hidden])){display:inline}
+.tile-h .simtag{margin-left:6px;font-size:8.5px;padding:2px 5px;flex:none}
+#cVs>.row .simtag{margin-left:auto}
 </style>
 <script>try{if(/[?&]embed=1\b/.test(location.search))document.documentElement.classList.add("embed");}catch(e){}</script>
 </head>
@@ -1720,7 +1728,8 @@ function renderShared(){
   setT($("tAero"),s.wx==="dry"?"X-MODE ENABLED":"X-MODE DISABLED");
   $$("#wxSeg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.w===s.wx));
   let lapTxt,pct;
-  if(race){const ll=s.leadLap();lapTxt=s.done?"FINE GARA":s.t<LIGHTS&&!s.started?"SEMAFORI…":"LAP "+ll+" / "+s.laps;pct=s.done?100:clamp(s.order[0].dist/(s.laps*s.L)*100,0,100);}
+  if(race){const ll=s.leadLap();lapTxt=s.done?"FINE GARA":s.t<LIGHTS&&!s.started?"SEMAFORI…":"LAP "+ll+" / "+s.laps;pct=s.done?100:clamp(s.order[0].dist/(s.laps*s.L)*100,0,100);
+    if(live.active&&live.isRace&&live.lap){const tl=live.laps||s.laps;lapTxt="LAP "+Math.min(live.lap,tl)+" / "+tl;pct=clamp((live.lap-1)/tl*100,0,100);}}
   else{lapTxt=s.done?"SESSIONE CONCLUSA":SLABEL[s.session]+" "+fmtClock(s.dur-s.t);pct=clamp(s.t/s.dur*100,0,100);
     if(live.active&&!live.isRace&&live.clock)lapTxt=(live.qpart?"Q"+live.qpart:SLABEL[s.session])+" "+String(live.clock).replace(/^00:/,"");}
   setT($("lapLbl"),lapTxt);setT($("lapPct"),Math.round(pct)+"%");setW($("mLap"),pct);
@@ -1766,9 +1775,11 @@ function renderPit(){
     setT(r.gap,gap);setT(r.int,int);setT(r.mom,mom);setC(r.mom,mom==="DR/MOM"?"mom":mom?"pit":"");
     const t=tele(s,c,1);
     const lty=D.liveOn&&live.tyre[d.num]||c.tyre;
-    setT(r.ty,lty);setC(r.ty,"ty ty-"+lty);setT(r.age,Math.floor(t.age)+"L");setW(r.wear,t.wear);
-    setT(r.pit,String(c.pitStops));
-    if(D.liveOn&&!live.isRace){const ll=live.lastLap[d.num];setT(r.last,ll?fmtLap(ll):"—");setC(r.last,ll&&ll===live.best[d.num]?"k2":"");}
+    const lag=D.liveOn&&live.age[d.num]!=null?live.age[d.num]:null;
+    setT(r.ty,lty);setC(r.ty,"ty ty-"+lty);setT(r.age,(lag!=null?lag:Math.floor(t.age))+"L");
+    setW(r.wear,lag!=null?clamp(lag/({S:22,M:32,H:42,I:30,W:30}[lty]||30)*100,0,100):t.wear);
+    setT(r.pit,String(D.liveOn&&live.pits[d.num]!=null?live.pits[d.num]:c.pitStops));
+    if(D.liveOn&&(!live.isRace||live.lastLap[d.num])){const ll=live.lastLap[d.num];setT(r.last,ll?fmtLap(ll):"—");setC(r.last,ll&&!live.isRace&&ll===live.best[d.num]?"k2":"");}
     else{setT(r.last,fmtLap(c.lastLap));setC(r.last,c.lastCls>1?"k"+c.lastCls:"");}setT(r.cat,cat);
     r.tr.classList.toggle("elim",D.liveOn&&!live.isRace?!!(live.ko&&live.ko[d.num]):s.kind==="q"&&i>=16);
     let hide=false;
@@ -1794,7 +1805,7 @@ function renderPit(){
     if(Math.min(da,dbh)<2&&near){setT(pg,"TRAFFICO (TRAFFIC ALERT) · "+DRIVERS[near.id].code);setC(pg,"tag traffic");}
     else{setT(pg,"ARIA PULITA (CLEAN AIR)");setC(pg,"tag clear");}
   }
-  setT($("mapHint"),s.replay?"Replay · posizioni ricostruite dai tempi reali di giro e settore • tocca una vettura":(D.liveOn?"Classifica live OpenF1 • ":"")+"Posizioni in pista simulate • tocca una vettura");
+  setT($("mapHint"),s.replay?"Replay · posizioni ricostruite dai tempi reali di giro e settore • tocca una vettura":(D.liveOn?"Classifica live "+(live.key?"OpenF1":"F1")+" • ":"")+"Posizioni in pista simulate • tocca una vettura");
 
   /* cockpit: campi lenti */
   if(ctab==="cockpit"){
@@ -1822,10 +1833,12 @@ function renderPit(){
   /* feed */
   if(s.feedId!==lastFeedId||live.radioVer!==lastRadioVer){
     lastFeedId=s.feedId;lastRadioVer=live.radioVer;
-    fillFeed($("feed"),live.active&&live.rc.length?live.rc.concat(s.feedArr.filter(f=>f.cls!=="rc")).slice(0,14):s.feedArr.slice(0,14),race);
-    const rl=live.radio.length?live.radio.map(r=>({cls:"radio",tag:r.code,text:"Team radio reale (OpenF1)",url:r.url,lap:0,t:0})):s.feedArr.filter(f=>f.cls==="radio").slice(0,8);
-    fillFeed($("radioList"),rl,race);
-    setT($("feedSub"),(live.active&&live.rc.length?"FIA REALE · ":"")+(live.radio.length?"RADIO REALI + SIMULATE":"RADIO SIMULATA"));
+    /* in live solo messaggi reali: niente sorpassi o radio inventati dalla simulazione */
+    const LV=live.active&&live.hasPos,rad=live.radio.map(r=>({cls:"radio",tag:r.code,text:"Team radio reale",url:r.url,lap:0,t:0,date:r.date}));
+    const items=LV?live.rc.concat(rad).sort((x,y)=>(Date.parse(y.date)||0)-(Date.parse(x.date)||0)).slice(0,14):s.feedArr.slice(0,14);
+    fillFeed($("feed"),items,race);
+    fillFeed($("radioList"),LV?rad:s.feedArr.filter(f=>f.cls==="radio").slice(0,8),race);
+    setT($("feedSub"),LV?"FIA REALE"+(rad.length?" · TEAM RADIO REALI":" · nessun team radio pubblicato"):"RADIO SIMULATA");
   }
 }
 let lastRadioVer=0;
@@ -2129,7 +2142,7 @@ async function initShared(){
 const API="https://api.openf1.org/v1";
 const live={on:false,active:false,status:"SIM",note:"",last:null,key:store.get("key",""),poll:store.get("poll",8),
   weather:null,pos:{},gap:{},int:{},hasPos:false,car:null,carNum:0,radio:[],radioVer:0,rc:[],rcFlag:null,timer:0,busy:false,session:null,
-  best:{},lastLap:{},lastN:{},tyre:{},qgap:{},ko:{},inPit:{},qpart:0,clock:"",lapsSince:0,skey:null,isRace:true,sess:null,gp:null,acct:store.get("ofUser",""),exp:store.get("keyExp",0)};
+  best:{},lastLap:{},lastN:{},tyre:{},age:{},pits:{},lap:0,laps:0,qgap:{},ko:{},inPit:{},qpart:0,clock:"",lapsSince:0,skey:null,isRace:true,sess:null,gp:null,acct:store.get("ofUser",""),exp:store.get("keyExp",0)};
 if([8,3,1.5].indexOf(live.poll)<0)live.poll=8;
 function apiGet(path){
   const h=live.key?{Authorization:"Bearer "+live.key}:{};
@@ -2165,12 +2178,12 @@ async function pollLive(){
       /* la sessione reale decide GP e tipo di sessione mostrati */
       const gp=rpGp(s),sess=LIVE_SESS[s.session_name]||null,isRace=sess==="race"||sess==="sprint";
       live.gp=gp;live.sess=sess;live.isRace=isRace;
-      if(live.skey!==s.session_key){live.skey=s.session_key;live.best={};live.lastLap={};live.lastN={};live.tyre={};live.lapsSince=0;live.gap={};live.int={};live.pos={};live.hasPos=false;liveDrivers();}
+      if(live.skey!==s.session_key){live.skey=s.session_key;live.best={};live.lastLap={};live.lastN={};live.tyre={};live.age={};live.pits={};live.lap=0;live.laps=0;live.lapsSince=0;live.gap={};live.int={};live.pos={};live.hasPos=false;liveDrivers();}
       if(gp&&sess&&(ctl.gp!==gp||ctl.session!==sess)&&!ctl.replay&&canControl())mutate(c=>resetCtl(c,gp,sess));
       const since=encodeURIComponent(new Date(now-25000).toISOString());
       const J={weather:apiGet("/weather?session_key=latest"),pos:apiGet("/position?session_key=latest"),rc:apiGet("/race_control?session_key=latest"),st:apiGet("/stints?session_key=latest")};
       if(isRace)J.iv=apiGet("/intervals?session_key=latest&date%3E"+since);
-      else J.laps=apiGet("/laps?session_key=latest"+(live.lapsSince?"&date_start%3E"+encodeURIComponent(new Date(live.lapsSince).toISOString()):""));
+      J.laps=apiGet("/laps?session_key=latest"+(live.lapsSince?"&date_start%3E"+encodeURIComponent(new Date(live.lapsSince).toISOString()):""));
       if(live.key){
         const num=DRIVERS[sel].num;
         J.car=apiGet("/car_data?session_key=latest&driver_number="+num+"&date%3E"+encodeURIComponent(new Date(now-6000).toISOString())).then(a=>({num,a}));
@@ -2185,12 +2198,14 @@ async function pollLive(){
         for(const l of R.laps.value){if(!l||l.driver_number==null)continue;const n=l.driver_number,d=+l.lap_duration;
           if(d>0){if(!l.is_pit_out_lap&&(!live.best[n]||d<live.best[n]))live.best[n]=d;if(!live.lastN[n]||l.lap_number>=live.lastN[n]){live.lastN[n]=l.lap_number;live.lastLap[n]=d;}}}
         live.lapsSince=now-5*60000;
+        if(isRace){const mx=Math.max(0,...Object.values(live.lastN));if(mx)live.lap=mx+1;}
       }
       if(ok("st")&&Array.isArray(R.st.value)){const m={};for(const x of R.st.value)if(x&&x.driver_number!=null&&(!m[x.driver_number]||x.stint_number>=m[x.driver_number].stint_number))m[x.driver_number]=x;
-        for(const k in m)live.tyre[k]=TYRE1[String(m[k].compound||"").toUpperCase()]||"";}
+        for(const k in m){live.tyre[k]=TYRE1[String(m[k].compound||"").toUpperCase()]||"";const z=m[k];live.pits[k]=Math.max(0,(+z.stint_number||1)-1);
+          if(z.lap_start!=null){const last=z.lap_end!=null?+z.lap_end:(live.lastN[k]||+z.lap_start);live.age[k]=(+z.tyre_age_at_start||0)+Math.max(0,last-(+z.lap_start)+1);}}}
       if(ok("rc"))applyRaceControl(R.rc.value);
       if(ok("car")&&R.car.value.a.length){live.car=R.car.value.a[R.car.value.a.length-1];live.carNum=R.car.value.num;}
-      if(ok("radio")&&Array.isArray(R.radio.value)){live.radio=R.radio.value.slice(-6).reverse().map(x=>({code:(DRIVERS[NUM2ID[x.driver_number]]||{code:"#"+x.driver_number}).code,url:x.recording_url}));live.radioVer++;}
+      if(ok("radio")&&Array.isArray(R.radio.value)){live.radio=R.radio.value.slice(-6).reverse().map(x=>({code:(DRIVERS[NUM2ID[x.driver_number]]||{code:"#"+x.driver_number}).code,url:x.recording_url,date:x.date}));live.radioVer++;}
       const rej=rr.filter(x=>x.status==="rejected").map(x=>x.reason&&x.reason.status);
       if(rej.indexOf(401)>=0&&live.acct){ofRenew(true);live.note="rinnovo accesso…";}
       else if(rej.indexOf(401)>=0||rej.indexOf(403)>=0)live.note=live.key?"codice scaduto o non valido: accedi di nuovo":"dati live riservati all'account OpenF1 sponsor";
@@ -4007,7 +4022,7 @@ function f1ltApply(){
     const gp=rpGp({circuit_short_name:si.Meeting.Circuit&&si.Meeting.Circuit.ShortName,location:si.Meeting.Location,country_name:si.Meeting.Country&&si.Meeting.Country.Name});
     const sess=LIVE_SESS[si.Name]||null,isRace=sess==="race"||sess==="sprint";
     live.gp=gp;live.sess=sess;live.isRace=isRace;live.session={session_name:si.Name,circuit_short_name:si.Meeting.Location};
-    if(live.skey!==si.Key){live.skey=si.Key;live.best={};live.lastLap={};live.tyre={};live.gap={};live.int={};live.pos={};live.qgap={};live.ko={};live.inPit={};}
+    if(live.skey!==si.Key){live.skey=si.Key;live.best={};live.lastLap={};live.tyre={};live.gap={};live.int={};live.pos={};live.qgap={};live.ko={};live.inPit={};live.age={};live.pits={};live.lap=0;live.laps=0;}
     if(gp&&sess&&(ctl.gp!==gp||ctl.session!==sess)&&!ctl.replay&&canControl())mutate(c=>resetCtl(c,gp,sess));
   }
   if(S.DriverList&&!F1LT.drv){F1LT.drv=true;f1ltDrivers(S.DriverList);}
@@ -4025,17 +4040,20 @@ function f1ltApply(){
         const stt=ST[(p||1)-1];live.qgap[num]=part>0?(stt&&stt.TimeDiffToFastest||""):(L.TimeDiffToFastest||"");
       }
       const ll=L.LastLapTime&&L.LastLapTime.Value;if(ll)live.lastLap[num]=f1ltSec(ll);
+      if(L.NumberOfPitStops!=null)live.pits[num]=+L.NumberOfPitStops||0;
     }
     live.hasPos=Object.keys(live.pos).length>0;
   }
   if(S.TimingAppData&&S.TimingAppData.Lines)for(const n in S.TimingAppData.Lines){const a=S.TimingAppData.Lines[n];const st=f1ltList(a&&a.Stints);
-    for(let i=st.length-1;i>=0;i--){const c=String(st[i].Compound||"").toUpperCase();if(TYRE1[c]){live.tyre[+n]=TYRE1[c];break;}}}
+    for(let i=st.length-1;i>=0;i--){const c=String(st[i].Compound||"").toUpperCase();if(TYRE1[c]){live.tyre[+n]=TYRE1[c];break;}}
+    if(st.length){const z=st[st.length-1];if(z&&z.TotalLaps!=null)live.age[+n]=+z.TotalLaps||0;}}
+  if(S.LapCount&&S.LapCount.CurrentLap){live.lap=+S.LapCount.CurrentLap;live.laps=+S.LapCount.TotalLaps||0;}
   if(S.WeatherData){const w=S.WeatherData;live.weather={air_temperature:+w.AirTemp,track_temperature:+w.TrackTemp,humidity:+w.Humidity,rainfall:+w.Rainfall,wind_speed:+w.WindSpeed,wind_direction:+w.WindDirection,pressure:+w.Pressure};}
   if(S.RaceControlMessages&&S.RaceControlMessages.Messages)applyRaceControl(f1ltList(S.RaceControlMessages.Messages).map(x=>({message:x.Message,category:x.Category,flag:x.Flag,scope:x.Scope,driver_number:x.RacingNumber?+x.RacingNumber:null,lap_number:x.Lap||0,date:x.Utc})));
   if(S.TrackStatus){const f={"1":"GREEN","2":"YELLOW","4":"SC","5":"RED","6":"VSC","7":"VSC"}[String(S.TrackStatus.Status)];
     if(f&&f!==live.tsFlag){live.tsFlag=f;live.rcFlag=f;if(f!==sim.flag&&!sim.done&&canControl())pushEvent("flag",f);}}
   if(S.TeamRadio&&S.TeamRadio.Captures&&si&&si.Path){
-    const rr=f1ltList(S.TeamRadio.Captures).slice(-6).reverse().map(x=>({code:(DRIVERS[NUM2ID[+x.RacingNumber]]||{code:"#"+x.RacingNumber}).code,url:"https://livetiming.formula1.com/static/"+si.Path+x.Path}));
+    const rr=f1ltList(S.TeamRadio.Captures).slice(-6).reverse().map(x=>({code:(DRIVERS[NUM2ID[+x.RacingNumber]]||{code:"#"+x.RacingNumber}).code,url:"https://livetiming.formula1.com/static/"+si.Path+x.Path,date:x.Utc}));
     const k=JSON.stringify(rr);if(k!==F1LT.radioKey){F1LT.radioKey=k;live.radio=rr;live.radioVer++;}}
   const ss=S.SessionStatus&&S.SessionStatus.Status,clk=S.ExtrapolatedClock&&S.ExtrapolatedClock.Remaining;
   live.clock=clk||"";live.sstatus=ss||"";
@@ -4065,6 +4083,63 @@ function f1ltRestoreDrivers(){
   DRIVERS.forEach((d,i)=>Object.assign(d,F1LT.orig[i]));Object.keys(NUM2ID).forEach(k=>delete NUM2ID[k]);DRIVERS.forEach((d,i)=>{NUM2ID[d.num]=i;});refreshDriverDom();
 }
 
+/* =====================================================================
+   Etichetta rossa "SIMULATO" accanto al titolo delle sezioni con dati non reali.
+   Cambia da sola: senza live è tutto simulato; con il live F1 sono reali classifica,
+   meteo, giro e messaggi FIA; nel replay i dati sono reali e la mappa è stimata.
+   ===================================================================== */
+const SIMT={list:[],key:""};
+const SIMT_TIP={
+  sim:"Dati simulati dall'app: premi CONNETTI LIVE durante una sessione o apri un REPLAY per i dati reali.",
+  pos:"Le posizioni delle auto sulla mappa sono simulate: il GPS delle vetture è riservato a F1 TV.",
+  est:"Nel replay le posizioni sulla mappa sono stimate dai tempi reali di giro e settore, non dal GPS.",
+  part:"Velocità, giri motore, marcia, acceleratore e freno sono reali; gli altri valori (ERS, temperature, forze G, aerodinamica) sono simulati.",
+  grip:"Il grip della pista è stimato dall'app; pressione, temperature, pioggia e vento sono reali."};
+function simtagMake(after,inside){
+  const s=document.createElement("span");s.className="simtag";s.hidden=true;s.setAttribute("role","note");
+  if(inside)inside.appendChild(s);
+  else if(after.tagName==="H2"){const w=document.createElement("div");w.className="simwrap";after.parentNode.insertBefore(w,after);w.append(after,s);}
+  else after.insertAdjacentElement("afterend",s);
+  return s;
+}
+(function simtagInit(){
+  const add=(el,fn)=>{if(el)SIMT.list.push({el,fn});};
+  const h2=sel=>{const p=document.querySelector(sel);const h=p&&p.querySelector(".panel-h h2");return h?simtagMake(h):null;};
+  add(h2(".p-table"),m=>m.tableReal?null:["SIMULATO","sim"]);
+  add(h2(".p-map"),m=>m.replay?["POSIZIONI STIMATE","est"]:m.live?["POSIZIONI SIMULATE","pos"]:["SIMULATO","sim"]);
+  add(h2(".p-feed"),m=>m.replay||m.live?null:["SIMULATO","sim"]);
+  /* console: accanto al nome del pilota nel cockpit e in cima al confronto VS */
+  add(simtagMake($("dName")),m=>m.carReal?["IN PARTE SIMULATO","part"]:["SIMULATO","sim"]);
+  {const r=document.querySelector("#cVs>.row");if(r){const s=simtagMake(null,r);add(s,m=>m.replay||m.carReal?["IN PARTE SIMULATO","part"]:["SIMULATO","sim"]);}}
+  /* card meteo e sessione */
+  $$("section.tiles .tile").forEach(t=>{const h=t.querySelector(".tile-h>span:first-child");if(!h)return;const s=simtagMake(h);
+    if(t.classList.contains("t-lap"))add(s,m=>m.lapReal?null:["SIMULATO","sim"]);
+    else if(t.querySelector("#tGrip"))add(s,m=>m.weatherReal?["GRIP SIMULATO","grip"]:["SIMULATO","sim"]);
+    else add(s,m=>m.weatherReal?null:["SIMULATO","sim"]);});
+  /* Ultra Telemetria */
+  $$("#vTele .panel").forEach(p=>{const h=p.querySelector(".panel-h h2");if(!h)return;const t=h.textContent.toLowerCase(),s=simtagMake(h);
+    if(/live telemetry|oscilloscopio/.test(t))add(s,m=>m.carReal?["IN PARTE SIMULATO","part"]:["SIMULATO","sim"]);
+    else if(/passo gara|distacco dal leader|strategia gomme|lap chart|settori/.test(t))add(s,m=>m.replay?null:["SIMULATO","sim"]);
+    else add(s,()=>["SIMULATO","sim"]);});
+  /* 3D Showroom: modello e indici generati dall'app */
+  $$("#vShow .panel").forEach(p=>{const h=p.querySelector(".panel-h h2");if(h)add(simtagMake(h),()=>["SIMULATO","sim"]);});
+})();
+function simtagState(){
+  const replay=!!(sim&&sim.replay),liveA=!!(live.active&&live.hasPos);
+  let carReal=false;
+  if(live.active&&live.car&&live.carNum===DRIVERS[sel].num)carReal=true;
+  else if(replay&&window.rpCarSample){try{carReal=!!rpCarSample(sim.byId[sel],sim.t);}catch(e){}}
+  return{replay,live:liveA,tableReal:replay||liveA,carReal,
+    weatherReal:replay||!!(live.active&&live.weather),
+    lapReal:replay||!!(live.active&&(live.isRace?live.lap:live.clock))};
+}
+function simtagUpdate(){
+  const m=simtagState(),out=SIMT.list.map(x=>x.fn(m));
+  const key=JSON.stringify(out);if(key===SIMT.key)return;SIMT.key=key;
+  SIMT.list.forEach((x,i)=>{const r=out[i];x.el.hidden=!r;if(r){if(x.el.textContent!==r[0])x.el.textContent=r[0];x.el.title=SIMT_TIP[r[1]];}});
+}
+setInterval(simtagUpdate,700);
+
 /* ---------- avvio ---------- */
 function start(saved){
   if(saved&&saved.ctl){const v=validCtl(saved.ctl);if(v)ctl=v;}
@@ -4077,6 +4152,7 @@ function start(saved){
   const fol=bootFollower();
   if(fol&&window.tvAutoInline)setTimeout(window.tvAutoInline,400);
   if(!fol&&window.sglBoot)window.sglBoot();
+  simtagUpdate();
   requestAnimationFrame(frame);if(!fol||MSC.role!=="follow")initShared();
 }
 const hot=window.claude&&window.claude.hot;
