@@ -1013,7 +1013,7 @@ html.embed .sportlink{display:none!important}
   <div class="mbox">
     <div class="panel-h"><h2 id="apiH">Dati live OpenF1</h2><button class="tog sq mclose" type="button" aria-label="Chiudi">×</button></div>
     <div class="pad">
-      <p class="note">I dati in tempo reale durante le sessioni sono riservati all'account <b>sponsor</b> di OpenF1 (a pagamento, da openf1.org). Senza account l'app usa i dati gratuiti, che arrivano solo a sessione finita.</p>
+      <p class="note"><b>Senza account</b> CONNETTI LIVE usa il live timing ufficiale F1, gratis: posizioni, tempi (Q1/Q2/Q3 ed eliminati in qualifica, distacchi in gara), gomme, meteo, direzione gara e stato pista in tempo reale. Telemetria e GPS delle auto restano riservati a F1 TV.<br><b>Con l'account sponsor</b> di OpenF1 (a pagamento) si aggiunge la telemetria del pilota seguito.</p>
       <div class="sect"><span>ACCEDI CON L'ACCOUNT OPENF1</span></div>
       <div class="of-login">
         <input id="apiUser" type="email" autocomplete="username" placeholder="Email o username OpenF1" aria-label="Email o username OpenF1">
@@ -1721,7 +1721,8 @@ function renderShared(){
   $$("#wxSeg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.w===s.wx));
   let lapTxt,pct;
   if(race){const ll=s.leadLap();lapTxt=s.done?"FINE GARA":s.t<LIGHTS&&!s.started?"SEMAFORI…":"LAP "+ll+" / "+s.laps;pct=s.done?100:clamp(s.order[0].dist/(s.laps*s.L)*100,0,100);}
-  else{lapTxt=s.done?"SESSIONE CONCLUSA":SLABEL[s.session]+" "+fmtClock(s.dur-s.t);pct=clamp(s.t/s.dur*100,0,100);}
+  else{lapTxt=s.done?"SESSIONE CONCLUSA":SLABEL[s.session]+" "+fmtClock(s.dur-s.t);pct=clamp(s.t/s.dur*100,0,100);
+    if(live.active&&!live.isRace&&live.clock)lapTxt=(live.qpart?"Q"+live.qpart:SLABEL[s.session])+" "+String(live.clock).replace(/^00:/,"");}
   setT($("lapLbl"),lapTxt);setT($("lapPct"),Math.round(pct)+"%");setW($("mLap"),pct);
   $$("#flagSeg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.f===s.flag));
   const fp=$("flagPill"),ftxt=s.done?"CHEQUERED":s.flag==="SC"?"SAFETY CAR":s.flag;
@@ -1736,11 +1737,13 @@ function renderPit(){
     let gap="—",int="—",mom="",cat="",iv=-1;
     if(D.liveOn&&!live.isRace){
       /* qualifica e prove reali: miglior giro e distacco dal primo */
-      const b=live.best[d.num],lb=live.best[DRIVERS[lead.id].num];
-      gap=b?fmtLap(b):"—";int=i===0?(b?(s.kind==="q"?"POLE":"P1"):"—"):(b&&lb&&b>=lb?"+"+(b-lb).toFixed(3):"—");
+      const b=live.best[d.num],lb=live.best[DRIVERS[lead.id].num],qg=live.qgap&&live.qgap[d.num];
+      gap=b?fmtLap(b):"—";int=i===0?(b?(s.kind==="q"?"POLE":"P1"):"—"):(qg?qg:b&&lb&&b>=lb?"+"+(b-lb).toFixed(3):"—");
+      if(live.ko&&live.ko[d.num])mom="ELIMINATO";else if(live.inPit&&live.inPit[d.num])mom="IN PIT";
     }else if(D.liveOn){
       gap=i===0?"LEADER":fmtGapLive(live.gap[d.num]);const lv=live.int[d.num];int=i===0?"—":fmtGapLive(lv);iv=typeof lv==="number"?lv:-1;
       if(iv>0&&iv<0.8)mom="DR/MOM";
+      if(live.inPit&&live.inPit[d.num])mom="IN PIT";
     }else if(race){
       if(i===0)gap=c.finished?"VINCITORE":"LEADER";
       else{
@@ -1767,7 +1770,7 @@ function renderPit(){
     setT(r.pit,String(c.pitStops));
     if(D.liveOn&&!live.isRace){const ll=live.lastLap[d.num];setT(r.last,ll?fmtLap(ll):"—");setC(r.last,ll&&ll===live.best[d.num]?"k2":"");}
     else{setT(r.last,fmtLap(c.lastLap));setC(r.last,c.lastCls>1?"k"+c.lastCls:"");}setT(r.cat,cat);
-    r.tr.classList.toggle("elim",s.kind==="q"&&i>=16);
+    r.tr.classList.toggle("elim",D.liveOn&&!live.isRace?!!(live.ko&&live.ko[d.num]):s.kind==="q"&&i>=16);
     let hide=false;
     if(flt==="top")hide=i>=10;
     else if(flt==="btl"){const nx=i+1<ord.length&&race&&!D.liveOn?s.interval(i+1):-1;hide=!((iv>0&&iv<1)||(nx>0&&nx<1));}
@@ -2126,7 +2129,7 @@ async function initShared(){
 const API="https://api.openf1.org/v1";
 const live={on:false,active:false,status:"SIM",note:"",last:null,key:store.get("key",""),poll:store.get("poll",8),
   weather:null,pos:{},gap:{},int:{},hasPos:false,car:null,carNum:0,radio:[],radioVer:0,rc:[],rcFlag:null,timer:0,busy:false,session:null,
-  best:{},lastLap:{},lastN:{},tyre:{},lapsSince:0,skey:null,isRace:true,sess:null,gp:null,acct:store.get("ofUser",""),exp:store.get("keyExp",0)};
+  best:{},lastLap:{},lastN:{},tyre:{},qgap:{},ko:{},inPit:{},qpart:0,clock:"",lapsSince:0,skey:null,isRace:true,sess:null,gp:null,acct:store.get("ofUser",""),exp:store.get("keyExp",0)};
 if([8,3,1.5].indexOf(live.poll)<0)live.poll=8;
 function apiGet(path){
   const h=live.key?{Authorization:"Bearer "+live.key}:{};
@@ -2233,8 +2236,10 @@ function setLive(on){if(on&&ctl.replay)rpExit();
   if(on){
     if(ctl.gp!==NEXT_GP&&canControl())mutate(c=>resetCtl(c,NEXT_GP,ctl.session||"race"));
     if(live.acct)ofRenew(false);
-    live.status="STANDBY_NEXT_GP";live.note="collegamento…";pollLive();live.timer=setInterval(pollLive,live.poll*1000);
-  }else{live.active=false;live.status="SIM";live.weather=null;live.hasPos=false;live.car=null;live.radio=[];live.rc=[];live.rcFlag=null;live.radioVer++;}
+    live.status="STANDBY_NEXT_GP";live.note="collegamento…";
+    if(live.key){pollLive();live.timer=setInterval(pollLive,live.poll*1000);}
+    else f1ltStart();
+  }else{f1ltStop();live.active=false;live.status="SIM";live.weather=null;live.hasPos=false;live.car=null;live.radio=[];live.rc=[];live.rcFlag=null;live.radioVer++;}
   updateLiveUI();dirty=true;
 }
 function updateLiveUI(){
@@ -2243,13 +2248,13 @@ function updateLiveUI(){
   led.className="led"+(live.status==="CONNECTED"?" ok":live.on?" wait":"");
   tx.textContent=!live.on?"SIM":live.status==="CONNECTED"?"CONNECTED · "+hh+(live.note?" · "+live.note:""):"STANDBY NEXT GP"+(hh?" · check "+hh:"")+(live.note?" · "+live.note:"");
   $("liveSync").hidden=!live.on;
-  const a=$("apiBtn");a.textContent=live.acct?"OPENF1 · SPONSOR ("+live.poll.toFixed(1)+"s)":live.key?"API KEY · PRO ("+live.poll.toFixed(1)+"s)":"API KEY · PUBLIC ("+live.poll.toFixed(1)+"s)";a.className="chip"+(live.key?" pro":"")+(live.acct?" sp":"");
+  const a=$("apiBtn");a.textContent=live.acct?"OPENF1 · SPONSOR ("+live.poll.toFixed(1)+"s)":live.key?"API KEY · PRO ("+live.poll.toFixed(1)+"s)":"LIVE · F1 GRATIS";a.className="chip"+(live.key?" pro":"")+(live.acct?" sp":"");
   if($("apiOut")){$("apiOut").hidden=!live.acct;setT($("apiLogin"),live.acct?"ACCEDI DI NUOVO":"ACCEDI");}
   $$("#pollSeg button").forEach(x=>x.setAttribute("aria-pressed",+x.dataset.p===live.poll));
   const eg=$("epGrid");eg.innerHTML=["/car_data","/team_radio","/location"].map(n=>'<div class="mini"><span>'+n+'</span><b class="'+(live.key?"k2":"")+'">'+(live.key?(n==="/location"?"SBLOCCATO · non usato":"SBLOCCATO"):"RICHIEDE CHIAVE")+'</b></div>').join("");
 }
 $("liveBtn").addEventListener("click",()=>setLive(!live.on));
-$("liveSync").addEventListener("click",()=>{pollLive();toast("Sync manuale richiesto.");});
+$("liveSync").addEventListener("click",()=>{if(live.on&&!live.key&&typeof F1LT!=="undefined"){F1LT.retry=0;if(F1LT.ws){try{F1LT.ws.close();}catch(e){}}else f1ltConnect();toast("Ricollego il live timing F1…");}else{pollLive();toast("Sync manuale richiesto.");}});
 
 /* modali */
 let lastFocus=null;
@@ -2258,7 +2263,7 @@ function closeModals(){$$(".modal").forEach(m=>{m.hidden=true;});if(lastFocus&&l
 $$(".modal").forEach(m=>m.addEventListener("click",e=>{if(e.target===m||e.target.closest(".mclose"))closeModals();}));
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModals();});
 $("apiBtn").addEventListener("click",()=>{$("apiKey").value=live.key;$("apiRes").hidden=true;$("apiUser").value=live.acct||store.get("ofUser","");$("apiLoginRes").hidden=true;updateLiveUI();openModal("apiModal");});
-$("apiKey").addEventListener("input",e=>{live.key=e.target.value.trim();store.set("key",live.key);live.exp=0;store.set("keyExp",0);updateLiveUI();});
+$("apiKey").addEventListener("input",e=>{const had=!!live.key;live.key=e.target.value.trim();store.set("key",live.key);live.exp=0;store.set("keyExp",0);if(had!==!!live.key)liveRestart();updateLiveUI();});
 $("apiLogin").addEventListener("click",async()=>{
   const u=$("apiUser").value.trim(),pw=$("apiPass").value,box=$("apiLoginRes");box.hidden=false;
   if(!u||!pw){box.className="testbox ko";box.textContent="Scrivi email (o username) e password del tuo account OpenF1.";return;}
@@ -2266,14 +2271,16 @@ $("apiLogin").addEventListener("click",async()=>{
   try{const t=await ofToken(u,pw);ofSet(t);live.acct=u;store.set("ofUser",u);if($("apiRem").checked)store.set("ofPass",pw);else store.set("ofPass","");
     $("apiKey").value=live.key;$("apiPass").value="";
     box.className="testbox ok";box.textContent="Accesso riuscito: codice valido fino alle "+new Date(t.exp).toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"})+($("apiRem").checked?", poi si rinnova da solo.":". Senza \"Ricorda\" dovrai accedere di nuovo tra un'ora.")+" Ora premi CONNETTI LIVE.";
-    if(live.poll>3){live.poll=3;store.set("poll",3);if(live.on){clearInterval(live.timer);live.timer=setInterval(pollLive,live.poll*1000);}}
-    updateLiveUI();
+    if(live.poll>3){live.poll=3;store.set("poll",3);}
+    liveRestart();updateLiveUI();
   }catch(e){box.className="testbox ko";box.textContent=e&&(e.status===401||e.status===400||e.status===403)?"Email o password non corrette, oppure l'account non è sponsor (HTTP "+e.status+").":e&&e.status?"Accesso non riuscito: HTTP "+e.status+".":"Accesso non riuscito: richiesta bloccata o rete assente"+(inClaude?" (dentro Claude le chiamate esterne sono bloccate: usa il sito GitHub)":"")+".";}
 });
-$("apiOut").addEventListener("click",()=>{live.acct="";live.key="";live.exp=0;["ofUser","ofPass","key","keyExp"].forEach(k=>store.set(k,""));$("apiKey").value="";$("apiLoginRes").hidden=true;updateLiveUI();toast("Uscito dall'account OpenF1 su questo dispositivo.");});
+$("apiOut").addEventListener("click",()=>{live.acct="";live.key="";live.exp=0;["ofUser","ofPass","key","keyExp"].forEach(k=>store.set(k,""));$("apiKey").value="";$("apiLoginRes").hidden=true;liveRestart();updateLiveUI();toast("Uscito dall'account OpenF1 su questo dispositivo.");});
 $("apiEye").addEventListener("click",()=>{const i=$("apiKey"),show=i.type==="password";i.type=show?"text":"password";$("apiEye").textContent=show?"NASCONDI":"MOSTRA";});
-$("apiClr").addEventListener("click",()=>{$("apiKey").value="";live.key="";store.set("key","");updateLiveUI();});
-$("pollSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;live.poll=+b.dataset.p;store.set("poll",live.poll);if(live.on){clearInterval(live.timer);live.timer=setInterval(pollLive,live.poll*1000);}updateLiveUI();});
+$("apiClr").addEventListener("click",()=>{const had=!!live.key;$("apiKey").value="";live.key="";store.set("key","");if(had)liveRestart();updateLiveUI();});
+/* cambia fonte live (account OpenF1 ↔ live timing F1 gratis) senza tenerle accese insieme */
+function liveRestart(){if(live.on){setLive(false);setLive(true);}}
+$("pollSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;live.poll=+b.dataset.p;store.set("poll",live.poll);if(live.on&&live.key){clearInterval(live.timer);live.timer=setInterval(pollLive,live.poll*1000);}updateLiveUI();});
 $("apiTest").addEventListener("click",async()=>{
   const box=$("apiRes");box.hidden=false;box.className="testbox";box.textContent="Test in corso…";const t0=performance.now();
   try{const j=await apiGet("/sessions?session_key=latest"),ms=Math.round(performance.now()-t0),s=j&&j[j.length-1];
@@ -3942,6 +3949,121 @@ $("tvExtHide").addEventListener("click",()=>{TV.guideOff=true;$("tvExtBox").hidd
 {const sl=document.querySelector(".sportlink");if(sl&&inClaude)sl.hidden=true;}
 /* all'avvio: se l'ultima volta era attivo, riapre lo schermo singolo */
 window.sglBoot=()=>{if(store.get("sglOn",false)&&innerWidth>=900&&!SOLO)sglEnter(SGL.cfg);};
+
+/* =====================================================================
+   Live timing ufficiale F1, gratis e senza account
+   WebSocket SignalR (protocollo JSON) su wss://livetiming.formula1.com/signalrcore,
+   senza "negotiate" (bloccato dal browser per gli altri siti). Arrivano tempi,
+   posizioni, Q1/Q2/Q3, gomme, meteo, direzione gara e stato pista; la telemetria
+   e il GPS delle auto sono riservati a F1 TV e restano esclusi.
+   ===================================================================== */
+const F1LT={ws:null,on:false,st:{},buf:"",ping:0,retry:0,rt:0,applyT:0,drv:false,orig:null,changed:false,radioKey:"",
+  url:"wss://livetiming.formula1.com/signalrcore",
+  topics:["Heartbeat","DriverList","ExtrapolatedClock","RaceControlMessages","SessionInfo","SessionStatus","SessionData","TimingAppData","TimingData","TrackStatus","WeatherData","LapCount","TeamRadio"]};
+function f1ltMerge(t,u){
+  if(u===null||typeof u!=="object")return u;
+  if(Array.isArray(u))return u.map(x=>f1ltMerge(null,x));
+  if(t===null||typeof t!=="object")t={};
+  for(const k in u){if(k==="_kf")continue;const v=u[k];
+    if(Array.isArray(t)&&/^\d+$/.test(k))t[+k]=v&&typeof v==="object"?f1ltMerge(t[+k],v):v;
+    else t[k]=v&&typeof v==="object"?f1ltMerge(Array.isArray(v)?null:t[k],v):v;}
+  return t;
+}
+function f1ltStart(){F1LT.on=true;F1LT.retry=0;F1LT.drv=false;f1ltConnect();}
+function f1ltStop(){
+  F1LT.on=false;clearInterval(F1LT.ping);clearTimeout(F1LT.rt);clearTimeout(F1LT.applyT);F1LT.applyT=0;
+  if(F1LT.ws){const w=F1LT.ws;F1LT.ws=null;try{w.close();}catch(e){}}
+  F1LT.st={};F1LT.radioKey="";f1ltRestoreDrivers();
+}
+function f1ltConnect(){
+  if(!F1LT.on)return;let ws;
+  try{ws=new WebSocket(F1LT.url);}catch(e){live.note="live timing F1 non raggiungibile";updateLiveUI();f1ltRetry();return;}
+  F1LT.ws=ws;F1LT.buf="";live.note="collegamento al live timing F1…";updateLiveUI();
+  ws.onopen=()=>{ws.send(JSON.stringify({protocol:"json",version:1})+"\x1e");};
+  ws.onmessage=async e=>{let d=e.data;if(typeof d!=="string")d=await d.text();F1LT.buf+=d;let i;
+    while((i=F1LT.buf.indexOf("\x1e"))>=0){const raw=F1LT.buf.slice(0,i);F1LT.buf=F1LT.buf.slice(i+1);let m;try{m=JSON.parse(raw);}catch(x){continue;}if(F1LT.ws===ws)f1ltMsg(m,ws);}};
+  ws.onerror=()=>{};
+  ws.onclose=()=>{clearInterval(F1LT.ping);if(F1LT.ws!==ws)return;F1LT.ws=null;
+    if(F1LT.on){live.active=false;live.status="STANDBY_NEXT_GP";live.note=inClaude?"dentro Claude i collegamenti esterni sono bloccati: usa il sito GitHub":"live timing F1 disconnesso: riprovo…";updateLiveUI();f1ltRetry();}};
+  clearInterval(F1LT.ping);F1LT.ping=setInterval(()=>{if(ws.readyState===1)ws.send('{"type":6}\x1e');},10000);
+}
+function f1ltRetry(){clearTimeout(F1LT.rt);F1LT.retry++;F1LT.rt=setTimeout(f1ltConnect,Math.min(30000,2000*F1LT.retry));}
+function f1ltMsg(m,ws){
+  if(!m.type){ws.send(JSON.stringify({type:1,invocationId:"0",target:"Subscribe",arguments:[F1LT.topics]})+"\x1e");return;}
+  if(m.type===3){if(m.error){live.note="live timing F1: "+m.error;updateLiveUI();return;}
+    F1LT.st={};const r=m.result||{};for(const k in r)F1LT.st[k]=f1ltMerge(null,r[k]);F1LT.retry=0;F1LT.drv=false;f1ltApplySoon(true);return;}
+  if(m.type===1&&m.target==="feed"&&Array.isArray(m.arguments)){const k=m.arguments[0];if(k==="Heartbeat")return;
+    F1LT.st[k]=f1ltMerge(F1LT.st[k],m.arguments[1]);f1ltApplySoon(k==="RaceControlMessages"||k==="TrackStatus"||k==="SessionInfo"||k==="DriverList");return;}
+  if(m.type===7&&m.error){live.note="live timing F1 chiuso: "+m.error;updateLiveUI();}
+}
+function f1ltApplySoon(now){if(now){clearTimeout(F1LT.applyT);F1LT.applyT=0;f1ltApply();return;}if(!F1LT.applyT)F1LT.applyT=setTimeout(()=>{F1LT.applyT=0;f1ltApply();},400);}
+function f1ltSec(v){if(!v)return 0;const m=String(v).match(/^(?:(\d+):)?(\d+(?:\.\d+)?)$/);return m?(+(m[1]||0))*60+(+m[2]):0;}
+function f1ltNum(v){if(v==null||v==="")return null;const m=String(v).match(/^\+?(-?\d+(?:\.\d+)?)$/);return m?+m[1]:String(v);}
+function f1ltList(x){return x?(Array.isArray(x)?x:Object.keys(x).filter(k=>/^\d+$/.test(k)).sort((a,b)=>a-b).map(k=>x[k])).filter(Boolean):[];}
+function f1ltApply(){
+  if(!F1LT.on)return;
+  const S=F1LT.st,si=S.SessionInfo,td=S.TimingData;live.last=new Date();
+  if(si&&si.Meeting){
+    const gp=rpGp({circuit_short_name:si.Meeting.Circuit&&si.Meeting.Circuit.ShortName,location:si.Meeting.Location,country_name:si.Meeting.Country&&si.Meeting.Country.Name});
+    const sess=LIVE_SESS[si.Name]||null,isRace=sess==="race"||sess==="sprint";
+    live.gp=gp;live.sess=sess;live.isRace=isRace;live.session={session_name:si.Name,circuit_short_name:si.Meeting.Location};
+    if(live.skey!==si.Key){live.skey=si.Key;live.best={};live.lastLap={};live.tyre={};live.gap={};live.int={};live.pos={};live.qgap={};live.ko={};live.inPit={};}
+    if(gp&&sess&&(ctl.gp!==gp||ctl.session!==sess)&&!ctl.replay&&canControl())mutate(c=>resetCtl(c,gp,sess));
+  }
+  if(S.DriverList&&!F1LT.drv){F1LT.drv=true;f1ltDrivers(S.DriverList);}
+  if(td&&td.Lines){
+    const part=+td.SessionPart||0;live.pos={};live.qpart=part;
+    for(const n in td.Lines){const L=td.Lines[n],num=+n;if(!L||!num)continue;
+      if(L.Position)live.pos[num]=+L.Position;
+      live.inPit[num]=!!L.InPit;live.ko[num]=!!L.KnockedOut;
+      if(live.isRace){live.gap[num]=f1ltNum(L.GapToLeader);live.int[num]=f1ltNum(L.IntervalToPositionAhead&&L.IntervalToPositionAhead.Value);}
+      else{
+        const B=f1ltList(L.BestLapTimes),ST=f1ltList(L.Stats);let p=part;
+        if(part>0&&L.KnockedOut)while(p>1&&!(B[p-1]&&B[p-1].Value))p--;
+        const bt=part>0?(B[p-1]&&B[p-1].Value):(L.BestLapTime&&L.BestLapTime.Value);
+        live.best[num]=f1ltSec(bt);
+        const stt=ST[(p||1)-1];live.qgap[num]=part>0?(stt&&stt.TimeDiffToFastest||""):(L.TimeDiffToFastest||"");
+      }
+      const ll=L.LastLapTime&&L.LastLapTime.Value;if(ll)live.lastLap[num]=f1ltSec(ll);
+    }
+    live.hasPos=Object.keys(live.pos).length>0;
+  }
+  if(S.TimingAppData&&S.TimingAppData.Lines)for(const n in S.TimingAppData.Lines){const a=S.TimingAppData.Lines[n];const st=f1ltList(a&&a.Stints);
+    for(let i=st.length-1;i>=0;i--){const c=String(st[i].Compound||"").toUpperCase();if(TYRE1[c]){live.tyre[+n]=TYRE1[c];break;}}}
+  if(S.WeatherData){const w=S.WeatherData;live.weather={air_temperature:+w.AirTemp,track_temperature:+w.TrackTemp,humidity:+w.Humidity,rainfall:+w.Rainfall,wind_speed:+w.WindSpeed,wind_direction:+w.WindDirection,pressure:+w.Pressure};}
+  if(S.RaceControlMessages&&S.RaceControlMessages.Messages)applyRaceControl(f1ltList(S.RaceControlMessages.Messages).map(x=>({message:x.Message,category:x.Category,flag:x.Flag,scope:x.Scope,driver_number:x.RacingNumber?+x.RacingNumber:null,lap_number:x.Lap||0,date:x.Utc})));
+  if(S.TrackStatus){const f={"1":"GREEN","2":"YELLOW","4":"SC","5":"RED","6":"VSC","7":"VSC"}[String(S.TrackStatus.Status)];
+    if(f&&f!==live.tsFlag){live.tsFlag=f;live.rcFlag=f;if(f!==sim.flag&&!sim.done&&canControl())pushEvent("flag",f);}}
+  if(S.TeamRadio&&S.TeamRadio.Captures&&si&&si.Path){
+    const rr=f1ltList(S.TeamRadio.Captures).slice(-6).reverse().map(x=>({code:(DRIVERS[NUM2ID[+x.RacingNumber]]||{code:"#"+x.RacingNumber}).code,url:"https://livetiming.formula1.com/static/"+si.Path+x.Path}));
+    const k=JSON.stringify(rr);if(k!==F1LT.radioKey){F1LT.radioKey=k;live.radio=rr;live.radioVer++;}}
+  const ss=S.SessionStatus&&S.SessionStatus.Status,clk=S.ExtrapolatedClock&&S.ExtrapolatedClock.Remaining;
+  live.clock=clk||"";live.sstatus=ss||"";
+  live.active=live.hasPos;live.status=live.active?"CONNECTED":"STANDBY_NEXT_GP";
+  const SST={Inactive:"non ancora iniziata",Finished:"finita",Finalised:"chiusa",Ends:"finita",Aborted:"sospesa"};
+  live.note="F1 live timing"+(si?" · "+si.Name+(live.isRace?"":live.qpart?" Q"+live.qpart:""):"")+(ss&&ss!=="Started"?" · "+(SST[ss]||ss):"")+(clk&&ss==="Started"?" · mancano "+clk:"");
+  if(!live.active&&!td)live.note="F1 live timing collegato · nessuna sessione in corso";
+  updateLiveUI();dirty=true;lastSlow=0;
+}
+/* piloti della sessione reale: numeri e nomi, e chi sostituisce chi */
+function f1ltDrivers(DL){
+  const real=Object.keys(DL).filter(k=>/^\d+$/.test(k)&&DL[k]&&DL[k].RacingNumber).map(k=>DL[k]);if(!real.length)return;
+  if(!F1LT.orig)F1LT.orig=DRIVERS.map(d=>Object.assign({},d));
+  const nums=new Set(real.map(r=>+r.RacingNumber)),codes=new Set(real.map(r=>String(r.Tla||"").toUpperCase()));
+  const free=DRIVERS.map((d,i)=>i).filter(i=>!nums.has(DRIVERS[i].num)&&!codes.has(DRIVERS[i].code));let ch=false;
+  for(const r of real){const num=+r.RacingNumber,code=String(r.Tla||"").toUpperCase();
+    const at=NUM2ID[num];if(at!=null&&DRIVERS[at].num===num)continue;
+    let i=DRIVERS.findIndex(x=>x.code===code);
+    if(i<0){const tn=String(r.TeamName||"").toLowerCase().split(/\s+/)[0];let j=free.findIndex(k=>TEAMS[DRIVERS[k].team]&&String(TEAMS[DRIVERS[k].team].n).toLowerCase().indexOf(tn)>=0);if(j<0)j=0;i=free.length?free.splice(j,1)[0]:-1;}
+    if(i<0)continue;
+    if(NUM2ID[DRIVERS[i].num]===i)delete NUM2ID[DRIVERS[i].num];
+    Object.assign(DRIVERS[i],{num,code:code||DRIVERS[i].code,first:r.FirstName||DRIVERS[i].first,last:r.LastName||DRIVERS[i].last});NUM2ID[num]=i;ch=true;}
+  if(ch){F1LT.changed=true;refreshDriverDom();}
+}
+function f1ltRestoreDrivers(){
+  if(!F1LT.changed||!F1LT.orig)return;F1LT.changed=false;
+  DRIVERS.forEach((d,i)=>Object.assign(d,F1LT.orig[i]));Object.keys(NUM2ID).forEach(k=>delete NUM2ID[k]);DRIVERS.forEach((d,i)=>{NUM2ID[d.num]=i;});refreshDriverDom();
+}
 
 /* ---------- avvio ---------- */
 function start(saved){
